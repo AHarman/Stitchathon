@@ -19,7 +19,6 @@ public class KnitPatternView extends View {
     private Paint mainColorPaint;
     private Paint contrastColorPaint;
     private Paint doneOverlayPaint;
-    private Paint textPaint;
     private float stitchSize = 1;
     private float stitchPad = 2;
 
@@ -40,11 +39,8 @@ public class KnitPatternView extends View {
         contrastColorPaint.setColor(Color.argb(255, 0, 0, 255));
         contrastColorPaint.setStyle(Paint.Style.FILL);
         doneOverlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        doneOverlayPaint.setColor(Color.argb(100, 255, 255, 255));
+        doneOverlayPaint.setColor(Color.argb(150, 255, 255, 255));
         doneOverlayPaint.setStyle(Paint.Style.FILL);
-        textPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
-        textPaint.setColor(Color.WHITE);
-        textPaint.setStyle(Paint.Style.FILL);
 
         mGestureDetector = new GestureDetector(this.getContext(), new gestureListener());
     }
@@ -63,7 +59,13 @@ public class KnitPatternView extends View {
         fitPatternWidth();
     }
 
-    public void progressed() {
+    public void incrementOne() {
+        pattern.increment();
+        invalidate();
+    }
+
+    public void incrementRow() {
+        pattern.incrementRow();
         invalidate();
     }
 
@@ -76,7 +78,7 @@ public class KnitPatternView extends View {
         Log.wtf("ok", "longest: " + pattern.getWidestRow());
         stitchesWide = pattern.getWidestRow();
         float totalPadding = stitchPad * (stitchesWide + 1);
-        stitchSize = (float)(canvasWidth - totalPadding)/ (float)stitchesWide;
+        stitchSize = (canvasWidth - totalPadding) / (float)stitchesWide;
         stitchesHigh = (int) (canvasHeight / (stitchSize + stitchPad) + 1);
     }
 
@@ -114,9 +116,7 @@ public class KnitPatternView extends View {
     private class gestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            Log.wtf("touchy", "single tap");
-            pattern.increment();
-            invalidate();
+            incrementOne();
             return true;
         }
 
