@@ -1,6 +1,6 @@
 package com.alexharman.stitchathon;
 
-import org.json.JSONObject;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -10,11 +10,14 @@ public class KnitPattern {
     public Stitch[][] stitches;
 
     // We assume that all prior stitches are done
-    private int stitchesDone = 0;
+    private int totalStitchesDone = 0;
     private int currentRow = 0;
-    private int currentStitchInRow = 0;
+    private int nextStitchInRow = 0;
     private int widestRow = 0;
     private String[] stitchTypes;
+
+    // Assuming doubleknit for now. Will be false for knitting on the round
+    private boolean oddRowsOpposite = true;
 
     KnitPattern(String[][] pattern) {
         ArrayList<String> stitchTypes = new ArrayList<String>();
@@ -33,35 +36,44 @@ public class KnitPattern {
     }
 
     public void increment() {
-        stitchesDone++;
-        stitches[currentRow][currentStitchInRow].done = true;
-        currentStitchInRow++;
-        if (currentStitchInRow >= stitches[currentRow].length){
+        totalStitchesDone++;
+
+        stitches[currentRow][nextStitchInRow].done = true;
+
+        nextStitchInRow += oddRowsOpposite && currentRow % 2 == 1 ? -1 : 1;
+        if (isEndOfRow()) {
+            Log.d("row row", "in the end of row bit");
             currentRow++;
-            currentStitchInRow = 0;
+            nextStitchInRow = oddRowsOpposite && currentRow % 2 == 1 ? stitches[currentRow].length - 1 : 0;
         }
     }
 
-    public void incrementRow() {
-        stitchesDone += stitches[currentRow].length - currentStitchInRow;
-        currentRow++;
-        currentStitchInRow = 0;
+    private boolean isEndOfRow() {
+        if (oddRowsOpposite && currentRow % 2 == 1) {
+            return nextStitchInRow == -1;
+        }
+        return nextStitchInRow == stitches[currentRow].length;
     }
 
-    public int getStitchesDone() {
-        return stitchesDone;
+    public void incrementRow() {
+        totalStitchesDone += stitches[currentRow].length - nextStitchInRow;
+        currentRow++;
+        nextStitchInRow = 0;
+    }
+
+    public int getTotalStitchesDone() {
+        return totalStitchesDone;
     }
 
     public int getCurrentRow() {
         return currentRow;
     }
 
-    public int getCurrentStitchInRow() {
-        return currentStitchInRow;
+    public int getNextStitchInRow() {
+        return nextStitchInRow;
     }
 
     public int getWidestRow() {
         return widestRow;
     }
-
 }
