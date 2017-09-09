@@ -6,6 +6,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class KnitPatternView extends View {
@@ -26,6 +28,8 @@ public class KnitPatternView extends View {
     private int stitchesWide;
     private int stitchesHigh;
 
+    private GestureDetector mGestureDetector;
+
     public KnitPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -41,6 +45,8 @@ public class KnitPatternView extends View {
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
         textPaint.setColor(Color.WHITE);
         textPaint.setStyle(Paint.Style.FILL);
+
+        mGestureDetector = new GestureDetector(this.getContext(), new gestureListener());
     }
 
     @Override
@@ -82,16 +88,41 @@ public class KnitPatternView extends View {
         }
 
         canvas.translate(canvasWidth, canvasHeight - stitchPad - stitchSize);
-        Log.wtf("ok", "stitch size: " + stitchSize);
-        Log.wtf("ok", "translate: " + (canvasWidth - stitchPad - stitchSize) + ", " + (canvasHeight - stitchPad - stitchSize));
         for (int row = 0; row < Math.min(stitchesHigh, pattern.stitches.length); row++) {
             canvas.save();
             for (int col = 0; col < Math.min(pattern.stitches[row].length, stitchesWide); col++) {
-                canvas.translate(-stitchSize-stitchPad, 0);
-                canvas.drawRect(0, 0, stitchSize, stitchSize, pattern.stitches[row][col].getType() == "M" ? mainColorPaint : contrastColorPaint);
+                drawStitch(canvas, pattern.stitches[row][col]);
             }
             canvas.restore();
             canvas.translate(0, -stitchSize-stitchPad);
+        }
+    }
+
+    private void drawStitch(Canvas canvas, Stitch stitch) {
+        canvas.translate(-stitchSize-stitchPad, 0);
+        canvas.drawRect(0, 0, stitchSize, stitchSize, stitch.getType().equals("M") ? mainColorPaint : contrastColorPaint);
+        if (stitch.done) {
+            canvas.drawRect(0, 0, stitchSize, stitchSize, doneOverlayPaint);
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return mGestureDetector.onTouchEvent(event);
+    }
+
+    private class gestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            Log.wtf("touchy", "single tap");
+            pattern.increment();
+            invalidate();
+            return true;
+        }
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return true;
         }
     }
 }
