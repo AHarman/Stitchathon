@@ -13,6 +13,7 @@ public class KnitPattern {
     private int stitchesDone = 0;
     private int currentRow = 0;
     private int currentStitchInRow = 0;
+    private int widestRow = 0;
     private String[] stitchTypes;
 
     KnitPattern(String[][] pattern) {
@@ -20,6 +21,7 @@ public class KnitPattern {
         stitches = new Stitch[pattern.length][];
         for (int row = 0; row < pattern.length; row++) {
             stitches[row] = new Stitch[pattern[row].length];
+            widestRow = Math.max(widestRow, stitches[row].length);
             for (int col = 0; col < pattern[row].length; col++) {
                 if (!stitchTypes.contains(pattern[row][col])) {
                     stitchTypes.add(pattern[row][col]);
@@ -27,7 +29,7 @@ public class KnitPattern {
                 stitches[row][col] = new Stitch(pattern[row][col]);
             }
         }
-        this.stitchTypes = (String[]) stitchTypes.toArray(new String[0]);
+        this.stitchTypes = stitchTypes.toArray(new String[0]);
     }
 
     public void increment() {
@@ -56,6 +58,10 @@ public class KnitPattern {
 
     public int getCurrentStitchInRow() {
         return currentStitchInRow;
+    }
+
+    public int getWidestRow() {
+        return widestRow;
     }
 
 }

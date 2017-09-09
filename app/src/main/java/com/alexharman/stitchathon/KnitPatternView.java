@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 public class KnitPatternView extends View {
@@ -15,9 +16,10 @@ public class KnitPatternView extends View {
     // TODO: Build and associative array of stitches->paints
     private Paint mainColorPaint;
     private Paint contrastColorPaint;
+    private Paint doneOverlayPaint;
     private Paint textPaint;
-    private int stitchSize = 20;
-    private int stitchPad = 5;
+    private float stitchSize = 1;
+    private float stitchPad = 2;
 
     private int canvasHeight;
     private int canvasWidth;
@@ -33,6 +35,9 @@ public class KnitPatternView extends View {
         contrastColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         contrastColorPaint.setColor(Color.argb(255, 0, 0, 255));
         contrastColorPaint.setStyle(Paint.Style.FILL);
+        doneOverlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        doneOverlayPaint.setColor(Color.argb(100, 255, 255, 255));
+        doneOverlayPaint.setStyle(Paint.Style.FILL);
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG | Paint.SUBPIXEL_TEXT_FLAG);
         textPaint.setColor(Color.WHITE);
         textPaint.setStyle(Paint.Style.FILL);
@@ -41,13 +46,15 @@ public class KnitPatternView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        canvasHeight = h - getPaddingBottom() - getPaddingBottom();
-        canvasWidth = w - getPaddingLeft() - getPaddingRight();
+        canvasHeight = h;
+        canvasWidth = w;
+
+        Log.wtf("ok", "onsizechanged");
 
         // Want a stitch either side just in case we're not square on.
-        stitchesHigh = h / stitchSize + 2;
-        stitchesWide = w / stitchSize + 2;
-        invalidate();
+        stitchesHigh = (int) (h / (stitchSize + stitchPad) + 1);
+        stitchesWide = (int) (w / (stitchSize + stitchPad) + 1);
+        fitPatternWidth();
     }
 
     public void progressed() {
@@ -59,6 +66,14 @@ public class KnitPatternView extends View {
         invalidate();
     }
 
+    public void fitPatternWidth() {
+        Log.wtf("ok", "longest: " + pattern.getWidestRow());
+        stitchesWide = pattern.getWidestRow();
+        float totalPadding = stitchPad * (stitchesWide + 1);
+        stitchSize = (float)(canvasWidth - totalPadding)/ (float)stitchesWide;
+        stitchesHigh = (int) (canvasHeight / (stitchSize + stitchPad) + 1);
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -66,17 +81,17 @@ public class KnitPatternView extends View {
             return;
         }
 
-        //int startPos =
-
-        canvas.translate(canvasWidth - stitchSize, canvasHeight - stitchSize);
-        canvas.drawRect(0, 0, stitchSize, stitchSize, mainColorPaint);
-        canvas.translate(-stitchSize-stitchPad, 0);
-        canvas.drawRect(0, 0, stitchSize, stitchSize, mainColorPaint);
-
-        /*int currentRow = pattern.getCurrentRow();
-        for (int patternRow = currentRow - stitchesHigh/2; i < currentRow + stitchesHigh/2; i++) {
-            for (int patternCol = pattern.get)
-        }*/
+        canvas.translate(canvasWidth, canvasHeight - stitchPad - stitchSize);
+        Log.wtf("ok", "stitch size: " + stitchSize);
+        Log.wtf("ok", "translate: " + (canvasWidth - stitchPad - stitchSize) + ", " + (canvasHeight - stitchPad - stitchSize));
+        for (int row = 0; row < Math.min(stitchesHigh, pattern.stitches.length); row++) {
+            canvas.save();
+            for (int col = 0; col < Math.min(pattern.stitches[row].length, stitchesWide); col++) {
+                canvas.translate(-stitchSize-stitchPad, 0);
+                canvas.drawRect(0, 0, stitchSize, stitchSize, pattern.stitches[row][col].getType() == "M" ? mainColorPaint : contrastColorPaint);
+            }
+            canvas.restore();
+            canvas.translate(0, -stitchSize-stitchPad);
+        }
     }
 }
-
