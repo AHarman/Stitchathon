@@ -10,6 +10,9 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.Stack;
+
+
 public class KnitPatternView extends View {
 
     private KnitPattern pattern = null;
@@ -26,6 +29,8 @@ public class KnitPatternView extends View {
     private int canvasWidth;
     private int stitchesWide;
     private int stitchesHigh;
+
+    private Stack<Integer> undoStack = new Stack<>();
 
     private GestureDetector mGestureDetector;
 
@@ -61,11 +66,13 @@ public class KnitPatternView extends View {
 
     public void incrementOne() {
         pattern.increment();
+        undoStack.push(1);
         invalidate();
     }
 
     public void incrementRow() {
-        pattern.incrementRow();
+        Integer stitchesIncremented = pattern.incrementRow();
+        undoStack.push(stitchesIncremented);
         invalidate();
     }
 
@@ -111,6 +118,9 @@ public class KnitPatternView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         return mGestureDetector.onTouchEvent(event);
+    }
+
+    public void undo() {
     }
 
     private class gestureListener extends GestureDetector.SimpleOnGestureListener {

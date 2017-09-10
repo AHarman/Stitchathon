@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -81,8 +83,23 @@ public class MainActivity extends AppCompatActivity
                 {"M","M","M","M","M","M","M","C","C","C","C","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
                 {"M","M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"}};
         KnitPattern pattern = new KnitPattern(patternString);
-        KnitPatternView patternView = (KnitPatternView) findViewById(R.id.knitView);
+        final KnitPatternView patternView = (KnitPatternView) findViewById(R.id.knitView);
         patternView.setPattern(pattern);
+
+        Button incrementRowButton = (Button) findViewById(R.id.increment_row_button);
+        incrementRowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                patternView.incrementRow();
+            }
+        });
+        Button undoButton = (Button) findViewById(R.id.undo_button);
+        undoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                patternView.undo();
+            }
+        });
     }
 
     @Override

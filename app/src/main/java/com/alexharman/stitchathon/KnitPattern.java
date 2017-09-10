@@ -37,28 +37,30 @@ public class KnitPattern {
 
     public void increment() {
         totalStitchesDone++;
-
         stitches[currentRow][nextStitchInRow].done = true;
-
-        nextStitchInRow += oddRowsOpposite && currentRow % 2 == 1 ? -1 : 1;
+        nextStitchInRow += onReversedRow() ? -1 : 1;
         if (isEndOfRow()) {
-            Log.d("row row", "in the end of row bit");
             currentRow++;
-            nextStitchInRow = oddRowsOpposite && currentRow % 2 == 1 ? stitches[currentRow].length - 1 : 0;
+            nextStitchInRow = getStartOfRow();
         }
     }
 
-    private boolean isEndOfRow() {
-        if (oddRowsOpposite && currentRow % 2 == 1) {
-            return nextStitchInRow == -1;
-        }
-        return nextStitchInRow == stitches[currentRow].length;
-    }
+    public int incrementRow() {
+        int newStitchesDone = 0;
+        int order = onReversedRow() ? -1 : 1;
 
-    public void incrementRow() {
-        totalStitchesDone += stitches[currentRow].length - nextStitchInRow;
+        for (int i = nextStitchInRow; i*order <= getEndOfRow(); i += order) {
+            stitches[currentRow][i].done = true;
+            newStitchesDone++;
+        }
+
+        totalStitchesDone += newStitchesDone;
         currentRow++;
-        nextStitchInRow = 0;
+        nextStitchInRow = getStartOfRow();
+        return newStitchesDone;
+    }
+
+    public void undoStitch() {
     }
 
     public int getTotalStitchesDone() {
@@ -71,6 +73,31 @@ public class KnitPattern {
 
     public int getNextStitchInRow() {
         return nextStitchInRow;
+    }
+
+    private boolean onReversedRow() {
+        return oddRowsOpposite && (currentRow % 2 == 1);
+    }
+
+    private boolean isEndOfRow() {
+        if (onReversedRow()) {
+            return nextStitchInRow == -1;
+        }
+        return nextStitchInRow == stitches[currentRow].length;
+    }
+
+    private int getEndOfRow() {
+        if (onReversedRow()) {
+            return 0;
+        }
+        return stitches[currentRow].length - 1;
+    }
+
+    private int getStartOfRow() {
+        if (onReversedRow()) {
+            return stitches[currentRow].length - 1;
+        }
+        return 0;
     }
 
     public int getWidestRow() {
