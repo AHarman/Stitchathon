@@ -36,6 +36,10 @@ public class KnitPattern {
     }
 
     public void increment() {
+        if (currentRow == stitches.length-1 && (nextStitchInRow < 0 || nextStitchInRow > stitches[stitches.length-1].length)) {
+            return;
+        }
+
         totalStitchesDone++;
         stitches[currentRow][nextStitchInRow].done = true;
         nextStitchInRow += onReversedRow() ? -1 : 1;
@@ -46,6 +50,9 @@ public class KnitPattern {
     }
 
     public int incrementRow() {
+        if (currentRow == stitches.length-1 && (nextStitchInRow < 0 || nextStitchInRow > stitches[stitches.length-1].length)) {
+            return 0;
+        }
         int newStitchesDone = 0;
         int direction = onReversedRow() ? -1 : 1;
 
