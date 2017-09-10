@@ -9,4 +9,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="increment_row_button">Increment Row</string>
+    <string name="undo_button">Undo</string>
 </resources>
