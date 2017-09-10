@@ -121,6 +121,14 @@ public class KnitPatternView extends View {
     }
 
     public void undo() {
+        if (undoStack.size() == 0) {
+            return;
+        }
+        Integer stitchesToUndo = undoStack.pop();
+        for (int i = 0; i < stitchesToUndo; i++) {
+            pattern.undoStitch();
+        }
+        invalidate();
     }
 
     private class gestureListener extends GestureDetector.SimpleOnGestureListener {

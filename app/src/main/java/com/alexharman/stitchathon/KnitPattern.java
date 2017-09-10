@@ -47,9 +47,9 @@ public class KnitPattern {
 
     public int incrementRow() {
         int newStitchesDone = 0;
-        int order = onReversedRow() ? -1 : 1;
+        int direction = onReversedRow() ? -1 : 1;
 
-        for (int i = nextStitchInRow; i*order <= getEndOfRow(); i += order) {
+        for (int i = nextStitchInRow; i*direction <= getEndOfRow(); i += direction) {
             stitches[currentRow][i].done = true;
             newStitchesDone++;
         }
@@ -61,6 +61,18 @@ public class KnitPattern {
     }
 
     public void undoStitch() {
+        int direction = onReversedRow() ? -1 : 1;
+        if(currentRow == 0 && nextStitchInRow == getStartOfRow()) {
+            return;
+        }
+
+        if (isStartOfRow()) {
+            currentRow--;
+            nextStitchInRow = getEndOfRow();
+        } else {
+            nextStitchInRow -= direction;
+        }
+        stitches[currentRow][nextStitchInRow].done = false;
     }
 
     public int getTotalStitchesDone() {
@@ -84,6 +96,13 @@ public class KnitPattern {
             return nextStitchInRow == -1;
         }
         return nextStitchInRow == stitches[currentRow].length;
+    }
+
+    private boolean isStartOfRow() {
+        if (onReversedRow()) {
+            return nextStitchInRow == stitches[currentRow].length - 1;
+        }
+        return nextStitchInRow == 0;
     }
 
     private int getEndOfRow() {
