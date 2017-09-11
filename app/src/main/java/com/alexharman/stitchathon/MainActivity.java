@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.alexharman.stitchathon.KnitPackage.KnitPattern;
 import com.alexharman.stitchathon.KnitPackage.KnitPatternParser;
 
 import org.json.JSONException;
@@ -39,7 +40,8 @@ public class MainActivity extends AppCompatActivity
 
         KnitPatternParser parser = new KnitPatternParser();
         try {
-            patternView.setPattern(parser.parseJSON(getString(R.string.test_pattern_json_string)));
+            KnitPattern knitPattern = new KnitPattern(parser.parseJSON(getString(R.string.test_pattern_json_string_subpattern_whole)));
+            patternView.setPattern(knitPattern);
         } catch (JSONException e) {
             e.printStackTrace();
         }

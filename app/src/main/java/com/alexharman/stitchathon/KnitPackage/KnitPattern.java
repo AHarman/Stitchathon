@@ -18,7 +18,19 @@ public class KnitPattern {
     // Assuming doubleknit for now. Will be false for knitting on the round
     private boolean oddRowsOpposite = true;
 
-    KnitPattern(String[][] pattern) {
+    public KnitPattern(String[][] pattern) {
+        buildPattern(pattern);
+    }
+
+    public KnitPattern(ArrayList<ArrayList<String>> pattern) {
+        String[][] arPattern = new String[pattern.size()][0];
+        for (int i = 0; i < pattern.size(); i++) {
+            arPattern[i] = pattern.get(i).toArray(new String[pattern.get(i).size()]);
+        }
+        buildPattern(arPattern);
+    }
+
+    private void buildPattern(String[][] pattern) {
         ArrayList<String> stitchTypes = new ArrayList<String>();
         stitches = new Stitch[pattern.length][];
         for (int row = 0; row < pattern.length; row++) {
