@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon;
+package com.alexharman.stitchathon.KnitPackage;
 
 public class Stitch {
     private int width;

@@ -10,6 +10,9 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.alexharman.stitchathon.KnitPackage.KnitPattern;
+import com.alexharman.stitchathon.KnitPackage.Stitch;
+
 import java.util.Stack;
 
 

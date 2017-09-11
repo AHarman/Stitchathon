@@ -1,6 +1,4 @@
-package com.alexharman.stitchathon;
-
-import android.util.Log;
+package com.alexharman.stitchathon.KnitPackage;
 
 import java.util.ArrayList;
 
@@ -8,6 +6,7 @@ import java.util.ArrayList;
 public class KnitPattern {
 
     public Stitch[][] stitches;
+    public String name;
 
     // We assume that all prior stitches are done
     private int totalStitchesDone = 0;
