@@ -12,6 +12,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.alexharman.stitchathon.KnitPackage.KnitPatternParser;
+
+import org.json.JSONException;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -31,60 +35,14 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        String[][] patternString = {
-                {"M","M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","C","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","C","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","C","C","C","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","C","M","M","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","C","C","M","C","C","C","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","C","C","M","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","C","C","C","C","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","C","C","C","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","M","C","C","M","C","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","M","M","C","C","C","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","C","M","C","C","C","C","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","C","C","M","C","C","C","C","C","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","C","C","C","M","C","C","C","C","C","C","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","C","C","C","M","C","C","C","C","C","C","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","M","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","M","C","C","M","C","C","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","M","C","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","M","C","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","C","C","C","C","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","M","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","C","C","C","C","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","M","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","M","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","C","C","C","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","C","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","C","C","C","C","M","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"},
-                {"M","M","M","M","M","M","M","M","C","C","C","C","M","M","M","C","C","C","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M","M"}};
-        KnitPattern pattern = new KnitPattern(patternString);
         final KnitPatternView patternView = (KnitPatternView) findViewById(R.id.knitView);
-        patternView.setPattern(pattern);
+
+        KnitPatternParser parser = new KnitPatternParser();
+        try {
+            patternView.setPattern(parser.parseJSON(getString(R.string.test_pattern_json_string)));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         Button incrementRowButton = (Button) findViewById(R.id.increment_row_button);
         incrementRowButton.setOnClickListener(new View.OnClickListener() {
