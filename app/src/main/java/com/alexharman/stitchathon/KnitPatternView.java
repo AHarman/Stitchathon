@@ -1,6 +1,7 @@
 package com.alexharman.stitchathon;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -32,6 +33,8 @@ public class KnitPatternView extends View {
     private int canvasWidth;
     private int stitchesWide;
     private int stitchesHigh;
+    Bitmap mcBitmap;
+    Bitmap ccBitmap;
 
     private Stack<Integer> undoStack = new Stack<>();
 
@@ -51,6 +54,13 @@ public class KnitPatternView extends View {
         doneOverlayPaint.setStyle(Paint.Style.FILL);
 
         mGestureDetector = new GestureDetector(this.getContext(), new gestureListener());
+
+        mcBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_8888);
+        ccBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(mcBitmap);
+        canvas.drawRect(0.0f, 0.0f, stitchSize, stitchSize, mainColorPaint);
+        canvas = new Canvas(ccBitmap);
+        canvas.drawRect(0.0f, 0.0f, stitchSize, stitchSize, contrastColorPaint);
     }
 
     @Override
@@ -112,7 +122,8 @@ public class KnitPatternView extends View {
 
     private void drawStitch(Canvas canvas, Stitch stitch) {
         canvas.translate(-stitchSize-stitchPad, 0);
-        canvas.drawRect(0, 0, stitchSize, stitchSize, stitch.getType().equals("M") ? mainColorPaint : contrastColorPaint);
+        Bitmap b = stitch.getType().equals("M") ? mcBitmap : ccBitmap;
+        canvas.drawBitmap(b, 0, 0, stitch.done ? doneOverlayPaint : null);
         if (stitch.done) {
             canvas.drawRect(0, 0, stitchSize, stitchSize, doneOverlayPaint);
         }
