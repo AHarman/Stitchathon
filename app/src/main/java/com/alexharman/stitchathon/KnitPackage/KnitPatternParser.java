@@ -30,8 +30,8 @@ public class KnitPatternParser {
         String patternName = jsonPattern.getString("name");
         Log.d("Parse", "Name: " + patternName);
         ArrayList<String> properties = extractProperties(jsonPattern);
-        HashMap<String, ArrayList<ArrayList<String>>> subpatterns = extractSubpatterns(jsonPattern);
         ArrayList<ArrayList<String>> stringPattern = extractPattern(jsonPattern);
+        HashMap<String, ArrayList<ArrayList<String>>> subpatterns = extractSubpatterns(jsonPattern);
 
         stringPattern = expandPattern(stringPattern, properties, subpatterns);
 
@@ -46,7 +46,7 @@ public class KnitPatternParser {
                 }
             }
         }
-        Log.d("parse", "Done on " + patternName);
+        Log.d("Parse", "Done on " + patternName);
         return stringPattern;
     }
 
@@ -92,17 +92,17 @@ public class KnitPatternParser {
         String[] subpatternTextSplit = subpatternText.split(", ?");
         String subpatternName = subpatternTextSplit[0].split(":")[1];
         ArrayList<ArrayList<String>> subpattern = new ArrayList<>();
-        Log.d("Parse", "subpattern name " + subpatternName);
-        Log.d("Parse", "Exists? " + subpatterns.containsKey(subpatternName));
         ArrayList<ArrayList<String>> subpatternOriginal = subpatterns.get(subpatternName);
-        Log.d("Parse", "Is null? " + (subpatternOriginal == null));
         for (int i = 0; i < subpatternOriginal.size(); i++) {
             subpattern.add((ArrayList<String>) subpatternOriginal.get(i).clone());
         }
 
+        Log.d("Parse", "subpattern name " + subpatternName);
+
         String modName;
         String modValue;
         for (int i = 1; i < subpatternTextSplit.length; i++) {
+            Log.d("Parse", "applying " + subpatternTextSplit[i]);
             modName = subpatternTextSplit[i].split(":")[0];
             modValue = subpatternTextSplit[i].split(":")[1];
             switch (modName) {
@@ -119,19 +119,25 @@ public class KnitPatternParser {
                 case "asymmetric":
                     ArrayList<ArrayList<String>> reverseSide;
                     if (modValue.equals("mirror-ud")) {
-                        reverseSide = (ArrayList<ArrayList<String>>) subpattern.clone();
+                        reverseSide = new ArrayList<>();
+                        for (int j = 0; j < subpattern.size(); j++) {
+                            reverseSide.add((ArrayList<String>) subpattern.get(j).clone());
+                        }
                         Collections.reverse(reverseSide);
                     } else if(modValue.equals("mirror-lr")) {
-                        reverseSide = (ArrayList<ArrayList<String>>) subpattern.clone();
-                        for (int j = 0; j < reverseSide.size(); j++) {
+                        reverseSide = new ArrayList<>();
+                        for (int j = 0; j < subpattern.size(); j++) {
+                            reverseSide.add((ArrayList<String>) subpattern.get(j).clone());
                             Collections.reverse(reverseSide.get(j));
                         }
                     } else {
                         break;
                     }
+                    String stitch;
                     for (int row = 0; row < subpattern.size(); row++) {
                         for (int col = 0; col < subpattern.get(row).size(); col++) {
-                            subpattern.get(row).set(col, subpattern.get(row).get(col) + "/" + reverseSide.get(row).get(col));
+                            stitch = subpattern.get(row).get(col) + "/" + reverseSide.get(row).get(col);
+                            subpattern.get(row).set(col, stitch);
                         }
                     }
                     break;
@@ -162,7 +168,6 @@ public class KnitPatternParser {
                 JSONObject jsonSubpattern = subpatternsJSON.getJSONObject(i);
                 Log.d("Parse", "Subpattern: " + jsonSubpattern.getString("name"));
                 ArrayList<ArrayList<String>> subpattern = parseJSON(jsonSubpattern);
-                Log.e("Parse", "Here here here " + (subpattern == null));
                 subpatterns.put(jsonSubpattern.getString("name"), subpattern);
             }
         } else {

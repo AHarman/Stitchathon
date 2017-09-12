@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity
 
         KnitPatternParser parser = new KnitPatternParser();
         try {
-            KnitPattern knitPattern = new KnitPattern(parser.parseJSON(getString(R.string.test_pattern_json_string_subpattern_whole)));
+            KnitPattern knitPattern = new KnitPattern(parser.parseJSON(getString(R.string.test_pattern_asymmetric_lr)));
             patternView.setPattern(knitPattern);
         } catch (JSONException e) {
             e.printStackTrace();
