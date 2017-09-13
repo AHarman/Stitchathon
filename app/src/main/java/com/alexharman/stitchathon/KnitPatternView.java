@@ -31,6 +31,7 @@ public class KnitPatternView extends View {
 
     private int canvasHeight;
     private int canvasWidth;
+    private int[] backgroundColor = {0xFF, 0xFF, 0xFF, 0xFF};
     Bitmap mcBitmap;
     Bitmap ccBitmap;
     Bitmap patternBitmap;
@@ -49,7 +50,7 @@ public class KnitPatternView extends View {
         contrastColorPaint.setColor(Color.argb(255, 0, 0, 255));
         contrastColorPaint.setStyle(Paint.Style.FILL);
         doneOverlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        doneOverlayPaint.setColor(Color.argb(150, 255, 255, 255));
+        doneOverlayPaint.setColor(Color.argb(150, backgroundColor[1], backgroundColor[2], backgroundColor[3]));
         doneOverlayPaint.setStyle(Paint.Style.FILL);
 
         mGestureDetector = new GestureDetector(this.getContext(), new gestureListener());
@@ -67,6 +68,7 @@ public class KnitPatternView extends View {
         canvas = new Canvas(ccBitmap);
         canvas.drawRect(0.0f, 0.0f, stitchSize, stitchSize, contrastColorPaint);
         canvas = new Canvas(patternBitmap);
+        canvas.drawARGB(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
         drawPattern(canvas);
     }
 
@@ -78,8 +80,9 @@ public class KnitPatternView extends View {
     }
 
     public void incrementOne() {
-        pattern.increment();
         undoStack.push(1);
+        markOneStitchDone();
+        pattern.increment();
         invalidate();
     }
 
@@ -122,8 +125,25 @@ public class KnitPatternView extends View {
         Bitmap b = stitch.getType().equals("M") ? mcBitmap : ccBitmap;
         canvas.drawBitmap(b, 0, 0, stitch.done ? doneOverlayPaint : null);
         if (stitch.done) {
-            canvas.drawRect(0, 0, stitchSize, stitchSize, doneOverlayPaint);
+            canvas.drawRect(stitchPad, stitchPad, stitchSize, stitchSize, doneOverlayPaint);
         }
+    }
+
+    private void markOneStitchDone() {
+        int row = pattern.getCurrentRow();
+        int col = pattern.getNextStitchInRow();
+        Stitch stitch = pattern.stitches[row][col];
+        float yTranslate = stitchPad + row * (stitchPad + stitchSize);
+        float xTranslate;
+        if (pattern.getRowDirection() == 1) {
+            xTranslate = stitchPad + pattern.getCurrentStitchDistance() * (stitchPad + stitchSize);
+            xTranslate += (stitch.getWidth() - 1) * (stitchSize + stitchPad);
+        } else {
+            xTranslate = patternBitmap.getWidth() - (pattern.getCurrentStitchDistance() + 1) * (stitchPad + stitchSize);
+        }
+        Canvas canvas = new Canvas(patternBitmap);
+        canvas.translate(xTranslate, yTranslate);
+        canvas.drawRect(0, 0, stitchSize, stitchSize, doneOverlayPaint);
     }
 
     @Override

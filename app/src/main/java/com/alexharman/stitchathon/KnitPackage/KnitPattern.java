@@ -8,6 +8,8 @@ public class KnitPattern {
     public Stitch[][] stitches;
     public String name;
 
+    // Takes width of stitches into account
+    private int currentStitchDistance = 0;
     // We assume that all prior stitches are done
     private int totalStitchesDone = 0;
     private int currentRow = 0;
@@ -53,11 +55,13 @@ public class KnitPattern {
             return;
         }
 
+        currentStitchDistance += stitches[currentRow][nextStitchInRow].getWidth();
         totalStitchesDone++;
         stitches[currentRow][nextStitchInRow].done = true;
-        nextStitchInRow += onReversedRow() ? -1 : 1;
+        nextStitchInRow += getRowDirection();
         if (isEndOfRow()) {
             currentRow++;
+            currentStitchDistance = 0;
             nextStitchInRow = getStartOfRow();
         }
     }
@@ -67,7 +71,7 @@ public class KnitPattern {
             return 0;
         }
         int newStitchesDone = 0;
-        int direction = onReversedRow() ? -1 : 1;
+        int direction = getRowDirection();
 
         for (int i = nextStitchInRow; i*direction <= getEndOfRow(); i += direction) {
             stitches[currentRow][i].done = true;
@@ -77,11 +81,11 @@ public class KnitPattern {
         totalStitchesDone += newStitchesDone;
         currentRow++;
         nextStitchInRow = getStartOfRow();
+        currentStitchDistance = 0;
         return newStitchesDone;
     }
 
     public void undoStitch() {
-        int direction = onReversedRow() ? -1 : 1;
         if(currentRow == 0 && nextStitchInRow == getStartOfRow()) {
             return;
         }
@@ -90,7 +94,7 @@ public class KnitPattern {
             currentRow--;
             nextStitchInRow = getEndOfRow();
         } else {
-            nextStitchInRow -= direction;
+            nextStitchInRow -= getRowDirection();
         }
         stitches[currentRow][nextStitchInRow].done = false;
     }
@@ -107,36 +111,36 @@ public class KnitPattern {
         return nextStitchInRow;
     }
 
-    private boolean onReversedRow() {
-        return oddRowsOpposite && (currentRow % 2 == 1);
+    public int getRowDirection() {
+        return oddRowsOpposite && (currentRow % 2 == 1) ? -1 : 1;
     }
 
     private boolean isEndOfRow() {
-        if (onReversedRow()) {
-            return nextStitchInRow == -1;
+        if (getRowDirection() == 1) {
+            return nextStitchInRow == stitches[currentRow].length;
         }
-        return nextStitchInRow == stitches[currentRow].length;
+        return nextStitchInRow == -1;
     }
 
     private boolean isStartOfRow() {
-        if (onReversedRow()) {
-            return nextStitchInRow == stitches[currentRow].length - 1;
+        if (getRowDirection() == 1) {
+            return nextStitchInRow == 0;
         }
-        return nextStitchInRow == 0;
+        return nextStitchInRow == stitches[currentRow].length - 1;
     }
 
     private int getEndOfRow() {
-        if (onReversedRow()) {
-            return 0;
-        }
-        return stitches[currentRow].length - 1;
-    }
-
-    private int getStartOfRow() {
-        if (onReversedRow()) {
+        if (getRowDirection() == 1) {
             return stitches[currentRow].length - 1;
         }
         return 0;
+    }
+
+    private int getStartOfRow() {
+        if (getRowDirection() == 1) {
+            return 0;
+        }
+        return stitches[currentRow].length - 1;
     }
 
     public int getWidth() {
@@ -145,5 +149,9 @@ public class KnitPattern {
 
     public int getRows() {
         return rows;
+    }
+
+    public int getCurrentStitchDistance() {
+        return currentStitchDistance;
     }
 }
