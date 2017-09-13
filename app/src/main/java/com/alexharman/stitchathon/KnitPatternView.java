@@ -26,15 +26,14 @@ public class KnitPatternView extends View {
     private Paint mainColorPaint;
     private Paint contrastColorPaint;
     private Paint doneOverlayPaint;
-    private float stitchSize = 1;
+    private float stitchSize = 10;
     private float stitchPad = 2;
 
     private int canvasHeight;
     private int canvasWidth;
-    private int stitchesWide;
-    private int stitchesHigh;
     Bitmap mcBitmap;
     Bitmap ccBitmap;
+    Bitmap patternBitmap;
 
     private Stack<Integer> undoStack = new Stack<>();
 
@@ -54,13 +53,21 @@ public class KnitPatternView extends View {
         doneOverlayPaint.setStyle(Paint.Style.FILL);
 
         mGestureDetector = new GestureDetector(this.getContext(), new gestureListener());
+    }
+
+    private void createPatternBitmap() {
+        int bitmapWidth = (int) (pattern.getWidth() * stitchSize + (pattern.getWidth() + 1) * stitchPad);
+        int bitmapHeight = (int) (pattern.getRows() * stitchSize + (pattern.getRows() + 1) * stitchPad);
 
         mcBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_8888);
         ccBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_8888);
+        patternBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(mcBitmap);
         canvas.drawRect(0.0f, 0.0f, stitchSize, stitchSize, mainColorPaint);
         canvas = new Canvas(ccBitmap);
         canvas.drawRect(0.0f, 0.0f, stitchSize, stitchSize, contrastColorPaint);
+        canvas = new Canvas(patternBitmap);
+        drawPattern(canvas);
     }
 
     @Override
@@ -68,13 +75,6 @@ public class KnitPatternView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         canvasHeight = h;
         canvasWidth = w;
-
-        Log.wtf("ok", "onsizechanged");
-
-        // Want a stitch either side just in case we're not square on.
-        stitchesHigh = (int) (h / (stitchSize + stitchPad) + 1);
-        stitchesWide = (int) (w / (stitchSize + stitchPad) + 1);
-        fitPatternWidth();
     }
 
     public void incrementOne() {
@@ -91,15 +91,8 @@ public class KnitPatternView extends View {
 
     public void setPattern(KnitPattern pattern) {
         this.pattern = pattern;
+        createPatternBitmap();
         invalidate();
-    }
-
-    public void fitPatternWidth() {
-        Log.wtf("ok", "longest: " + pattern.getWidestRow());
-        stitchesWide = pattern.getWidestRow();
-        float totalPadding = stitchPad * (stitchesWide + 1);
-        stitchSize = (canvasWidth - totalPadding) / (float)stitchesWide;
-        stitchesHigh = (int) (canvasHeight / (stitchSize + stitchPad) + 1);
     }
 
     @Override
@@ -108,20 +101,24 @@ public class KnitPatternView extends View {
         if (pattern == null) {
             return;
         }
+        canvas.drawBitmap(patternBitmap, 0.0f, 0.0f, null);
+    }
 
-        canvas.translate(canvasWidth, canvasHeight - stitchPad - stitchSize);
-        for (int row = 0; row < Math.min(stitchesHigh, pattern.stitches.length); row++) {
+    private void drawPattern(Canvas canvas) {
+        canvas.translate(0, stitchPad);
+        for (int row = 0; row < pattern.getRows(); row++) {
             canvas.save();
-            for (int col = 0; col < Math.min(pattern.stitches[row].length, stitchesWide); col++) {
+            canvas.translate(stitchPad, 0);
+            for (int col = 0; col < pattern.getWidth(); col++) {
                 drawStitch(canvas, pattern.stitches[row][col]);
+                canvas.translate(stitchSize+stitchPad, 0);
             }
             canvas.restore();
-            canvas.translate(0, -stitchSize-stitchPad);
+            canvas.translate(0, stitchSize+stitchPad);
         }
     }
 
     private void drawStitch(Canvas canvas, Stitch stitch) {
-        canvas.translate(-stitchSize-stitchPad, 0);
         Bitmap b = stitch.getType().equals("M") ? mcBitmap : ccBitmap;
         canvas.drawBitmap(b, 0, 0, stitch.done ? doneOverlayPaint : null);
         if (stitch.done) {

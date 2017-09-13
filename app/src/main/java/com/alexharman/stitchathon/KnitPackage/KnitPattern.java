@@ -12,7 +12,8 @@ public class KnitPattern {
     private int totalStitchesDone = 0;
     private int currentRow = 0;
     private int nextStitchInRow = 0;
-    private int widestRow = 0;
+    private int width = 0;
+    private int rows = 0;
     private String[] stitchTypes;
 
     // Assuming doubleknit for now. Will be false for knitting on the round
@@ -35,7 +36,7 @@ public class KnitPattern {
         stitches = new Stitch[pattern.length][];
         for (int row = 0; row < pattern.length; row++) {
             stitches[row] = new Stitch[pattern[row].length];
-            widestRow = Math.max(widestRow, stitches[row].length);
+            width = Math.max(width, stitches[row].length);
             for (int col = 0; col < pattern[row].length; col++) {
                 if (!stitchTypes.contains(pattern[row][col])) {
                     stitchTypes.add(pattern[row][col]);
@@ -43,6 +44,7 @@ public class KnitPattern {
                 stitches[row][col] = new Stitch(pattern[row][col]);
             }
         }
+        rows = pattern.length;
         this.stitchTypes = stitchTypes.toArray(new String[0]);
     }
 
@@ -137,7 +139,11 @@ public class KnitPattern {
         return 0;
     }
 
-    public int getWidestRow() {
-        return widestRow;
+    public int getWidth() {
+        return width;
+    }
+
+    public int getRows() {
+        return rows;
     }
 }
