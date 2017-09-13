@@ -1,5 +1,7 @@
 package com.alexharman.stitchathon.KnitPackage;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 
@@ -9,12 +11,12 @@ public class KnitPattern {
     public String name;
 
     // Takes width of stitches into account
-    private int currentStitchDistance = 0;
+    private int currentDistanceInRow = 0;
     // We assume that all prior stitches are done
     private int totalStitchesDone = 0;
     private int currentRow = 0;
     private int nextStitchInRow = 0;
-    private int width = 0;
+    private int patternWidth = 0;
     private int rows = 0;
     private String[] stitchTypes;
 
@@ -35,16 +37,19 @@ public class KnitPattern {
 
     private void buildPattern(String[][] pattern) {
         ArrayList<String> stitchTypes = new ArrayList<String>();
+        int rowWidth;
         stitches = new Stitch[pattern.length][];
         for (int row = 0; row < pattern.length; row++) {
+            rowWidth = 0;
             stitches[row] = new Stitch[pattern[row].length];
-            width = Math.max(width, stitches[row].length);
             for (int col = 0; col < pattern[row].length; col++) {
                 if (!stitchTypes.contains(pattern[row][col])) {
                     stitchTypes.add(pattern[row][col]);
                 }
                 stitches[row][col] = new Stitch(pattern[row][col]);
+                rowWidth += stitches[row][col].getWidth();
             }
+            patternWidth = Math.max(patternWidth, rowWidth);
         }
         rows = pattern.length;
         this.stitchTypes = stitchTypes.toArray(new String[0]);
@@ -55,13 +60,13 @@ public class KnitPattern {
             return;
         }
 
-        currentStitchDistance += stitches[currentRow][nextStitchInRow].getWidth();
+        currentDistanceInRow += stitches[currentRow][nextStitchInRow].getWidth();
         totalStitchesDone++;
         stitches[currentRow][nextStitchInRow].done = true;
         nextStitchInRow += getRowDirection();
         if (isEndOfRow()) {
             currentRow++;
-            currentStitchDistance = 0;
+            currentDistanceInRow = 0;
             nextStitchInRow = getStartOfRow();
         }
     }
@@ -81,7 +86,7 @@ public class KnitPattern {
         totalStitchesDone += newStitchesDone;
         currentRow++;
         nextStitchInRow = getStartOfRow();
-        currentStitchDistance = 0;
+        currentDistanceInRow = 0;
         return newStitchesDone;
     }
 
@@ -93,7 +98,12 @@ public class KnitPattern {
         if (isStartOfRow()) {
             currentRow--;
             nextStitchInRow = getEndOfRow();
+            currentDistanceInRow = 0;
+            for (int c = Math.min(getStartOfRow(), getEndOfRow()); c < Math.max(getStartOfRow(), getEndOfRow()); c += 1) {
+                currentDistanceInRow += stitches[currentRow][c].getWidth();
+            }
         } else {
+            currentDistanceInRow -= stitches[currentRow][nextStitchInRow].getWidth();
             nextStitchInRow -= getRowDirection();
         }
         stitches[currentRow][nextStitchInRow].done = false;
@@ -115,14 +125,14 @@ public class KnitPattern {
         return oddRowsOpposite && (currentRow % 2 == 1) ? -1 : 1;
     }
 
-    private boolean isEndOfRow() {
+    public boolean isEndOfRow() {
         if (getRowDirection() == 1) {
             return nextStitchInRow == stitches[currentRow].length;
         }
         return nextStitchInRow == -1;
     }
 
-    private boolean isStartOfRow() {
+    public boolean isStartOfRow() {
         if (getRowDirection() == 1) {
             return nextStitchInRow == 0;
         }
@@ -143,15 +153,22 @@ public class KnitPattern {
         return stitches[currentRow].length - 1;
     }
 
-    public int getWidth() {
-        return width;
+    public int getStitchesLeftInRow() {
+        if (getRowDirection() == 1) {
+            return stitches[currentRow].length - nextStitchInRow;
+        }
+        return nextStitchInRow + 1;
+    }
+
+    public int getPatternWidth() {
+        return patternWidth;
     }
 
     public int getRows() {
         return rows;
     }
 
-    public int getCurrentStitchDistance() {
-        return currentStitchDistance;
+    public int getCurrentDistanceInRow() {
+        return currentDistanceInRow;
     }
 }

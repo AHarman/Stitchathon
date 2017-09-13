@@ -57,7 +57,7 @@ public class KnitPatternView extends View {
     }
 
     private void createPatternBitmap() {
-        int bitmapWidth = (int) (pattern.getWidth() * stitchSize + (pattern.getWidth() + 1) * stitchPad);
+        int bitmapWidth = (int) (pattern.getPatternWidth() * stitchSize + (pattern.getPatternWidth() + 1) * stitchPad);
         int bitmapHeight = (int) (pattern.getRows() * stitchSize + (pattern.getRows() + 1) * stitchPad);
 
         mcBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_8888);
@@ -81,14 +81,14 @@ public class KnitPatternView extends View {
 
     public void incrementOne() {
         undoStack.push(1);
-        markOneStitchDone();
+        markStitchesDone(1);
         pattern.increment();
         invalidate();
     }
 
     public void incrementRow() {
-        Integer stitchesIncremented = pattern.incrementRow();
-        undoStack.push(stitchesIncremented);
+        markStitchesDone(pattern.getStitchesLeftInRow());
+        undoStack.push(pattern.incrementRow());
         invalidate();
     }
 
@@ -112,7 +112,7 @@ public class KnitPatternView extends View {
         for (int row = 0; row < pattern.getRows(); row++) {
             canvas.save();
             canvas.translate(stitchPad, 0);
-            for (int col = 0; col < pattern.getWidth(); col++) {
+            for (int col = 0; col < pattern.getPatternWidth(); col++) {
                 drawStitch(canvas, pattern.stitches[row][col]);
                 canvas.translate(stitchSize+stitchPad, 0);
             }
@@ -129,21 +129,26 @@ public class KnitPatternView extends View {
         }
     }
 
-    private void markOneStitchDone() {
+    // Only works until end of row, don't use beyond that
+    private void markStitchesDone(int numStitches) {
         int row = pattern.getCurrentRow();
         int col = pattern.getNextStitchInRow();
         Stitch stitch = pattern.stitches[row][col];
+        Canvas canvas = new Canvas(patternBitmap);
         float yTranslate = stitchPad + row * (stitchPad + stitchSize);
         float xTranslate;
         if (pattern.getRowDirection() == 1) {
-            xTranslate = stitchPad + pattern.getCurrentStitchDistance() * (stitchPad + stitchSize);
+            xTranslate = stitchPad + pattern.getCurrentDistanceInRow() * (stitchPad + stitchSize);
             xTranslate += (stitch.getWidth() - 1) * (stitchSize + stitchPad);
         } else {
-            xTranslate = patternBitmap.getWidth() - (pattern.getCurrentStitchDistance() + 1) * (stitchPad + stitchSize);
+            xTranslate = patternBitmap.getWidth() - (pattern.getCurrentDistanceInRow() + 1) * (stitchPad + stitchSize);
         }
-        Canvas canvas = new Canvas(patternBitmap);
         canvas.translate(xTranslate, yTranslate);
-        canvas.drawRect(0, 0, stitchSize, stitchSize, doneOverlayPaint);
+        xTranslate = pattern.getRowDirection() * (stitchPad + stitchSize);
+        for (int i = 0; i < numStitches; i++) {
+            canvas.drawRect(0, 0, stitchSize, stitchSize, doneOverlayPaint);
+            canvas.translate(xTranslate, 0);
+        }
     }
 
     @Override
@@ -156,8 +161,23 @@ public class KnitPatternView extends View {
             return;
         }
         Integer stitchesToUndo = undoStack.pop();
+        Canvas canvas = new Canvas(patternBitmap);
+        Stitch lastStitch;
+        float xTranslate;
+        float yTranslate;
+
         for (int i = 0; i < stitchesToUndo; i++) {
             pattern.undoStitch();
+            lastStitch = pattern.stitches[pattern.getCurrentRow()][pattern.getNextStitchInRow()];
+            if (pattern.getRowDirection() == 1) {
+                xTranslate = pattern.getCurrentDistanceInRow() * (stitchPad + stitchSize) + stitchPad;
+            } else {
+                xTranslate = patternBitmap.getWidth() - (pattern.getCurrentDistanceInRow() + 1) * (stitchPad + stitchSize);
+            }
+            yTranslate = pattern.getCurrentRow() * (stitchPad + stitchSize) + stitchPad;
+            canvas.translate(xTranslate, yTranslate);
+            drawStitch(canvas, lastStitch);
+            canvas.setMatrix(null);
         }
         invalidate();
     }
