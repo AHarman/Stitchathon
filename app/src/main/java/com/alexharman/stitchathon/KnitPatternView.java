@@ -33,6 +33,8 @@ public class KnitPatternView extends View {
 
     private int viewHeight;
     private int viewWidth;
+    int xOffset = 0;
+    int yOffset = 0;
     private int[] backgroundColor = {0xFF, 0xFF, 0xFF, 0xFF};
     private boolean fitPatternWidth = true;
     Bitmap mcBitmap;
@@ -101,8 +103,13 @@ public class KnitPatternView extends View {
             right = Math.min(patternBitmap.getWidth(), viewWidth);
             top = 0;
             bottom = Math.min(patternBitmap.getHeight(), viewHeight);
+            left += xOffset;
+            right += xOffset;
         }
-
+        Log.d("Canvas", "top before: " + top);
+        top += yOffset;
+        Log.d("Canvas", "top: " + top);
+        bottom += yOffset;
         patternSrcRectangle = new Rect(left, top, right, bottom);
     }
 
@@ -130,8 +137,20 @@ public class KnitPatternView extends View {
 
     private void zoomPattern() {
         fitPatternWidth = !fitPatternWidth;
+        xOffset = 0;
+        if (fitPatternWidth) {
+            yOffset = 0;
+        }
         updatePatternSrcRectangle();
         updatePatternDstRectangle();
+        invalidate();
+    }
+
+    private void scroll(float distanceX, float distanceY) {
+        float ratio = (float) patternSrcRectangle.width() / patternDstRectangle.width();
+        xOffset = (int) Math.min(Math.max(distanceX * ratio + xOffset, 0), patternBitmap.getWidth() - patternSrcRectangle.width());
+        yOffset = (int) Math.min(Math.max(distanceY * ratio + yOffset, 0), patternBitmap.getHeight() - patternSrcRectangle.height());
+        updatePatternSrcRectangle();
         invalidate();
     }
 
@@ -252,6 +271,12 @@ public class KnitPatternView extends View {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             zoomPattern();
+            return true;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            scroll(distanceX, distanceY);
             return true;
         }
 
