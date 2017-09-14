@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -29,12 +31,16 @@ public class KnitPatternView extends View {
     private float stitchSize = 10;
     private float stitchPad = 2;
 
-    private int canvasHeight;
-    private int canvasWidth;
+    private int viewHeight;
+    private int viewWidth;
     private int[] backgroundColor = {0xFF, 0xFF, 0xFF, 0xFF};
+    private boolean fitPatternWidth = true;
     Bitmap mcBitmap;
     Bitmap ccBitmap;
     Bitmap patternBitmap;
+
+    private RectF patternDstRectangle;
+    private Rect patternSrcRectangle;
 
     private Stack<Integer> undoStack = new Stack<>();
 
@@ -75,8 +81,58 @@ public class KnitPatternView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        canvasHeight = h;
-        canvasWidth = w;
+        viewHeight = h;
+        viewWidth = w;
+        updatePatternSrcRectangle();
+        updatePatternDstRectangle();
+        invalidate();
+    }
+
+    private void updatePatternSrcRectangle() {
+        int left, right, top, bottom;
+        if (fitPatternWidth) {
+            left = 0;
+            right = patternBitmap.getWidth();
+            top = 0;
+            float ratio = (float)patternBitmap.getWidth() / (float)viewWidth ;
+            bottom = Math.min(patternBitmap.getHeight(), (int) ((float)viewHeight * ratio));
+        } else {
+            left = 0;
+            right = Math.min(patternBitmap.getWidth(), viewWidth);
+            top = 0;
+            bottom = Math.min(patternBitmap.getHeight(), viewHeight);
+        }
+
+        patternSrcRectangle = new Rect(left, top, right, bottom);
+    }
+
+    private void updatePatternDstRectangle() {
+        float left, right, top, bottom;
+        if (fitPatternWidth) {
+            left = 0;
+            top = 0;
+            right = viewWidth;
+            float ratio = (float)viewWidth / (float)patternBitmap.getWidth();
+            bottom = Math.min(viewHeight, patternBitmap.getHeight() * ratio);
+        } else {
+            left = 0;
+            top = 0;
+            right = Math.min(viewWidth, patternBitmap.getWidth());
+            bottom = Math.min(viewHeight, patternBitmap.getHeight());
+            if (patternBitmap.getWidth() < viewWidth) {
+                left += (viewWidth - patternBitmap.getWidth()) / 2;
+                right += (viewWidth - patternBitmap.getWidth()) / 2;
+            }
+        }
+        patternDstRectangle = new RectF(left, top, right, bottom);
+    }
+
+
+    private void zoomPattern() {
+        fitPatternWidth = !fitPatternWidth;
+        updatePatternSrcRectangle();
+        updatePatternDstRectangle();
+        invalidate();
     }
 
     public void incrementOne() {
@@ -95,6 +151,10 @@ public class KnitPatternView extends View {
     public void setPattern(KnitPattern pattern) {
         this.pattern = pattern;
         createPatternBitmap();
+        if (viewWidth > 0) {
+            updatePatternSrcRectangle();
+            updatePatternDstRectangle();
+        }
         invalidate();
     }
 
@@ -104,7 +164,7 @@ public class KnitPatternView extends View {
         if (pattern == null) {
             return;
         }
-        canvas.drawBitmap(patternBitmap, 0.0f, 0.0f, null);
+        canvas.drawBitmap(patternBitmap, patternSrcRectangle, patternDstRectangle, null);
     }
 
     private void drawPattern(Canvas canvas) {
@@ -186,6 +246,12 @@ public class KnitPatternView extends View {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             incrementOne();
+            return true;
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            zoomPattern();
             return true;
         }
 
