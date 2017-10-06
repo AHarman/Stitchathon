@@ -40,6 +40,7 @@ public class KnitPatternView extends View {
     Bitmap mcBitmap;
     Bitmap ccBitmap;
     Bitmap patternBitmap;
+    Bitmap bitmapToDraw;
 
     private RectF patternDstRectangle;
     private Rect patternSrcRectangle;
@@ -85,8 +86,10 @@ public class KnitPatternView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         viewHeight = h;
         viewWidth = w;
+        bitmapToDraw = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444);
         updatePatternSrcRectangle();
         updatePatternDstRectangle();
+        updateBitmapToDraw();
         invalidate();
     }
 
@@ -106,9 +109,7 @@ public class KnitPatternView extends View {
             left += xOffset;
             right += xOffset;
         }
-        Log.d("Canvas", "top before: " + top);
         top += yOffset;
-        Log.d("Canvas", "top: " + top);
         bottom += yOffset;
         patternSrcRectangle = new Rect(left, top, right, bottom);
     }
@@ -134,7 +135,6 @@ public class KnitPatternView extends View {
         patternDstRectangle = new RectF(left, top, right, bottom);
     }
 
-
     private void zoomPattern() {
         fitPatternWidth = !fitPatternWidth;
         xOffset = 0;
@@ -143,6 +143,7 @@ public class KnitPatternView extends View {
         }
         updatePatternSrcRectangle();
         updatePatternDstRectangle();
+        updateBitmapToDraw();
         invalidate();
     }
 
@@ -151,6 +152,7 @@ public class KnitPatternView extends View {
         xOffset = (int) Math.min(Math.max(distanceX * ratio + xOffset, 0), patternBitmap.getWidth() - patternSrcRectangle.width());
         yOffset = (int) Math.min(Math.max(distanceY * ratio + yOffset, 0), patternBitmap.getHeight() - patternSrcRectangle.height());
         updatePatternSrcRectangle();
+        updateBitmapToDraw();
         invalidate();
     }
 
@@ -173,6 +175,7 @@ public class KnitPatternView extends View {
         if (viewWidth > 0) {
             updatePatternSrcRectangle();
             updatePatternDstRectangle();
+            bitmapToDraw = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444);
         }
         invalidate();
     }
@@ -183,7 +186,7 @@ public class KnitPatternView extends View {
         if (pattern == null) {
             return;
         }
-        canvas.drawBitmap(patternBitmap, patternSrcRectangle, patternDstRectangle, null);
+        canvas.drawBitmap(bitmapToDraw, 0, 0, null);
     }
 
     private void drawPattern(Canvas canvas) {
@@ -228,6 +231,16 @@ public class KnitPatternView extends View {
             canvas.drawRect(0, 0, stitchSize, stitchSize, doneOverlayPaint);
             canvas.translate(xTranslate, 0);
         }
+        updateBitmapToDraw();
+    }
+
+    private void updateBitmapToDraw() {
+        Canvas canvas = new Canvas(bitmapToDraw);
+        if (viewWidth > patternDstRectangle.width() ||
+                viewHeight > patternDstRectangle.height()) {
+            canvas.drawARGB(0xFF, 0xFF, 0xFF, 0xFF);
+        }
+        canvas.drawBitmap(patternBitmap, patternSrcRectangle, patternDstRectangle, null);
     }
 
     @Override
@@ -258,6 +271,7 @@ public class KnitPatternView extends View {
             drawStitch(canvas, lastStitch);
             canvas.setMatrix(null);
         }
+        updateBitmapToDraw();
         invalidate();
     }
 
