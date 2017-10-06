@@ -164,12 +164,14 @@ public class KnitPatternView extends View {
         undoStack.push(1);
         markStitchesDone(1);
         pattern.increment();
+        ((MainActivity) getContext()).updateStitchCounter();
         invalidate();
     }
 
     public void incrementRow() {
         markStitchesDone(pattern.getStitchesLeftInRow());
         undoStack.push(pattern.incrementRow());
+        ((MainActivity) getContext()).updateStitchCounter();
         invalidate();
     }
 
@@ -276,6 +278,7 @@ public class KnitPatternView extends View {
             canvas.setMatrix(null);
         }
         updateBitmapToDraw();
+        ((MainActivity) getContext()).updateStitchCounter();
         invalidate();
     }
 

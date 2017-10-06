@@ -14,6 +14,7 @@ public class KnitPattern {
     private int currentDistanceInRow = 0;
     // We assume that all prior stitches are done
     private int totalStitchesDone = 0;
+    private int totalStitches = 0;
     private int currentRow = 0;
     private int nextStitchInRow = 0;
     private int patternWidth = 0;
@@ -46,6 +47,7 @@ public class KnitPattern {
                 if (!stitchTypes.contains(pattern[row][col])) {
                     stitchTypes.add(pattern[row][col]);
                 }
+                totalStitches++;
                 stitches[row][col] = new Stitch(pattern[row][col]);
                 rowWidth += stitches[row][col].getWidth();
             }
@@ -113,6 +115,10 @@ public class KnitPattern {
         return totalStitchesDone;
     }
 
+    public int getTotalStitches() {
+        return totalStitches;
+    }
+
     public int getCurrentRow() {
         return currentRow;
     }
@@ -158,6 +164,13 @@ public class KnitPattern {
             return stitches[currentRow].length - nextStitchInRow;
         }
         return nextStitchInRow + 1;
+    }
+
+    public int getStitchesDoneInRow() {
+        if (getRowDirection() == 1) {
+            return nextStitchInRow;
+        }
+        return stitches[currentRow].length - nextStitchInRow - 1;
     }
 
     public int getPatternWidth() {

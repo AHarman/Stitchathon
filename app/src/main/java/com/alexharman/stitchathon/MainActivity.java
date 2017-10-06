@@ -7,10 +7,12 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.alexharman.stitchathon.KnitPackage.KnitPattern;
 import com.alexharman.stitchathon.KnitPackage.KnitPatternParser;
@@ -19,6 +21,11 @@ import org.json.JSONException;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private TextView stitchCount;
+    private TextView rowCount;
+    private TextView completeCount;
+    private KnitPattern knitPattern;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,15 +43,19 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        final KnitPatternView patternView = (KnitPatternView) findViewById(R.id.knitView);
+        stitchCount = (TextView) findViewById(R.id.stitch_counter);
+        rowCount = (TextView) findViewById(R.id.row_counter);
+        completeCount = (TextView) findViewById(R.id.complete_counter);
 
+        final KnitPatternView patternView = (KnitPatternView) findViewById(R.id.knitView);
         KnitPatternParser parser = new KnitPatternParser();
         try {
-            KnitPattern knitPattern = new KnitPattern(parser.parseJSON(getString(R.string.test_pattern_json_string_subpattern_whole)));
+            knitPattern = new KnitPattern(parser.parseJSON(getString(R.string.test_pattern_json_string_subpattern_whole)));
             patternView.setPattern(knitPattern);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        updateStitchCounter();
 
         Button incrementRowButton = (Button) findViewById(R.id.increment_row_button);
         incrementRowButton.setOnClickListener(new View.OnClickListener() {
@@ -117,5 +128,14 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void updateStitchCounter() {
+        String s = getString(R.string.stitch_counter) + knitPattern.getStitchesDoneInRow();
+        stitchCount.setText(s);
+        s = getString(R.string.row_counter) + (knitPattern.getCurrentRow() + 1);
+        rowCount.setText(s);
+        s = getString(R.string.complete_counter) + (100 * knitPattern.getTotalStitchesDone() / knitPattern.getTotalStitches()) + "%";
+        completeCount.setText(s);
     }
 }
