@@ -28,6 +28,7 @@ public class KnitPatternView extends View {
     private Paint mainColorPaint;
     private Paint contrastColorPaint;
     private Paint doneOverlayPaint;
+    private Paint bitmapToDrawPaint;
     private float stitchSize = 10;
     private float stitchPad = 2;
 
@@ -61,6 +62,9 @@ public class KnitPatternView extends View {
         doneOverlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         doneOverlayPaint.setColor(Color.argb(150, backgroundColor[1], backgroundColor[2], backgroundColor[3]));
         doneOverlayPaint.setStyle(Paint.Style.FILL);
+        bitmapToDrawPaint = new Paint();
+        bitmapToDrawPaint.setAntiAlias(true);
+        bitmapToDrawPaint.setFilterBitmap(true);
 
         mGestureDetector = new GestureDetector(this.getContext(), new gestureListener());
     }
@@ -69,9 +73,9 @@ public class KnitPatternView extends View {
         int bitmapWidth = (int) (pattern.getPatternWidth() * stitchSize + (pattern.getPatternWidth() + 1) * stitchPad);
         int bitmapHeight = (int) (pattern.getRows() * stitchSize + (pattern.getRows() + 1) * stitchPad);
 
-        mcBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_8888);
-        ccBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_8888);
-        patternBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+        mcBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_4444);
+        ccBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_4444);
+        patternBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_4444);
         Canvas canvas = new Canvas(mcBitmap);
         canvas.drawRect(0.0f, 0.0f, stitchSize, stitchSize, mainColorPaint);
         canvas = new Canvas(ccBitmap);
@@ -240,7 +244,7 @@ public class KnitPatternView extends View {
                 viewHeight > patternDstRectangle.height()) {
             canvas.drawARGB(0xFF, 0xFF, 0xFF, 0xFF);
         }
-        canvas.drawBitmap(patternBitmap, patternSrcRectangle, patternDstRectangle, null);
+        canvas.drawBitmap(patternBitmap, patternSrcRectangle, patternDstRectangle, bitmapToDrawPaint);
     }
 
     @Override
