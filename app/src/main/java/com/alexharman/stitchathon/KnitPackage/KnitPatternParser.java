@@ -98,6 +98,7 @@ public class KnitPatternParser {
         }
 
         Log.d("Parse", "subpattern name " + subpatternName);
+        Log.d("Parse", "Doing " + subpatternText);
 
         String modName;
         String modValue;
@@ -117,15 +118,17 @@ public class KnitPatternParser {
                     }
                     break;
                 case "asymmetric":
+                    Log.d("Parse", "asymmetric");
                     ArrayList<ArrayList<String>> reverseSide;
+                    reverseSide = new ArrayList<>();
                     if (modValue.equals("mirror-ud")) {
-                        reverseSide = new ArrayList<>();
+                        Log.d("Parse", "mirror-ud");
                         for (int j = 0; j < subpattern.size(); j++) {
                             reverseSide.add((ArrayList<String>) subpattern.get(j).clone());
                         }
                         Collections.reverse(reverseSide);
                     } else if(modValue.equals("mirror-lr")) {
-                        reverseSide = new ArrayList<>();
+                        Log.d("Parse", "mirror-lr");
                         for (int j = 0; j < subpattern.size(); j++) {
                             reverseSide.add((ArrayList<String>) subpattern.get(j).clone());
                             Collections.reverse(reverseSide.get(j));
@@ -133,6 +136,7 @@ public class KnitPatternParser {
                     } else {
                         break;
                     }
+                    reverseDKColours(reverseSide);
                     String stitch;
                     for (int row = 0; row < subpattern.size(); row++) {
                         for (int col = 0; col < subpattern.get(row).size(); col++) {
@@ -144,6 +148,15 @@ public class KnitPatternParser {
             }
         }
         return subpattern;
+    }
+
+    private void reverseDKColours(ArrayList<ArrayList<String>> pattern) {
+        for (int row = 0; row < pattern.size(); row++) {
+            for (int col = 0; col < pattern.get(row).size(); col++) {
+                String stitch = pattern.get(row).get(col);
+                pattern.get(row).set(col, stitch.equals("M") ? "C" : "M");
+            }
+        }
     }
 
     private ArrayList<String> extractProperties(JSONObject jsonPattern) throws JSONException {

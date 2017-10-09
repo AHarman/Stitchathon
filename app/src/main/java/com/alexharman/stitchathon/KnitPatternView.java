@@ -5,8 +5,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -16,6 +18,10 @@ import android.view.View;
 import com.alexharman.stitchathon.KnitPackage.KnitPattern;
 import com.alexharman.stitchathon.KnitPackage.Stitch;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 
@@ -38,8 +44,7 @@ public class KnitPatternView extends View {
     int yOffset = 0;
     private int[] backgroundColor = {0xFF, 0xFF, 0xFF, 0xFF};
     private boolean fitPatternWidth = true;
-    Bitmap mcBitmap;
-    Bitmap ccBitmap;
+    HashMap<String, Bitmap> stitchBitmaps;
     Bitmap patternBitmap;
     Bitmap bitmapToDraw;
 
@@ -53,12 +58,16 @@ public class KnitPatternView extends View {
     public KnitPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        stitchBitmaps = new HashMap<>();
+
         mainColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mainColorPaint.setColor(Color.argb(255, 255, 0, 0));
         mainColorPaint.setStyle(Paint.Style.FILL);
+        mainColorPaint.setAntiAlias(true);
         contrastColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         contrastColorPaint.setColor(Color.argb(255, 0, 0, 255));
         contrastColorPaint.setStyle(Paint.Style.FILL);
+        contrastColorPaint.setAntiAlias(true);
         doneOverlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         doneOverlayPaint.setColor(Color.argb(150, backgroundColor[1], backgroundColor[2], backgroundColor[3]));
         doneOverlayPaint.setStyle(Paint.Style.FILL);
@@ -73,16 +82,51 @@ public class KnitPatternView extends View {
         int bitmapWidth = (int) (pattern.getPatternWidth() * stitchSize + (pattern.getPatternWidth() + 1) * stitchPad);
         int bitmapHeight = (int) (pattern.getRows() * stitchSize + (pattern.getRows() + 1) * stitchPad);
 
-        mcBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_4444);
-        ccBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_4444);
         patternBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_4444);
-        Canvas canvas = new Canvas(mcBitmap);
-        canvas.drawRect(0.0f, 0.0f, stitchSize, stitchSize, mainColorPaint);
-        canvas = new Canvas(ccBitmap);
-        canvas.drawRect(0.0f, 0.0f, stitchSize, stitchSize, contrastColorPaint);
-        canvas = new Canvas(patternBitmap);
+        Canvas canvas = new Canvas(patternBitmap);
         canvas.drawARGB(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
         drawPattern(canvas);
+    }
+
+    private void createStitchBitmaps() {
+        float startX = stitchSize * 7/10;
+        float stopX = stitchSize * 3/10;
+        Canvas canvas;
+        Bitmap mBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_4444);
+        Bitmap cBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_4444);
+        canvas = new Canvas(mBitmap); canvas.drawColor(mainColorPaint.getColor());
+        canvas = new Canvas(cBitmap); canvas.drawColor(contrastColorPaint.getColor());
+        stitchBitmaps.put("M", mBitmap);
+        stitchBitmaps.put("C", cBitmap);
+
+        Paint whitePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        whitePaint.setAntiAlias(true);
+        whitePaint.setFilterBitmap(true);
+        whitePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        whitePaint.setStrokeWidth(2.0f);
+        whitePaint.setColor(0xFFFFFFFF);
+
+        Path leftSide = new Path();
+        Path rightSide = new Path();
+        leftSide.setFillType(Path.FillType.EVEN_ODD);
+        leftSide.lineTo(startX - 1.0f, 0);
+        leftSide.lineTo(stopX - 1.0f, stitchSize);
+        leftSide.lineTo(0, stitchSize);
+        leftSide.close();
+        rightSide.setFillType(Path.FillType.EVEN_ODD);
+        rightSide.moveTo(startX + 1.0f, 0);
+        rightSide.lineTo(stitchSize, 0);
+        rightSide.lineTo(stitchSize, stitchSize);
+        rightSide.lineTo(stopX + 1.0f, stitchSize);
+        rightSide.close();
+
+        for (String s : new String[]{"M/M", "C/C", "M/C", "C/M"}) {
+            Bitmap b = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_4444);
+            canvas = new Canvas(b); canvas.drawColor(whitePaint.getColor());
+            canvas.drawPath(rightSide, s.startsWith("M") ? mainColorPaint : contrastColorPaint);
+            canvas.drawPath(leftSide, s.endsWith("M") ? mainColorPaint : contrastColorPaint);
+            stitchBitmaps.put(s, b);
+        }
     }
 
     @Override
@@ -142,9 +186,6 @@ public class KnitPatternView extends View {
     private void zoomPattern() {
         fitPatternWidth = !fitPatternWidth;
         xOffset = 0;
-        if (fitPatternWidth) {
-            yOffset = 0;
-        }
         updatePatternSrcRectangle();
         updatePatternDstRectangle();
         updateBitmapToDraw();
@@ -177,6 +218,7 @@ public class KnitPatternView extends View {
 
     public void setPattern(KnitPattern pattern) {
         this.pattern = pattern;
+        createStitchBitmaps();
         createPatternBitmap();
         if (viewWidth > 0) {
             updatePatternSrcRectangle();
@@ -210,7 +252,7 @@ public class KnitPatternView extends View {
     }
 
     private void drawStitch(Canvas canvas, Stitch stitch) {
-        Bitmap b = stitch.getType().equals("M") ? mcBitmap : ccBitmap;
+        Bitmap b = stitchBitmaps.get(stitch.getType());
         canvas.drawBitmap(b, 0, 0, stitch.done ? doneOverlayPaint : null);
         if (stitch.done) {
             canvas.drawRect(stitchPad, stitchPad, stitchSize, stitchSize, doneOverlayPaint);
