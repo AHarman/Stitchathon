@@ -8,9 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,10 +16,7 @@ import android.view.View;
 import com.alexharman.stitchathon.KnitPackage.KnitPattern;
 import com.alexharman.stitchathon.KnitPackage.Stitch;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 
@@ -238,6 +233,7 @@ public class KnitPatternView extends View {
             updatePatternSrcRectangle();
             updatePatternDstRectangle();
             bitmapToDraw = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444);
+            updateBitmapToDraw();
         }
         invalidate();
     }
