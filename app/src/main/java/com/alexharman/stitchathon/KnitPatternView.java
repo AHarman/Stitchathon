@@ -135,9 +135,11 @@ public class KnitPatternView extends View {
         viewHeight = h;
         viewWidth = w;
         bitmapToDraw = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444);
-        updatePatternSrcRectangle();
-        updatePatternDstRectangle();
-        updateBitmapToDraw();
+        if (pattern != null) {
+            updatePatternSrcRectangle();
+            updatePatternDstRectangle();
+            updateBitmapToDraw();
+        }
         invalidate();
     }
 
@@ -184,6 +186,9 @@ public class KnitPatternView extends View {
     }
 
     private void zoomPattern() {
+        if (pattern == null) {
+            return;
+        }
         fitPatternWidth = !fitPatternWidth;
         xOffset = 0;
         updatePatternSrcRectangle();
@@ -193,6 +198,9 @@ public class KnitPatternView extends View {
     }
 
     private void scroll(float distanceX, float distanceY) {
+        if (patternBitmap == null) {
+            return;
+        }
         float ratio = (float) patternSrcRectangle.width() / patternDstRectangle.width();
         xOffset = (int) Math.min(Math.max(distanceX * ratio + xOffset, 0), patternBitmap.getWidth() - patternSrcRectangle.width());
         yOffset = (int) Math.min(Math.max(distanceY * ratio + yOffset, 0), patternBitmap.getHeight() - patternSrcRectangle.height());
@@ -202,6 +210,9 @@ public class KnitPatternView extends View {
     }
 
     public void incrementOne() {
+        if (pattern == null) {
+            return;
+        }
         undoStack.push(1);
         markStitchesDone(1);
         pattern.increment();
@@ -210,6 +221,9 @@ public class KnitPatternView extends View {
     }
 
     public void incrementRow() {
+        if (pattern == null) {
+            return;
+        }
         markStitchesDone(pattern.getStitchesLeftInRow());
         undoStack.push(pattern.incrementRow());
         ((MainActivity) getContext()).updateStitchCounter();

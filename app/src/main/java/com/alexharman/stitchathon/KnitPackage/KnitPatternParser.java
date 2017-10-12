@@ -18,15 +18,14 @@ import java.util.regex.Pattern;
 
 public class KnitPatternParser {
 
-    public KnitPatternParser() {
-
+    public static KnitPattern createKnitPattern(String stringJsonPattern) throws JSONException {
+        JSONObject json = new JSONObject(stringJsonPattern);
+        KnitPattern pattern = new KnitPattern(parseJSON(json));
+        pattern.name = json.getString("name");
+        return pattern;
     }
 
-    public ArrayList<ArrayList<String>> parseJSON(String stringJsonPattern) throws JSONException {
-        return parseJSON(new JSONObject(stringJsonPattern));
-    }
-
-    public ArrayList<ArrayList<String>> parseJSON(JSONObject jsonPattern) throws JSONException {
+    private static ArrayList<ArrayList<String>> parseJSON(JSONObject jsonPattern) throws JSONException {
         String patternName = jsonPattern.getString("name");
         Log.d("Parse", "Name: " + patternName);
         ArrayList<String> properties = extractProperties(jsonPattern);
@@ -50,7 +49,7 @@ public class KnitPatternParser {
         return stringPattern;
     }
 
-    private ArrayList<String> expandContractedStitches(String contractedStitches){
+    private static ArrayList<String> expandContractedStitches(String contractedStitches){
         Pattern pattern = Pattern.compile("[0-9]+$");
         Matcher matcher = pattern.matcher(contractedStitches);
         ArrayList<String> expandedStitches = new ArrayList<>();
@@ -66,7 +65,7 @@ public class KnitPatternParser {
         return expandedStitches;
     }
 
-    private ArrayList<ArrayList<String>> expandPattern(ArrayList<ArrayList<String>> stringPattern, ArrayList<String> properties, HashMap<String, ArrayList<ArrayList<String>>> subpatterns) {
+    private static ArrayList<ArrayList<String>> expandPattern(ArrayList<ArrayList<String>> stringPattern, ArrayList<String> properties, HashMap<String, ArrayList<ArrayList<String>>> subpatterns) {
         ArrayList<String> row;
         String item;
 
@@ -88,7 +87,7 @@ public class KnitPatternParser {
         return stringPattern;
     }
 
-    private ArrayList<ArrayList<String>> getSubpatternAndApplyMods(String subpatternText, HashMap<String, ArrayList<ArrayList<String>>> subpatterns) {
+    private static ArrayList<ArrayList<String>> getSubpatternAndApplyMods(String subpatternText, HashMap<String, ArrayList<ArrayList<String>>> subpatterns) {
         String[] subpatternTextSplit = subpatternText.split(", ?");
         String subpatternName = subpatternTextSplit[0].split(":")[1];
         ArrayList<ArrayList<String>> subpattern = new ArrayList<>();
@@ -150,7 +149,7 @@ public class KnitPatternParser {
         return subpattern;
     }
 
-    private void reverseDKColours(ArrayList<ArrayList<String>> pattern) {
+    private static void reverseDKColours(ArrayList<ArrayList<String>> pattern) {
         for (int row = 0; row < pattern.size(); row++) {
             for (int col = 0; col < pattern.get(row).size(); col++) {
                 String stitch = pattern.get(row).get(col);
@@ -159,7 +158,7 @@ public class KnitPatternParser {
         }
     }
 
-    private ArrayList<String> extractProperties(JSONObject jsonPattern) throws JSONException {
+    private static ArrayList<String> extractProperties(JSONObject jsonPattern) throws JSONException {
         ArrayList<String> properties = new ArrayList<>();
         if (!jsonPattern.isNull("properties")) {
             JSONArray jsonProperties = jsonPattern.getJSONArray("properties");
@@ -171,7 +170,7 @@ public class KnitPatternParser {
         return properties;
     }
 
-    private HashMap<String, ArrayList<ArrayList<String>>> extractSubpatterns(JSONObject jsonPattern) throws JSONException {
+    private static HashMap<String, ArrayList<ArrayList<String>>> extractSubpatterns(JSONObject jsonPattern) throws JSONException {
         HashMap<String, ArrayList<ArrayList<String>>> subpatterns = new HashMap<>();
         JSONArray subpatternsJSON;
 
@@ -189,7 +188,7 @@ public class KnitPatternParser {
         return subpatterns;
     }
 
-    private ArrayList<ArrayList<String>> extractPattern(JSONObject jsonPattern) throws JSONException {
+    private static ArrayList<ArrayList<String>> extractPattern(JSONObject jsonPattern) throws JSONException {
         ArrayList<ArrayList<String>> stringPattern = new ArrayList<>();
         JSONArray jsonRawPattern = jsonPattern.getJSONArray("pattern");
         for (int i = 0; i < jsonRawPattern.length(); i++) {
