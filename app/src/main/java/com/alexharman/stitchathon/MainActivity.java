@@ -3,6 +3,7 @@ package com.alexharman.stitchathon;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity
     private KnitPatternView patternView;
 
     private static final int READ_EXTERNAL_FILE = 55;
+    private static final int READ_INTERNAL_FILE = 1234;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +117,10 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_import) {
+        if (id == R.id.nav_open) {
+            Intent intent = new Intent(this, OpenPattern.class);
+            startActivityForResult(intent,  READ_INTERNAL_FILE);
+        } else if (id == R.id.nav_import) {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("application/json");
@@ -165,6 +170,20 @@ public class MainActivity extends AppCompatActivity
         if (knitPattern != null) {
             setKnitPattern(knitPattern);
             savePatternToFile();
+            savePatternImage();
+        }
+    }
+
+    private void savePatternImage() {
+        Bitmap bm = patternView.patternBitmap;
+        FileOutputStream outputStream;
+
+        try {
+            outputStream = openFileOutput(knitPattern.name + ".png", Context.MODE_PRIVATE);
+            bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -187,11 +206,21 @@ public class MainActivity extends AppCompatActivity
         updateStitchCounter();
     }
 
+    private void openPattern(Uri patternUri, Uri imageUri) {
+        Gson gson = new Gson();
+        setKnitPattern(gson.fromJson(readTextFile(patternUri), KnitPattern.class));
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (requestCode == READ_EXTERNAL_FILE && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
                 importFile(resultData.getData());
+            }
+        }
+        if (requestCode == READ_INTERNAL_FILE && resultCode == Activity.RESULT_OK) {
+            if (resultData != null) {
+                openPattern((Uri) resultData.getParcelableExtra("pattern"), (Uri) resultData.getParcelableExtra("image"));
             }
         }
     }
