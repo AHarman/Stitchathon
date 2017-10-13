@@ -69,6 +69,8 @@ public class KnitPatternView extends View {
         bitmapToDrawPaint = new Paint();
         bitmapToDrawPaint.setAntiAlias(true);
         bitmapToDrawPaint.setFilterBitmap(true);
+        createStitchBitmaps();
+
 
         mGestureDetector = new GestureDetector(this.getContext(), new gestureListener());
     }
@@ -225,10 +227,14 @@ public class KnitPatternView extends View {
         invalidate();
     }
 
-    public void setPattern(KnitPattern pattern) {
+    public void setPattern(KnitPattern pattern, Bitmap bitmap) {
         this.pattern = pattern;
-        createStitchBitmaps();
-        createPatternBitmap();
+        if (bitmap == null) {
+            createPatternBitmap();
+        } else {
+            this.patternBitmap = bitmap;
+        }
+
         if (viewWidth > 0) {
             updatePatternSrcRectangle();
             updatePatternDstRectangle();
@@ -236,6 +242,10 @@ public class KnitPatternView extends View {
             updateBitmapToDraw();
         }
         invalidate();
+    }
+
+    public void setPattern(KnitPattern pattern) {
+        setPattern(pattern, null);
     }
 
     @Override

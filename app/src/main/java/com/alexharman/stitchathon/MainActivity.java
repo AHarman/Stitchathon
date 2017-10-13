@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -201,14 +202,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setKnitPattern(KnitPattern knitPattern) {
+        setKnitPattern(knitPattern, null);
+    }
+
+    private void setKnitPattern(KnitPattern knitPattern, Bitmap image) {
         this.knitPattern = knitPattern;
-        patternView.setPattern(knitPattern);
+        patternView.setPattern(knitPattern, image);
         updateStitchCounter();
     }
 
     private void openPattern(Uri patternUri, Uri imageUri) {
         Gson gson = new Gson();
-        setKnitPattern(gson.fromJson(readTextFile(patternUri), KnitPattern.class));
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inMutable = true;
+        Bitmap b = BitmapFactory.decodeFile(imageUri.getPath(), opts);
+        setKnitPattern(gson.fromJson(readTextFile(patternUri), KnitPattern.class), b);
     }
 
     @Override
