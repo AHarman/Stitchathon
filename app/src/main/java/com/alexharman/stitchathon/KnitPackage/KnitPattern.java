@@ -109,6 +109,7 @@ public class KnitPattern {
             nextStitchInRow -= getRowDirection();
         }
         stitches[currentRow][nextStitchInRow].done = false;
+        totalStitchesDone--;
     }
 
     public int getTotalStitchesDone() {
