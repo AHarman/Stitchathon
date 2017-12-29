@@ -9,6 +9,7 @@ import android.graphics.BitmapRegionDecoder;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -58,9 +59,10 @@ public class OpenPattern extends AppCompatActivity {
     }
 
     private void getNamesAndImages() {
+        Log.d("Opening", "in getNamesAndImages");
         ArrayList<String> filenames = new ArrayList<>(Arrays.asList(fileList()));
         for (String string : filenames) {
-            Log.d("Foo", string);
+            Log.d("Opening", "Filename: " + string);
             if (string.endsWith(".json")) {
                 jsonFilenames.add(string);
             } else if (string.endsWith(".png")) {
@@ -70,18 +72,20 @@ public class OpenPattern extends AppCompatActivity {
         }
     }
 
+    @Nullable
     private Bitmap createThumbnail(String filename) {
+        Log.d("Opening", "In createThumbnail");
+        Log.d("Opening", "Filename: " + filename);
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inSampleSize = 2;
         BitmapRegionDecoder bitmapRegionDecoder = null;
         try {
             bitmapRegionDecoder = BitmapRegionDecoder.newInstance(getFilesDir() + "/" + filename, false);
+            return bitmapRegionDecoder.decodeRegion(new Rect(0, 0, 500, 500), opts);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-        return bitmapRegionDecoder.decodeRegion(new Rect(0, 0, 500, 500), opts);
+        return Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     }
 
     private class myAdaptor extends BaseAdapter {
