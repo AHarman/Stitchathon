@@ -22,6 +22,7 @@ public class KnitPatternParser {
         JSONObject json = new JSONObject(stringJsonPattern);
         KnitPattern pattern = new KnitPattern(parseJSON(json));
         pattern.name = json.getString("name");
+        Log.d("Pers", "Pattern name is " + pattern.name);
         return pattern;
     }
 

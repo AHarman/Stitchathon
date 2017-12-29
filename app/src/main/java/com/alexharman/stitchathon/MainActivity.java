@@ -3,6 +3,7 @@ package com.alexharman.stitchathon;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,6 +29,7 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,6 +82,15 @@ public class MainActivity extends AppCompatActivity
                 patternView.undo();
             }
         });
+
+        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+        String knitPatternFP = sharedPreferences.getString("pattern", null);
+        String imageFP = sharedPreferences.getString("image", null);
+        if (knitPatternFP != null) {
+            Log.d("Pers", "in oCreate");
+            Log.d("Pers", "pattern filepath: " + knitPatternFP);
+            openPattern(Uri.fromFile(new File(knitPatternFP)), Uri.fromFile(new File(imageFP)));
+        }
     }
 
     @Override
@@ -144,6 +156,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private String readTextFile(Uri uri) {
+        Log.d("Pers", "in readTextFile()");
         InputStream inputStream;
         StringBuilder stringBuilder = new StringBuilder();
         try {
@@ -159,6 +172,8 @@ public class MainActivity extends AppCompatActivity
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Log.d("Pers", "Reading text got us this: " + stringBuilder.toString());
+        Log.d("Pers", "Length: " + stringBuilder.toString().length());
         return stringBuilder.toString();
     }
 
@@ -201,14 +216,29 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (knitPattern != null) {
+            savePatternToFile();
+            savePatternImage();
+        }
+    }
+
     private void setKnitPattern(KnitPattern knitPattern) {
         setKnitPattern(knitPattern, null);
     }
 
     private void setKnitPattern(KnitPattern knitPattern, Bitmap image) {
+        Log.d("Pers", "In setKnitPattern()");
+        Log.d("Pers", "Pattern null: " + (knitPattern==null));
         this.knitPattern = knitPattern;
         patternView.setPattern(knitPattern, image);
         updateStitchCounter();
+        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+        editor.putString("pattern", getFilesDir() + "/" + knitPattern.name + ".json");
+        editor.putString("image", getFilesDir() + "/" + knitPattern.name + ".png");
+        editor.apply();
     }
 
     private void openPattern(Uri patternUri, Uri imageUri) {
@@ -216,7 +246,20 @@ public class MainActivity extends AppCompatActivity
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inMutable = true;
         Bitmap b = BitmapFactory.decodeFile(imageUri.getPath(), opts);
-        setKnitPattern(gson.fromJson(readTextFile(patternUri), KnitPattern.class), b);
+        Log.d("Pers", "in openPattern()");
+        Log.d("Pers", "patternFP = " + patternUri.getPath());
+        String s = readTextFile(patternUri);
+        if (s == null) {
+            Log.d("Pers", "Didn't load in string properly");
+        } else {
+            KnitPattern pattern = gson.fromJson(s, KnitPattern.class);
+            Log.d("Pers", "GSON json is: " + s);
+            if (pattern != null) {
+                setKnitPattern(pattern, b);
+            } else {
+                Log.d("Pers", "Pattern did not load from json");
+            }
+        }
     }
 
     @Override
