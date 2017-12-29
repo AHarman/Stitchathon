@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -82,15 +83,6 @@ public class MainActivity extends AppCompatActivity
                 patternView.undo();
             }
         });
-
-        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
-        String knitPatternFP = sharedPreferences.getString("pattern", null);
-        String imageFP = sharedPreferences.getString("image", null);
-        if (knitPatternFP != null) {
-            Log.d("Pers", "in oCreate");
-            Log.d("Pers", "pattern filepath: " + knitPatternFP);
-            openPattern(Uri.fromFile(new File(knitPatternFP)), Uri.fromFile(new File(imageFP)));
-        }
     }
 
     @Override
@@ -178,12 +170,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void importFile(Uri uri) {
+        Log.d("Pers", "In importFile");
+        KnitPattern knitPattern = null;
         try {
             knitPattern = (KnitPatternParser.createKnitPattern(readTextFile(uri)));
         } catch (JSONException e) {
             e.printStackTrace();
         }
         if (knitPattern != null) {
+            Log.d("Pers", "Imported, going to save and set");
             setKnitPattern(knitPattern);
             savePatternToFile();
             savePatternImage();
@@ -191,6 +186,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void savePatternImage() {
+        Log.d("Pers", "In savePatternImage");
         Bitmap bm = patternView.patternBitmap;
         FileOutputStream outputStream;
 
@@ -198,40 +194,69 @@ public class MainActivity extends AppCompatActivity
             outputStream = openFileOutput(knitPattern.name + ".png", Context.MODE_PRIVATE);
             bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
             outputStream.close();
+            Log.d("Pers", "Finished saving image");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void savePatternToFile() {
+        Log.d("Pers", "In savePatternToFile");
         Gson gson = new Gson();
         FileOutputStream outputStream;
+        String gsonOutput = gson.toJson(knitPattern);
 
         try {
             outputStream = openFileOutput(knitPattern.name + ".json", Context.MODE_PRIVATE);
-            outputStream.write(gson.toJson(knitPattern).getBytes());
+            Log.d("Pers", "GSON gave us: " + gsonOutput);
+            Log.d("Pers", "Length: " + gsonOutput.length());
+            outputStream.write(gsonOutput.getBytes());
             outputStream.close();
+            Log.d("Pers", "Finished saving pattern");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onStart() {
+        super.onStart();
+        Log.d("Pers", "in onStart");
+
+        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+        String knitPatternFP = sharedPreferences.getString("pattern", null);
+        String imageFP = sharedPreferences.getString("image", null);
+        if (knitPatternFP != null) {
+            Log.d("Pers", "pattern filepath: " + knitPatternFP);
+            openPattern(Uri.fromFile(new File(knitPatternFP)), Uri.fromFile(new File(imageFP)));
+        } else {
+            Log.d("Pers", "knitPatternFP is null");
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
         if (knitPattern != null) {
             savePatternToFile();
             savePatternImage();
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("Foo", "in onStop");
+    }
+
     private void setKnitPattern(KnitPattern knitPattern) {
         setKnitPattern(knitPattern, null);
     }
 
-    private void setKnitPattern(KnitPattern knitPattern, Bitmap image) {
+    private void setKnitPattern(KnitPattern knitPattern, @Nullable Bitmap image) {
         Log.d("Pers", "In setKnitPattern()");
         Log.d("Pers", "Pattern null: " + (knitPattern==null));
+        Log.d("Pers", "Image null: " + (image==null));
         this.knitPattern = knitPattern;
         patternView.setPattern(knitPattern, image);
         updateStitchCounter();
@@ -241,21 +266,28 @@ public class MainActivity extends AppCompatActivity
         editor.apply();
     }
 
-    private void openPattern(Uri patternUri, Uri imageUri) {
-        Gson gson = new Gson();
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inMutable = true;
-        Bitmap b = BitmapFactory.decodeFile(imageUri.getPath(), opts);
+    private void openPattern(Uri patternUri, @Nullable Uri imageUri) {
         Log.d("Pers", "in openPattern()");
         Log.d("Pers", "patternFP = " + patternUri.getPath());
-        String s = readTextFile(patternUri);
-        if (s == null) {
+
+        Gson gson = new Gson();
+        Bitmap patternBitmap = null;
+
+        if (imageUri != null) {
+            Log.d("Pers", "Loading image from file");
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inMutable = true;
+            patternBitmap = BitmapFactory.decodeFile(imageUri.getPath(), opts);
+        }
+
+        String knitPatternGSON = readTextFile(patternUri);
+        if (knitPatternGSON == null || knitPatternGSON.length() == 0) {
             Log.d("Pers", "Didn't load in string properly");
         } else {
-            KnitPattern pattern = gson.fromJson(s, KnitPattern.class);
-            Log.d("Pers", "GSON json is: " + s);
+            KnitPattern pattern = gson.fromJson(knitPatternGSON, KnitPattern.class);
+            Log.d("Pers", "GSON json is: " + knitPatternGSON);
             if (pattern != null) {
-                setKnitPattern(pattern, b);
+                setKnitPattern(pattern, patternBitmap);
             } else {
                 Log.d("Pers", "Pattern did not load from json");
             }
@@ -265,11 +297,13 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (requestCode == READ_EXTERNAL_FILE && resultCode == Activity.RESULT_OK) {
+            Log.d("Pers", "Returned from the import file bit");
             if (resultData != null) {
                 importFile(resultData.getData());
             }
         }
         if (requestCode == READ_INTERNAL_FILE && resultCode == Activity.RESULT_OK) {
+            Log.d("Pers", "Returned from the open pattern bit");
             if (resultData != null) {
                 openPattern((Uri) resultData.getParcelableExtra("pattern"), (Uri) resultData.getParcelableExtra("image"));
             }

@@ -1,9 +1,6 @@
 package com.alexharman.stitchathon.KnitPackage;
 
-import android.util.Log;
-
 import java.util.ArrayList;
-
 
 public class KnitPattern {
 

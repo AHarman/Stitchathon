@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -227,7 +228,7 @@ public class KnitPatternView extends View {
         invalidate();
     }
 
-    public void setPattern(KnitPattern pattern, Bitmap bitmap) {
+    public void setPattern(KnitPattern pattern, @Nullable Bitmap bitmap) {
         this.pattern = pattern;
         if (bitmap == null) {
             createPatternBitmap();
