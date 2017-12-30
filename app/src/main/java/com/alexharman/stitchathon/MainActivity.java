@@ -84,6 +84,13 @@ public class MainActivity extends AppCompatActivity
                 patternView.undo();
             }
         });
+
+        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+        String knitPatternFP = sharedPreferences.getString("pattern", null);
+        String imageFP = sharedPreferences.getString("image", null);
+        if (knitPatternFP != null) {
+            openPattern(Uri.fromFile(new File(knitPatternFP)), Uri.fromFile(new File(imageFP)));
+        }
     }
 
     @Override
@@ -149,7 +156,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private String readTextFile(Uri uri) {
-        Log.d("Pers", "in readTextFile()");
         InputStream inputStream;
         StringBuilder stringBuilder = new StringBuilder();
         try {
@@ -165,8 +171,6 @@ public class MainActivity extends AppCompatActivity
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d("Pers", "Reading text got us this: " + stringBuilder.toString());
-        Log.d("Pers", "Length: " + stringBuilder.toString().length());
         return stringBuilder.toString();
     }
 
@@ -174,21 +178,12 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         Log.d("Lifecycle", "in onStart");
-
-        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
-        String knitPatternFP = sharedPreferences.getString("pattern", null);
-        String imageFP = sharedPreferences.getString("image", null);
-        if (knitPatternFP != null) {
-            Log.d("Pers", "pattern filepath: " + knitPatternFP);
-            openPattern(Uri.fromFile(new File(knitPatternFP)), Uri.fromFile(new File(imageFP)));
-        } else {
-            Log.d("Pers", "knitPatternFP is null");
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d("LifeCycle", "in onPause");
         if (knitPattern != null) {
             savePatternToFile();
         }
@@ -197,7 +192,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d("Foo", "in onStop");
+        Log.d("Lifecycle", "in onStop");
     }
 
     private void setKnitPattern(KnitPattern knitPattern) {
@@ -205,8 +200,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setKnitPattern(@NonNull KnitPattern knitPattern, @Nullable Bitmap image) {
-        Log.d("Pers", "In setKnitPattern()");
-        Log.d("Pers", "Image null: " + (image==null));
         this.knitPattern = knitPattern;
         patternView.setPattern(knitPattern, image);
         updateStitchCounter();
@@ -230,14 +223,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        Log.d("Lifecycle", "In onActivityResult");
         if (requestCode == READ_EXTERNAL_FILE && resultCode == Activity.RESULT_OK) {
-            Log.d("Pers", "Returned from the import file bit");
             if (resultData != null) {
                 importFile(resultData.getData());
             }
         }
         if (requestCode == READ_INTERNAL_FILE && resultCode == Activity.RESULT_OK) {
-            Log.d("Pers", "Returned from the open pattern bit");
             if (resultData != null) {
                 openPattern((Uri) resultData.getParcelableExtra("pattern"), (Uri) resultData.getParcelableExtra("image"));
             }
