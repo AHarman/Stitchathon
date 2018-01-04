@@ -195,6 +195,12 @@ public class MainActivity extends AppCompatActivity
         Log.d("Lifecycle", "in onStop");
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d("Lifecycle", "in onSaveInstanceState");
+    }
+
     private void setKnitPattern(KnitPattern knitPattern) {
         setKnitPattern(knitPattern, null);
     }
@@ -223,6 +229,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
         Log.d("Lifecycle", "In onActivityResult");
         if (requestCode == READ_EXTERNAL_FILE && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
@@ -271,6 +278,13 @@ public class MainActivity extends AppCompatActivity
 
     private class OpenPatternTask extends AsyncTask<Uri, Void, KnitPattern> {
         Bitmap patternBitmap = null;
+        ProgressbarDialog progressbarDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressbarDialog = ProgressbarDialog.newInstance("Loading pattern", true);
+            progressbarDialog.show(getSupportFragmentManager(), "Opening");
+        }
 
         @Override
         protected KnitPattern doInBackground(Uri... uris) {
@@ -307,10 +321,19 @@ public class MainActivity extends AppCompatActivity
             } else {
                 Log.d("OpenPatternTask", "Pattern did not load from json");
             }
+            progressbarDialog.dismiss();
         }
     }
 
     private class ImportPatternTask extends AsyncTask<Uri, Void, KnitPattern> {
+        ProgressbarDialog progressbarDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressbarDialog = ProgressbarDialog.newInstance("Importing pattern", true);
+            progressbarDialog.show(getSupportFragmentManager(), "Importing");
+        }
+
         @Override
         protected KnitPattern doInBackground(Uri... uris) {
             Uri uri = uris[0];
@@ -334,6 +357,7 @@ public class MainActivity extends AppCompatActivity
                 setKnitPattern(knitPattern);
                 savePatternToFile();
             }
+            progressbarDialog.dismiss();
         }
     }
 }

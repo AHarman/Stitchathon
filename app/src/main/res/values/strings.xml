@@ -16,4 +16,5 @@
     <string name="complete_counter">Complete: </string>
     <string name="open_pattern">Open Pattern</string>
     <string name="import_pattern">Import Pattern</string>
+    <string name="progress_bar_loading">Loading</string>
 </resources>
