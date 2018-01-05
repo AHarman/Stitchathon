@@ -76,14 +76,16 @@ public class KnitPatternView extends View {
         mGestureDetector = new GestureDetector(this.getContext(), new gestureListener());
     }
 
-    private void createPatternBitmap() {
-        int bitmapWidth = (int) (pattern.getPatternWidth() * stitchSize + (pattern.getPatternWidth() + 1) * stitchPad);
-        int bitmapHeight = (int) (pattern.getRows() * stitchSize + (pattern.getRows() + 1) * stitchPad);
+    public Bitmap createPatternBitmap(KnitPattern knitPattern) {
+        int bitmapWidth = (int) (knitPattern.getPatternWidth() * stitchSize + (knitPattern.getPatternWidth() + 1) * stitchPad);
+        int bitmapHeight = (int) (knitPattern.getRows() * stitchSize + (knitPattern.getRows() + 1) * stitchPad);
 
-        patternBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_4444);
-        Canvas canvas = new Canvas(patternBitmap);
+        Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_4444);
+        Canvas canvas = new Canvas(bitmap);
         canvas.drawARGB(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
-        drawPattern(canvas);
+        drawPattern(canvas, knitPattern);
+
+        return bitmap;
     }
 
     private void createStitchBitmaps() {
@@ -231,7 +233,7 @@ public class KnitPatternView extends View {
     public void setPattern(KnitPattern pattern, @Nullable Bitmap bitmap) {
         this.pattern = pattern;
         if (bitmap == null) {
-            createPatternBitmap();
+            patternBitmap = createPatternBitmap(pattern);
         } else {
             this.patternBitmap = bitmap;
         }
@@ -259,12 +261,16 @@ public class KnitPatternView extends View {
     }
 
     private void drawPattern(Canvas canvas) {
+        drawPattern(canvas, this.pattern);
+    }
+
+    private void drawPattern(Canvas canvas, KnitPattern knitPattern) {
         canvas.translate(0, stitchPad);
-        for (int row = 0; row < pattern.getRows(); row++) {
+        for (int row = 0; row < knitPattern.getRows(); row++) {
             canvas.save();
             canvas.translate(stitchPad, 0);
-            for (int col = 0; col < pattern.getPatternWidth(); col++) {
-                drawStitch(canvas, pattern.stitches[row][col]);
+            for (int col = 0; col < knitPattern.getPatternWidth(); col++) {
+                drawStitch(canvas, knitPattern.stitches[row][col]);
                 canvas.translate(stitchSize+stitchPad, 0);
             }
             canvas.restore();

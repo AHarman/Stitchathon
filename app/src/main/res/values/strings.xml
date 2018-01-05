@@ -16,5 +16,9 @@
     <string name="complete_counter">Complete: </string>
     <string name="open_pattern">Open Pattern</string>
     <string name="import_pattern">Import Pattern</string>
-    <string name="progress_bar_loading">Loading</string>
+    <string name="progress_bar_loading_pattern">Loading pattern</string>
+    <string name="progress_bar_importing_pattern">Importing pattern</string>
+    <string name="progress_bar_creating_bitmap">Creating pattern image</string>
+    <string name="progress_dialog_load_title">Loading</string>
+    <string name="progress_dialog_import_title">Importing</string>
 </resources>
