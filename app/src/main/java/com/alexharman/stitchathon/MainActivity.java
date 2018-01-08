@@ -46,8 +46,9 @@ public class MainActivity extends AppCompatActivity
     private KnitPattern knitPattern;
     private KnitPatternView patternView;
 
-    private static final int READ_EXTERNAL_FILE = 55;
-    private static final int READ_INTERNAL_FILE = 1234;
+    private static final int READ_EXTERNAL_IMAGE = 42;
+    private static final int READ_EXTERNAL_JSON_PATTERN = 55;
+    private static final int OPEN_INTERNAL_PATTERN = 1234;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,12 +133,17 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_open) {
             Intent intent = new Intent(this, OpenPattern.class);
-            startActivityForResult(intent,  READ_INTERNAL_FILE);
-        } else if (id == R.id.nav_import) {
+            startActivityForResult(intent, OPEN_INTERNAL_PATTERN);
+        } else if (id == R.id.nav_import_pattern) {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("application/json");
-            startActivityForResult(intent, READ_EXTERNAL_FILE);
+            startActivityForResult(intent, READ_EXTERNAL_JSON_PATTERN);
+        } else if (id == R.id.nav_import_image) {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("image/*");
+            startActivityForResult(intent, READ_EXTERNAL_JSON_PATTERN);
         }
 
         item.setChecked(false);
@@ -215,6 +221,10 @@ public class MainActivity extends AppCompatActivity
         editor.apply();
     }
 
+    private void importImage(Uri imageUri) {
+        new ImportImageTask().execute(imageUri);
+    }
+
     private void openPattern(Uri patternUri, @Nullable Uri imageUri) {
         new OpenPatternTask().execute(patternUri, imageUri);
     }
@@ -231,12 +241,17 @@ public class MainActivity extends AppCompatActivity
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
         Log.d("Lifecycle", "In onActivityResult");
-        if (requestCode == READ_EXTERNAL_FILE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == READ_EXTERNAL_JSON_PATTERN && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
                 importFile(resultData.getData());
             }
         }
-        if (requestCode == READ_INTERNAL_FILE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == READ_EXTERNAL_IMAGE && resultCode == Activity.RESULT_OK) {
+            if (resultData != null) {
+                importImage(resultData.getData());
+            }
+        }
+        if (requestCode == OPEN_INTERNAL_PATTERN && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
                 openPattern((Uri) resultData.getParcelableExtra("pattern"), (Uri) resultData.getParcelableExtra("image"));
             }
@@ -375,6 +390,27 @@ public class MainActivity extends AppCompatActivity
                 setKnitPattern(knitPattern, patternBitmap);
                 savePatternToFile();
             }
+            progressbarDialog.dismiss();
+        }
+    }
+
+    private class ImportImageTask extends AsyncTask<Uri, Void, String> {
+        ProgressbarDialog progressbarDialog;
+        @Override
+        protected void onPreExecute() {
+            Log.d("ImportImageTask", "In onPreExecute");
+            progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_import_title), true, getString(R.string.progress_bar_importing_pattern));
+            progressbarDialog.show(getSupportFragmentManager(), "Importing");
+        }
+
+        @Override
+        protected String doInBackground(Uri... uris) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
             progressbarDialog.dismiss();
         }
     }
