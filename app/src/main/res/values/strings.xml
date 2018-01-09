@@ -23,4 +23,11 @@
     <string name="progress_dialog_load_title">Loading</string>
     <string name="progress_dialog_import_title">Importing</string>
     <string name="import_image">Import Image</string>
+    <string name="stitches_wide">width</string>
+    <string name="stitches_high">height</string>
+    <string name="number_of_colours_label"># colours:</string>
+    <string name="import_image_dialog_title">Import options</string>
+    <string name="OK">OK</string>
+    <string name="cancel">cancel</string>
+    <string name="import_image_pattern_name_label">Pattern name:</string>
 </resources>

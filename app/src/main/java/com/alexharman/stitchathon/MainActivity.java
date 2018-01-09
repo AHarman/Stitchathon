@@ -28,6 +28,7 @@ import com.alexharman.stitchathon.KnitPackage.KnitPattern;
 import com.alexharman.stitchathon.KnitPackage.KnitPatternParser;
 import com.google.gson.Gson;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.BufferedReader;
@@ -38,7 +39,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        ImportImageDialog.ImportImageDialogListener{
 
     private TextView stitchCount;
     private TextView rowCount;
@@ -237,7 +239,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void importImage(Uri imageUri) {
-        new ImportImageTask().execute(imageUri);
+        ImportImageDialog importImageDialog = new ImportImageDialog();
+        importImageDialog.show(getSupportFragmentManager(), "Importing image");
     }
 
     private void openPattern(Uri patternUri, @Nullable Uri imageUri) {
@@ -271,6 +274,14 @@ public class MainActivity extends AppCompatActivity
                 openPattern((Uri) resultData.getParcelableExtra("pattern"), (Uri) resultData.getParcelableExtra("image"));
             }
         }
+    }
+
+    @Override
+    public void onImportImageDialogOK(@NotNull String name, int width, int height, int numColours) {
+        Log.d("onImportImageDialogOK", name);
+        Log.d("onImportImageDialogOK", ""+width);
+        Log.d("onImportImageDialogOK", ""+height);
+        Log.d("onImportImageDialogOK", ""+numColours);
     }
 
     private class SavePatternTask extends AsyncTask<KnitPattern, Void, Void> {
