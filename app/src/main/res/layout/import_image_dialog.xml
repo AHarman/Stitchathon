@@ -2,48 +2,83 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_margin="5dp"
-    android:layout_marginTop="10dp">
+    android:padding="10dp">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:text="@string/import_image_pattern_name_label"/>
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
         android:id="@+id/pattern_name_edittext"/>
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"
         android:orientation="horizontal">
+        <android.support.v4.widget.Space
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/stitch_count_label"
+            android:layout_weight="1"/>
+        <android.support.v4.widget.Space
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"/>
         <EditText
             android:id="@+id/stitches_wide_edittext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="number"
+            android:layout_gravity="center"
             android:hint="@string/stitches_wide"
-            android:minEms="4" />
+            android:inputType="number"
+            android:minEms="4"
+            android:textAlignment="center"
+            android:layout_weight="1"/>
+        <android.support.v4.widget.Space
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"/>
         <EditText
             android:id="@+id/stitches_high_edittext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="number"
+            android:layout_gravity="end"
             android:hint="@string/stitches_high"
-            android:minEms="4" />
+            android:inputType="number"
+            android:minEms="4"
+            android:textAlignment="center"
+            android:layout_weight="1"/>
+        <android.support.v4.widget.Space
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:gravity="center">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:text="@string/number_of_colours_label"/>
+        <android.support.v4.widget.Space
+            android:layout_width="50dp"
+            android:layout_height="wrap_content" />
         <NumberPicker
             android:id="@+id/import_image_numpicker"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 </LinearLayout>
