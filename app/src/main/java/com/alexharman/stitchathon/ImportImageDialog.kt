@@ -43,25 +43,57 @@ class ImportImageDialog: DialogFragment() {
         val numberPicker: NumberPicker = dialogView.findViewById(R.id.import_image_numpicker) as NumberPicker
         numberPicker.maxValue = 20
         numberPicker.minValue = 2
+        numberPicker.value = 2
+        numberPicker.wrapSelectorWheel = false
+
+        (dialogView.findViewById(R.id.pattern_name_edittext) as EditText).hint = arguments.getString("filename")
+        (dialogView.findViewById(R.id.stitches_wide_edittext) as EditText).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v, hf) })
+        (dialogView.findViewById(R.id.stitches_high_edittext) as EditText).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v, hf) })
 
         builder.setView(dialogView)
         builder.setCancelable(false)
         builder.setTitle(R.string.import_image_dialog_title)
         builder.setCancelable(false)
-        builder.setPositiveButton(R.string.OK, {_, _ -> returnValues()})
-        builder.setNegativeButton(R.string.cancel, {_, _ ->  dismiss()})
+        builder.setPositiveButton(R.string.OK, { d, _ -> returnValues(d) })
+        builder.setNegativeButton(R.string.cancel, { _, _ -> dismiss() })
         dialog = builder.create()
+        dialog.setOnShowListener { d: DialogInterface ->  (d as AlertDialog).getButton(Dialog.BUTTON_POSITIVE).setOnClickListener {  returnValues(d) } }
 
-        (dialogView.findViewById(R.id.import_image_numpicker) as NumberPicker).value = 2
         return dialog
     }
 
-    private fun returnValues() {
-        val name = (dialogView.findViewById(R.id.pattern_name_edittext) as EditText).text.toString()
-        val width = (dialogView.findViewById(R.id.stitches_wide_edittext) as EditText).text.toString().toInt()
-        val height = (dialogView.findViewById(R.id.stitches_high_edittext) as EditText).text.toString().toInt()
-        val numColours = (dialogView.findViewById(R.id.import_image_numpicker) as NumberPicker).value
+    private fun emptyTextCheck(v: View, hasFocus: Boolean) {
+        if (!hasFocus && (v as EditText).text.trim().isEmpty()) {
+            v.error = getString(R.string.empty_string_error)
+        } else if (!(v as EditText).text.trim().isEmpty()) {
+            v.error = null
+        }
+    }
 
-        listener.onImportImageDialogOK(name, width, height, numColours)
+    private fun returnValues(dialog: DialogInterface) {
+        val nameView = dialogView.findViewById(R.id.pattern_name_edittext) as EditText
+        var name = nameView.text.toString()
+        val widthView = dialogView.findViewById(R.id.stitches_wide_edittext) as EditText
+        val width = widthView.text.toString().toIntOrNull()
+        val heightView = dialogView.findViewById(R.id.stitches_high_edittext) as EditText
+        val height = widthView.text.toString().toIntOrNull()
+        val numPicker = dialogView.findViewById(R.id.import_image_numpicker) as NumberPicker
+        val numColours = numPicker.value
+        var formNotFull = false
+
+        if (name.isEmpty()) name = nameView.hint.toString()
+
+        if (width == null) {
+            widthView.error = getString(R.string.empty_string_error)
+            formNotFull = true
+        }
+        if (height == null) {
+            heightView.error = getString(R.string.empty_string_error)
+            formNotFull = true
+        }
+        if (formNotFull) return
+
+        dialog.dismiss()
+        listener.onImportImageDialogOK(name, width!!, height!!, numColours)
     }
 }
