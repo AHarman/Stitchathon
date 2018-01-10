@@ -289,7 +289,7 @@ public class MainActivity extends AppCompatActivity
         Log.d("onImportImageDialogOK", ""+width);
         Log.d("onImportImageDialogOK", ""+height);
         Log.d("onImportImageDialogOK", ""+numColours);
-//        new ImportImageTask(fileName).execute(imageUri);
+        new ImportImageTask(uri, name, width, height, numColours).execute();
     }
 
     private class SavePatternTask extends AsyncTask<KnitPattern, Void, Void> {
@@ -423,8 +423,24 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class ImportImageTask extends AsyncTask<Uri, Void, String> {
+    private class ImportImageTask extends AsyncTask<Void, Void, String> {
+        private Uri imageUri;
+        private String patternName;
+        private int width;
+        private int height;
+        private int numColours;
+        Bitmap bitmap;
+
         ProgressbarDialog progressbarDialog;
+
+        ImportImageTask(Uri uri, String name, int width, int height, int numColours) {
+            this.imageUri = uri;
+            this.patternName = name;
+            this.width = width;
+            this.height = height;
+            this.numColours = numColours;
+        }
+
         @Override
         protected void onPreExecute() {
             Log.d("ImportImageTask", "In onPreExecute");
@@ -433,13 +449,23 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected String doInBackground(Uri... uris) {
+        protected String doInBackground(Void... voids) {
+            bitmap = readImageFile(imageUri);
+            if (bitmap == null) {
+                Log.d("ImportImageTask", "bitmap null");
+                return null;
+            }
+
+            ImageReader imageReader = new ImageReader();
+            bitmap = imageReader.readImage(bitmap, width, height, numColours);
+
             return null;
         }
 
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            patternView.setPattern(knitPattern, bitmap);
             progressbarDialog.dismiss();
         }
     }
