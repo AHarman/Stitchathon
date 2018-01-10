@@ -47,10 +47,11 @@ public class MainActivity extends AppCompatActivity
     private TextView completeCount;
     private KnitPattern knitPattern;
     private KnitPatternView patternView;
+    private ImportImageDialog importImageDialog;
 
-    private static final int READ_EXTERNAL_IMAGE = 42;
-    private static final int READ_EXTERNAL_JSON_PATTERN = 55;
-    private static final int OPEN_INTERNAL_PATTERN = 1234;
+    static final int READ_EXTERNAL_IMAGE = 42;
+    static final int READ_EXTERNAL_JSON_PATTERN = 55;
+    static final int OPEN_INTERNAL_PATTERN = 1234;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,24 +135,29 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_open) {
-            Intent intent = new Intent(this, OpenPattern.class);
-            startActivityForResult(intent, OPEN_INTERNAL_PATTERN);
+            selectInternalPattern();
         } else if (id == R.id.nav_import_pattern) {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("application/json");
-            startActivityForResult(intent, READ_EXTERNAL_JSON_PATTERN);
+            selectExternalFile("application/json", READ_EXTERNAL_JSON_PATTERN);
         } else if (id == R.id.nav_import_image) {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("image/*");
-            startActivityForResult(intent, READ_EXTERNAL_IMAGE);
+            importImage();
         }
 
         item.setChecked(false);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    void selectInternalPattern() {
+        Intent intent = new Intent(this, OpenPattern.class);
+        startActivityForResult(intent, OPEN_INTERNAL_PATTERN);
+    }
+
+    void selectExternalFile(String type, int requestCode) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(type);
+        startActivityForResult(intent, requestCode);
     }
 
     public void updateStitchCounter() {
@@ -238,8 +244,8 @@ public class MainActivity extends AppCompatActivity
         editor.apply();
     }
 
-    private void importImage(Uri imageUri) {
-        ImportImageDialog importImageDialog = new ImportImageDialog();
+    private void importImage() {
+        importImageDialog = new ImportImageDialog();
         importImageDialog.show(getSupportFragmentManager(), "Importing image");
     }
 
@@ -265,8 +271,8 @@ public class MainActivity extends AppCompatActivity
             }
         }
         if (requestCode == READ_EXTERNAL_IMAGE && resultCode == Activity.RESULT_OK) {
-            if (resultData != null) {
-                importImage(resultData.getData());
+            if (resultData != null && resultData.getData() != null) {
+                importImageDialog.setUri(resultData.getData());
             }
         }
         if (requestCode == OPEN_INTERNAL_PATTERN && resultCode == Activity.RESULT_OK) {
@@ -277,11 +283,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onImportImageDialogOK(@NotNull String name, int width, int height, int numColours) {
+    public void onImportImageDialogOK(Uri uri, String name, int width, int height, int numColours) {
+        Log.d("onImportImageDialogOK", uri.getPath());
         Log.d("onImportImageDialogOK", name);
         Log.d("onImportImageDialogOK", ""+width);
         Log.d("onImportImageDialogOK", ""+height);
         Log.d("onImportImageDialogOK", ""+numColours);
+//        new ImportImageTask(fileName).execute(imageUri);
     }
 
     private class SavePatternTask extends AsyncTask<KnitPattern, Void, Void> {
@@ -363,8 +371,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private class ImportPatternTask extends AsyncTask<Uri, String, KnitPattern> {
-        ProgressbarDialog progressbarDialog;
-        Bitmap patternBitmap;
+        private ProgressbarDialog progressbarDialog;
+        private Bitmap patternBitmap;
 
         @Override
         protected void onPreExecute() {

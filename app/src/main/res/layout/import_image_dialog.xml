@@ -5,16 +5,42 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="10dp">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:text="@string/import_image_pattern_name_label"/>
-    <EditText
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:id="@+id/pattern_name_edittext"/>
+        android:layout_height="wrap_content">
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:layout_gravity="bottom"
+            android:hint="@string/select_image"
+            android:clickable="false"
+            android:id="@+id/import_image_browse_edittext"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/browse"
+            android:id="@+id/import_image_browse_button"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/import_image_pattern_name_label"
+            android:textStyle="bold"
+            android:labelFor="@id/pattern_name_edittext"/>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:textAlignment="center"
+            android:inputType="text"
+            android:id="@+id/pattern_name_edittext"/>
+    </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -30,6 +56,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="@string/stitch_count_label"
+            android:textStyle="bold"
             android:layout_weight="1"/>
         <android.support.v4.widget.Space
             android:layout_width="wrap_content"
@@ -72,6 +99,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:textStyle="bold"
             android:text="@string/number_of_colours_label"/>
         <android.support.v4.widget.Space
             android:layout_width="50dp"

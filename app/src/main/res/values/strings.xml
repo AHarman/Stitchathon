@@ -32,4 +32,6 @@
     <string name="import_image_pattern_name_label">Pattern name:</string>
     <string name="stitch_count_label">Stitches:</string>
     <string name="empty_string_error">Cannot be empty</string>
+    <string name="select_image">Select image</string>
+    <string name="browse">Browse</string>
 </resources>
