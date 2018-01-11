@@ -55,7 +55,32 @@ class ImageReader {
                              distanceTable: HashMap<Colour, ArrayList<Colour>>,
                              coloursWanted: Int)
             : HashMap<Int, Int> {
-        return HashMap<Int, Int>()
+        val groupedColours = ArrayList<ArrayList<Pair<Colour, Int>>>()
+
+        //Building initial structure
+        colourCount.entries.forEach({
+            val al = ArrayList<Pair<Colour, Int>>()
+            al.add(it.toPair())
+            groupedColours.add(al)
+        })
+        groupedColours.sortBy { it.sumBy { it.second } }
+
+        // Do an AV-style instant runoff election on colours.
+        // Each colour is a candidate, has votes equal to the number of pixels it has in the image
+        // Each colour's preference list is all the other colours in order of colour distance
+        while (groupedColours.size > coloursWanted) {
+            for ( pair in groupedColours.removeAt(0)) {
+                distanceTable.values.forEach { it.remove(pair.first) }
+                val movedTo = groupedColours.find { it[0].first == distanceTable[pair.first]!![0] }!!
+                movedTo.add(pair)
+                distanceTable[pair.first]!!.remove(movedTo[0].first)
+            }
+            groupedColours.sortBy { it.sumBy { it.second } }
+        }
+
+        val colourMapping = HashMap<Int, Int>()
+        groupedColours.forEach { list -> list.forEach { colourMapping[it.first.toArgb()] = list[0].first.toArgb() } }
+        return colourMapping
     }
 
     private fun createDistanceTable(colours: Array<Colour>): HashMap<Colour, ArrayList<Colour>> {
