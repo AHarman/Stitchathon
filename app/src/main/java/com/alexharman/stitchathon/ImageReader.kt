@@ -15,20 +15,24 @@ import kotlin.math.sqrt
 class ImageReader {
     fun readImage(bitmap: Bitmap, stitchesWide: Int, stitchesHigh: Int, numColours: Int): Bitmap {
         val sampledBitmap = Bitmap.createScaledBitmap(bitmap, stitchesWide, stitchesHigh, false)
-        quantizeColours(sampledBitmap, numColours)
-        return sampledBitmap
+        return quantizeColours(sampledBitmap, numColours)
     }
 
     // TODO: selectively use colourReduce in countColours() method if too many colours
     private fun quantizeColours(bitmap: Bitmap, numColours: Int): Bitmap {
         val colourCount = countColours(bitmap)
         if (colourCount.keys.size <= numColours) return bitmap
-        Log.d("quantizing", "We have ${colourCount.keys.size} colours in total")
         val distanceTable = createDistanceTable(colourCount.keys.toTypedArray())
+        val colourMap = groupColours(colourCount, distanceTable, numColours)
+        return replaceColours(bitmap, colourMap)
+    }
 
-        // Do more processing here if needed
-        Log.d("quantizing", "We have ${colourCount.keys.size} colours")
-        Log.d("quantizing", "We want to reduce that to $numColours")
+    private fun replaceColours(bitmap: Bitmap, colourMap: HashMap<Int, Int>): Bitmap {
+        for (row in 0 until bitmap.height) {
+            for (col in 0 until bitmap.width) {
+                bitmap.setPixel(col, row, colourMap[bitmap.getPixel(col, row)]!!)
+            }
+        }
         return bitmap
     }
 
@@ -45,6 +49,13 @@ class ImageReader {
             }
         }
         return colourCount
+    }
+
+    private fun groupColours(colourCount: HashMap<Colour, Int>,
+                             distanceTable: HashMap<Colour, ArrayList<Colour>>,
+                             coloursWanted: Int)
+            : HashMap<Int, Int> {
+        return HashMap<Int, Int>()
     }
 
     private fun createDistanceTable(colours: Array<Colour>): HashMap<Colour, ArrayList<Colour>> {
@@ -72,5 +83,7 @@ class ImageReader {
                 (argb and 0x00FF0000) shr (16 + colourReduce),
                 (argb and 0x0000FF00) shr (8 + colourReduce),
                 (argb and 0x000000FF) shr colourReduce)
+
+        fun toArgb(): Int = (0xFF shl 24) + (r shl 16) + (g shl 8) + b
     }
 }
