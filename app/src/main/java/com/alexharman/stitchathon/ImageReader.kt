@@ -1,7 +1,9 @@
 package com.alexharman.stitchathon
 
 import android.graphics.Bitmap
-import android.util.Log
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.math.sqrt
 
 /**
@@ -20,10 +22,9 @@ class ImageReader {
 
     // TODO: selectively use colourReduce in countColours() method if too many colours
     private fun quantizeColours(bitmap: Bitmap, numColours: Int): Bitmap {
-        val colourCount = countColours(bitmap)
-        if (colourCount.keys.size <= numColours) return bitmap
-        val distanceTable = createDistanceTable(colourCount.keys.toTypedArray())
-        val colourMap = groupColours(colourCount, distanceTable, numColours)
+        val colours = bitmapToColours(bitmap)
+        if (colours.distinct().size <= numColours) return bitmap
+        val colourMap = groupColours(colours, numColours)
         return replaceColours(bitmap, colourMap)
     }
 
@@ -36,45 +37,86 @@ class ImageReader {
         return bitmap
     }
 
-    private fun countColours(bitmap: Bitmap, colourReduce: Int = 0): HashMap<Colour, Int> {
-        val colourCount: HashMap<Colour, Int> = HashMap()
-        var currentPixel: Colour
-        var currentPixelCount: Int
+    private fun bitmapToColours(bitmap: Bitmap): ArrayList<Colour> {
+        val arr = IntArray(bitmap.width * bitmap.height)
+        bitmap.getPixels(arr, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        return arr.map { Colour(it) } as ArrayList<Colour>
+    }
 
-        for (row in 0 until bitmap.height) {
-            for (col in 0 until bitmap.width) {
-                currentPixel = Colour(bitmap.getPixel(col, row), colourReduce)
-                currentPixelCount = colourCount[currentPixel] ?: 0
-                colourCount.put(currentPixel, currentPixelCount + 1)
+    // Use k-means++
+    private fun groupColours(pixels: ArrayList<Colour>, coloursWanted: Int): HashMap<Int, Int> {
+        val centroids = pickInitialCentroids(pixels, coloursWanted)
+        var groups = HashMap<Colour, ArrayList<Colour>>()
+        var changesMade = true
+        centroids.forEach { groups[it] = ArrayList()}
+
+        while (changesMade) {
+            changesMade = false
+            // Assignment step
+            for (pixel in pixels) {
+                groups[centroids.minBy { sqColourDistance(it, pixel) }]?.add(pixel)
+            }
+
+            // Update step
+            val newGroups = HashMap<Colour, ArrayList<Colour>>()
+            for ((centroid, group) in groups) {
+                val newCentroid = Colour(
+                        group.sumBy { it.r } / group.size,
+                        group.sumBy { it.g } / group.size,
+                        group.sumBy { it.b } / group.size)
+
+                newGroups[newCentroid] = group
+                if (newCentroid != centroid) {
+                    changesMade = true
+                    centroids.remove(centroid)
+                    centroids.add(newCentroid)
+                }
+            }
+            groups = newGroups
+        }
+
+        val colourMap = HashMap<Int, Int>()
+        for ( (centroid, group) in groups) {
+            group.distinct().forEach { colourMap[it.toArgb()] = centroid.toArgb() }
+        }
+        return colourMap
+    }
+
+    private fun pickInitialCentroids(pixels: ArrayList<Colour>, numCentroids: Int): ArrayList<Colour> {
+        val rng = Random()
+        var distanceToCentroids: HashMap<Colour, Int>
+        val centroids = ArrayList<Colour>()
+        val initRandom = rng.nextInt(pixels.size)
+        centroids.add(pixels[initRandom])
+
+        while (centroids.size < numCentroids) {
+            distanceToCentroids = findDistanceToCentroid(centroids, pixels)
+
+            var randNum = rng.nextInt(distanceToCentroids.values.sum())
+            for( (colour, dist) in distanceToCentroids) {
+                randNum -= dist
+                if (randNum <= 0) {
+                    centroids.add(colour)
+                    break
+                }
             }
         }
-        return colourCount
+        return centroids
     }
 
-    private fun groupColours(colourCount: HashMap<Colour, Int>,
-                             distanceTable: HashMap<Colour, ArrayList<Colour>>,
-                             coloursWanted: Int)
-            : HashMap<Int, Int> {
-        return HashMap<Int, Int>()
-    }
+    private fun findDistanceToCentroid(centroids: ArrayList<Colour>,
+                                       pixels: ArrayList<Colour>): HashMap<Colour, Int> =
+        pixels.associate{ pixel -> Pair( pixel, centroids.map{sqColourDistance(it, pixel) }.min()!! ) } as HashMap<Colour, Int>
 
-    private fun createDistanceTable(colours: Array<Colour>): HashMap<Colour, ArrayList<Colour>> {
-        val distanceTable = HashMap<Colour, ArrayList<Colour>>()
-        var row: ArrayList<Colour>
-        for (colour in colours) {
-            row = ArrayList()
-            row.addAll(colours.filter { it != colour }.sortedBy { colourDistance(it, colour) } )
-            distanceTable[colour] = row
-        }
-        return distanceTable
-    }
-
-    private fun colourDistance(c1: Colour, c2:Colour): Double {
+    private fun sqColourDistance(c1: Colour, c2: Colour): Int {
         val rDist = c1.r - c2.r
         val gDist = c1.g - c2.g
         val bDist = c1.b - c2.b
-        return sqrt((rDist*rDist + gDist*gDist + bDist*bDist).toDouble())
+        return rDist*rDist + gDist*gDist + bDist*bDist
     }
+
+    private fun colourDistance(c1: Colour, c2:Colour): Double =
+            sqrt(sqColourDistance(c1, c2).toDouble())
 
     private data class Colour(val r: Int, val g: Int, val b: Int) {
         constructor(argb: Int) : this(argb, 0)
