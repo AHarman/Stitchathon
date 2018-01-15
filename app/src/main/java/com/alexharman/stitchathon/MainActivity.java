@@ -28,6 +28,7 @@ import com.alexharman.stitchathon.KnitPackage.KnitPattern;
 import com.alexharman.stitchathon.KnitPackage.KnitPatternParser;
 import com.google.gson.Gson;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.BufferedReader;
@@ -38,16 +39,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        ImportImageDialog.ImportImageDialogListener{
 
     private TextView stitchCount;
     private TextView rowCount;
     private TextView completeCount;
     private KnitPattern knitPattern;
     private KnitPatternView patternView;
+    private ImportImageDialog importImageDialog;
 
-    private static final int READ_EXTERNAL_FILE = 55;
-    private static final int READ_INTERNAL_FILE = 1234;
+    static final int READ_EXTERNAL_IMAGE = 42;
+    static final int READ_EXTERNAL_JSON_PATTERN = 55;
+    static final int OPEN_INTERNAL_PATTERN = 1234;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,19 +135,29 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_open) {
-            Intent intent = new Intent(this, OpenPattern.class);
-            startActivityForResult(intent,  READ_INTERNAL_FILE);
-        } else if (id == R.id.nav_import) {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("application/json");
-            startActivityForResult(intent, READ_EXTERNAL_FILE);
+            selectInternalPattern();
+        } else if (id == R.id.nav_import_pattern) {
+            selectExternalFile("application/json", READ_EXTERNAL_JSON_PATTERN);
+        } else if (id == R.id.nav_import_image) {
+            importImage();
         }
 
         item.setChecked(false);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    void selectInternalPattern() {
+        Intent intent = new Intent(this, OpenPattern.class);
+        startActivityForResult(intent, OPEN_INTERNAL_PATTERN);
+    }
+
+    void selectExternalFile(String type, int requestCode) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(type);
+        startActivityForResult(intent, requestCode);
     }
 
     public void updateStitchCounter() {
@@ -156,10 +170,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private String readTextFile(Uri uri) {
-        InputStream inputStream;
         StringBuilder stringBuilder = new StringBuilder();
         try {
-            inputStream = getContentResolver().openInputStream(uri);
+            InputStream inputStream = getContentResolver().openInputStream(uri);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
             String line;
@@ -172,6 +185,22 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
         return stringBuilder.toString();
+    }
+
+    private Bitmap readImageFile(Uri uri) {
+        Bitmap bitmap = null;
+        if (uri != null) {
+            try {
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inMutable = true;
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                bitmap = BitmapFactory.decodeStream(inputStream, null, opts);
+                inputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return bitmap;
     }
 
     @Override
@@ -215,6 +244,11 @@ public class MainActivity extends AppCompatActivity
         editor.apply();
     }
 
+    private void importImage() {
+        importImageDialog = new ImportImageDialog();
+        importImageDialog.show(getSupportFragmentManager(), "Importing image");
+    }
+
     private void openPattern(Uri patternUri, @Nullable Uri imageUri) {
         new OpenPatternTask().execute(patternUri, imageUri);
     }
@@ -231,16 +265,31 @@ public class MainActivity extends AppCompatActivity
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
         Log.d("Lifecycle", "In onActivityResult");
-        if (requestCode == READ_EXTERNAL_FILE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == READ_EXTERNAL_JSON_PATTERN && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
                 importFile(resultData.getData());
             }
         }
-        if (requestCode == READ_INTERNAL_FILE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == READ_EXTERNAL_IMAGE && resultCode == Activity.RESULT_OK) {
+            if (resultData != null && resultData.getData() != null) {
+                importImageDialog.setUri(resultData.getData());
+            }
+        }
+        if (requestCode == OPEN_INTERNAL_PATTERN && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
                 openPattern((Uri) resultData.getParcelableExtra("pattern"), (Uri) resultData.getParcelableExtra("image"));
             }
         }
+    }
+
+    @Override
+    public void onImportImageDialogOK(Uri uri, String name, int width, int height, int numColours) {
+        Log.d("onImportImageDialogOK", uri.getPath());
+        Log.d("onImportImageDialogOK", name);
+        Log.d("onImportImageDialogOK", ""+width);
+        Log.d("onImportImageDialogOK", ""+height);
+        Log.d("onImportImageDialogOK", ""+numColours);
+        new ImportImageTask(uri, name, width, height, numColours).execute();
     }
 
     private class SavePatternTask extends AsyncTask<KnitPattern, Void, Void> {
@@ -295,12 +344,7 @@ public class MainActivity extends AppCompatActivity
             Log.d("OpenPatternTask", "in doInBackground()");
             Log.d("OpenPatternTask", "patternFP = " + patternUri.getPath());
 
-            if (imageUri != null) {
-                Log.d("OpenPatternTask", "Loading image from file");
-                BitmapFactory.Options opts = new BitmapFactory.Options();
-                opts.inMutable = true;
-                patternBitmap = BitmapFactory.decodeFile(imageUri.getPath(), opts);
-            }
+            patternBitmap = readImageFile(imageUri);
 
             String knitPatternGSON = readTextFile(patternUri);
             if (knitPatternGSON.length() == 0) {
@@ -327,15 +371,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     private class ImportPatternTask extends AsyncTask<Uri, String, KnitPattern> {
-        ProgressbarDialog progressbarDialog;
-        Bitmap patternBitmap;
+        private ProgressbarDialog progressbarDialog;
+        private Bitmap patternBitmap;
 
         @Override
         protected void onPreExecute() {
             Log.d("ImportPatternTask", "In onPreExecute");
             Log.d("ImportPatternTask", "Thread: " + Thread.currentThread().getName());
             progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_import_title), true, getString(R.string.progress_bar_importing_pattern));
-            progressbarDialog.show(getSupportFragmentManager(), "Importing");
+            progressbarDialog.show(getSupportFragmentManager(), "Importing pattern");
         }
 
         @Override
@@ -375,6 +419,53 @@ public class MainActivity extends AppCompatActivity
                 setKnitPattern(knitPattern, patternBitmap);
                 savePatternToFile();
             }
+            progressbarDialog.dismiss();
+        }
+    }
+
+    private class ImportImageTask extends AsyncTask<Void, Void, String> {
+        private Uri imageUri;
+        private String patternName;
+        private int width;
+        private int height;
+        private int numColours;
+        Bitmap bitmap;
+
+        ProgressbarDialog progressbarDialog;
+
+        ImportImageTask(Uri uri, String name, int width, int height, int numColours) {
+            this.imageUri = uri;
+            this.patternName = name;
+            this.width = width;
+            this.height = height;
+            this.numColours = numColours;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            Log.d("ImportImageTask", "In onPreExecute");
+            progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_import_title), true, getString(R.string.progress_bar_processing_bitmap));
+            progressbarDialog.show(getSupportFragmentManager(), "Importing image");
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            bitmap = readImageFile(imageUri);
+            if (bitmap == null) {
+                Log.d("ImportImageTask", "bitmap null");
+                return null;
+            }
+
+            ImageReader imageReader = new ImageReader();
+            bitmap = imageReader.readImage(bitmap, width, height, numColours);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            patternView.setPattern(knitPattern, bitmap);
             progressbarDialog.dismiss();
         }
     }

@@ -7,13 +7,13 @@
             android:icon="@drawable/ic_folder_black_24dp"
             android:title="@string/open_pattern" />
         <item
-            android:id="@+id/nav_import"
+            android:id="@+id/nav_import_pattern"
             android:icon="@drawable/ic_create_new_folder_black_24dp"
             android:title="@string/import_pattern" />
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
+            android:id="@+id/nav_import_image"
+            android:icon="@drawable/ic_image_black_24dp"
+            android:title="@string/import_image" />
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
