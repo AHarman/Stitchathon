@@ -9,14 +9,13 @@ public class KnitPattern {
 
     // Takes width of stitches into account
     private int currentDistanceInRow = 0;
-    // We assume that all prior stitches are done
     private int totalStitchesDone = 0;
     private int totalStitches = 0;
     private int currentRow = 0;
     private int nextStitchInRow = 0;
     private int patternWidth = 0;
     private int rows = 0;
-    private String[] stitchTypes;
+    public ArrayList<Stitch> stitchTypes = new ArrayList<>();
 
     // Assuming doubleknit for now. Will be false for knitting on the round
     private boolean oddRowsOpposite = true;
@@ -31,11 +30,11 @@ public class KnitPattern {
         this.name = name;
     }
 
-    protected KnitPattern(String[][] pattern) {
+    KnitPattern(String[][] pattern) {
         buildPattern(pattern);
     }
 
-    protected KnitPattern(ArrayList<ArrayList<String>> pattern) {
+    KnitPattern(ArrayList<ArrayList<String>> pattern) {
         String[][] arPattern = new String[pattern.size()][0];
         for (int i = 0; i < pattern.size(); i++) {
             arPattern[i] = pattern.get(i).toArray(new String[pattern.get(i).size()]);
@@ -44,16 +43,14 @@ public class KnitPattern {
     }
 
     private void buildPattern(String[][] pattern) {
-        ArrayList<String> stitchTypes = new ArrayList<String>();
         int rowWidth;
+        ArrayList<String> stitchTypeStrings = new ArrayList<>();
         stitches = new Stitch[pattern.length][];
         for (int row = 0; row < pattern.length; row++) {
             rowWidth = 0;
             stitches[row] = new Stitch[pattern[row].length];
             for (int col = 0; col < pattern[row].length; col++) {
-                if (!stitchTypes.contains(pattern[row][col])) {
-                    stitchTypes.add(pattern[row][col]);
-                }
+                addNewStitchType(stitchTypeStrings, pattern[row][col]);
                 totalStitches++;
                 stitches[row][col] = new Stitch(pattern[row][col]);
                 rowWidth += stitches[row][col].getWidth();
@@ -61,7 +58,21 @@ public class KnitPattern {
             patternWidth = Math.max(patternWidth, rowWidth);
         }
         rows = pattern.length;
-        this.stitchTypes = stitchTypes.toArray(new String[0]);
+
+        for (String stitchString: stitchTypeStrings) {
+            stitchTypes.add(new Stitch(stitchString));
+        }
+    }
+
+    private void addNewStitchType(ArrayList<String> stitchTypes, String stitch) {
+        if (!stitchTypes.contains(stitch)) {
+            if (stitch.contains("/")) {
+                for (String s : stitch.split("/")) {
+                    addNewStitchType(stitchTypes, s);
+                }
+            }
+            stitchTypes.add(stitch);
+        }
     }
 
     public void increment() {
