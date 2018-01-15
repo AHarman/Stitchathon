@@ -71,7 +71,7 @@ public class KnitPattern {
 
         currentDistanceInRow += stitches[currentRow][nextStitchInRow].getWidth();
         totalStitchesDone++;
-        stitches[currentRow][nextStitchInRow].done = true;
+        stitches[currentRow][nextStitchInRow].setDone(true);
         nextStitchInRow += getRowDirection();
         if (isEndOfRow()) {
             currentRow++;
@@ -88,7 +88,7 @@ public class KnitPattern {
         int direction = getRowDirection();
 
         for (int i = nextStitchInRow; i*direction <= getEndOfRow(); i += direction) {
-            stitches[currentRow][i].done = true;
+            stitches[currentRow][i].setDone(true);
             newStitchesDone++;
         }
 
@@ -115,7 +115,7 @@ public class KnitPattern {
             currentDistanceInRow -= stitches[currentRow][nextStitchInRow].getWidth();
             nextStitchInRow -= getRowDirection();
         }
-        stitches[currentRow][nextStitchInRow].done = false;
+        stitches[currentRow][nextStitchInRow].setDone(false);
         totalStitchesDone--;
     }
 

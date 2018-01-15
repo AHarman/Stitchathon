@@ -280,10 +280,7 @@ public class KnitPatternView extends View {
 
     private void drawStitch(Canvas canvas, Stitch stitch) {
         Bitmap b = stitchBitmaps.get(stitch.getType());
-        canvas.drawBitmap(b, 0, 0, stitch.done ? doneOverlayPaint : null);
-        if (stitch.done) {
-            canvas.drawRect(stitchPad, stitchPad, stitchSize, stitchSize, doneOverlayPaint);
-        }
+        canvas.drawBitmap(b, 0, 0, stitch.isDone() ? doneOverlayPaint : null);
     }
 
     // Only works until end of row, don't use beyond that
