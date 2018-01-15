@@ -1,6 +1,7 @@
 package com.alexharman.stitchathon;
 
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -142,6 +143,12 @@ public class MainActivity extends AppCompatActivity
             importImage();
         } else if (id == R.id.nav_about_app) {
             new AppInfoDialog().show(getSupportFragmentManager(), "App info");
+        } else if (id == R.id.nav_settings) {
+            getFragmentManager().beginTransaction()
+                    .addToBackStack(null)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .replace(android.R.id.content, new SettingsFragment())
+                    .commit();
         }
 
         item.setChecked(false);
