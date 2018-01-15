@@ -91,6 +91,7 @@ public class KnitPattern {
         }
     }
 
+    // TODO: Causes outOfBounds exception if only 1 row left to fill
     public int incrementRow() {
         if (currentRow == stitches.length-1 && (nextStitchInRow < 0 || nextStitchInRow > stitches[stitches.length-1].length)) {
             return 0;

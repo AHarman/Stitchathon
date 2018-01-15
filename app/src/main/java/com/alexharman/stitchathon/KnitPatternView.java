@@ -3,7 +3,7 @@ package com.alexharman.stitchathon;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -17,6 +17,7 @@ import android.view.View;
 import com.alexharman.stitchathon.KnitPackage.KnitPattern;
 import com.alexharman.stitchathon.KnitPackage.Stitch;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -26,22 +27,27 @@ public class KnitPatternView extends View {
     private KnitPattern pattern = null;
 
     // So far only built for two-color double knits.
-    // TODO: Build and associative array of stitches->paints
-    private Paint mainColorPaint;
-    private Paint contrastColorPaint;
-    private Paint doneOverlayPaint;
-    private Paint bitmapToDrawPaint;
     private float stitchSize = 10;
     private float stitchPad = 2;
 
+    private boolean fitPatternWidth = true;
     private int viewHeight;
     private int viewWidth;
     int xOffset = 0;
     int yOffset = 0;
-    private int[] backgroundColor = {0xFF, 0xFF, 0xFF, 0xFF};
-    private boolean fitPatternWidth = true;
+
+    // TODO: Create colour changer and pass this in from preferences
+    private int backgroundColor = 0xFF808080;
+    private int doneOverlayColor = 0x80FFFFFF;
+    int[] colours = {0xFF0000FF, 0xFF00FF00, 0xFF00FFFF, 0xFFFF0000, 0xFFFF00FF, 0xFFFFFF00, 0x00000000, 0xFFFFFFFF};
+
     HashMap<String, Bitmap> stitchBitmaps;
+    HashMap<String, Paint> stitchPaints;
+    private Paint bitmapToDrawPaint;
+    private Paint doneOverlayPaint;
     Bitmap patternBitmap;
+
+    //TODO: Rename "currentView" or something.
     Bitmap bitmapToDraw;
 
     private RectF patternDstRectangle;
@@ -53,26 +59,6 @@ public class KnitPatternView extends View {
 
     public KnitPatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        stitchBitmaps = new HashMap<>();
-
-        mainColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mainColorPaint.setColor(Color.argb(255, 255, 0, 0));
-        mainColorPaint.setStyle(Paint.Style.FILL);
-        mainColorPaint.setAntiAlias(true);
-        contrastColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        contrastColorPaint.setColor(Color.argb(255, 0, 0, 255));
-        contrastColorPaint.setStyle(Paint.Style.FILL);
-        contrastColorPaint.setAntiAlias(true);
-        doneOverlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        doneOverlayPaint.setColor(Color.argb(150, backgroundColor[1], backgroundColor[2], backgroundColor[3]));
-        doneOverlayPaint.setStyle(Paint.Style.FILL);
-        bitmapToDrawPaint = new Paint();
-        bitmapToDrawPaint.setAntiAlias(true);
-        bitmapToDrawPaint.setFilterBitmap(true);
-        createStitchBitmaps();
-
-
         mGestureDetector = new GestureDetector(this.getContext(), new gestureListener());
     }
 
@@ -80,54 +66,98 @@ public class KnitPatternView extends View {
         int bitmapWidth = (int) (knitPattern.getPatternWidth() * stitchSize + (knitPattern.getPatternWidth() + 1) * stitchPad);
         int bitmapHeight = (int) (knitPattern.getRows() * stitchSize + (knitPattern.getRows() + 1) * stitchPad);
 
+        // TODO: Maybe don't set properties here
+        this.stitchPaints = createPaints(knitPattern.stitchTypes);
+        this.stitchBitmaps = createStitchBitmaps(knitPattern.stitchTypes);
+
         Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_4444);
         Canvas canvas = new Canvas(bitmap);
-        canvas.drawARGB(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
+        canvas.drawColor(backgroundColor);
         drawPattern(canvas, knitPattern);
 
         return bitmap;
     }
 
-    private void createStitchBitmaps() {
+    // TODO: Variable width
+    private HashMap<String, Bitmap> createStitchBitmaps(ArrayList<Stitch> stitches) {
+        HashMap<String, Bitmap> stitchBitmaps = new HashMap<>();
+        Bitmap bitmap;
+        int bitmapWidth;
+        Stitch currentStitch;
+
+        for (int i = 0; i < stitches.size(); i++) {
+            currentStitch = stitches.get(i);
+            if (currentStitch.isSplit()) {
+                bitmap = createSplitStitchBitmap(currentStitch);
+            } else {
+                bitmapWidth = (int) (stitchSize * currentStitch.getWidth() + (currentStitch.getWidth() - 1) * stitchPad);
+                bitmap = Bitmap.createBitmap(bitmapWidth, (int) stitchSize, Bitmap.Config.ARGB_8888);
+                new Canvas(bitmap).drawPaint(stitchPaints.get(currentStitch.getType()));
+            }
+            stitchBitmaps.put(stitches.get(i).getType(), bitmap);
+        }
+
+        return stitchBitmaps;
+    }
+
+    // TODO: Variable width
+    // We're going to assume that there's only 2 colours
+    private Bitmap createSplitStitchBitmap(Stitch stitch) {
+        int bitmapWidth = (int) (stitchSize * stitch.getWidth() + (stitch.getWidth() - 1) * stitchPad);
+        Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, (int) stitchSize, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Path leftSide;
+        Path rightSide;
+
+        // Can't think of better names for these
+        // Basically they define the diagonal
         float startX = stitchSize * 7/10;
         float stopX = stitchSize * 3/10;
-        Canvas canvas;
-        Bitmap mBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_4444);
-        Bitmap cBitmap = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_4444);
-        canvas = new Canvas(mBitmap); canvas.drawColor(mainColorPaint.getColor());
-        canvas = new Canvas(cBitmap); canvas.drawColor(contrastColorPaint.getColor());
-        stitchBitmaps.put("M", mBitmap);
-        stitchBitmaps.put("C", cBitmap);
+        Matrix matrix;
 
-        Paint whitePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        whitePaint.setAntiAlias(true);
-        whitePaint.setFilterBitmap(true);
-        whitePaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        whitePaint.setStrokeWidth(2.0f);
-        whitePaint.setColor(0xFFFFFFFF);
-
-        Path leftSide = new Path();
-        Path rightSide = new Path();
+        leftSide = new Path();
         leftSide.setFillType(Path.FillType.EVEN_ODD);
         leftSide.lineTo(startX - 1.0f, 0);
         leftSide.lineTo(stopX - 1.0f, stitchSize);
         leftSide.lineTo(0, stitchSize);
         leftSide.close();
-        rightSide.setFillType(Path.FillType.EVEN_ODD);
-        rightSide.moveTo(startX + 1.0f, 0);
-        rightSide.lineTo(stitchSize, 0);
-        rightSide.lineTo(stitchSize, stitchSize);
-        rightSide.lineTo(stopX + 1.0f, stitchSize);
-        rightSide.close();
 
-        for (String s : new String[]{"M/M", "C/C", "M/C", "C/M"}) {
-            Bitmap b = Bitmap.createBitmap((int)stitchSize, (int)stitchSize, Bitmap.Config.ARGB_4444);
-            canvas = new Canvas(b); canvas.drawColor(whitePaint.getColor());
-            canvas.drawPath(rightSide, s.startsWith("M") ? mainColorPaint : contrastColorPaint);
-            canvas.drawPath(leftSide, s.endsWith("M") ? mainColorPaint : contrastColorPaint);
-            stitchBitmaps.put(s, b);
-        }
+        rightSide = new Path(leftSide);
+        matrix = new Matrix();
+        matrix.postRotate(180, bitmap.getWidth()/2,bitmap.getHeight() / 2);
+        rightSide.transform(matrix);
+
+        canvas.drawPath(rightSide, stitchPaints.get(stitch.getMadeOf()[0]));
+        canvas.drawPath(leftSide, stitchPaints.get(stitch.getMadeOf()[1]));
+        return bitmap;
     }
+
+    private HashMap<String, Paint> createPaints(ArrayList<Stitch> stitches) {
+        Paint p;
+        HashMap<String, Paint> paints = new HashMap<>();
+        int colourCount = 0;
+
+        for (Stitch stitch: stitches) {
+            if (!stitch.isSplit()) {
+                p = new Paint(Paint.ANTI_ALIAS_FLAG);
+                p.setColor(colours[colourCount]);
+                p.setStyle(Paint.Style.FILL);
+                paints.put(stitch.getType(), p);
+                colourCount++;
+            }
+        }
+
+        // TODO: Split stitch paints and others into another function
+        doneOverlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        doneOverlayPaint.setColor(doneOverlayColor);
+        doneOverlayPaint.setStyle(Paint.Style.FILL);
+        bitmapToDrawPaint = new Paint();
+        bitmapToDrawPaint.setAntiAlias(true);
+        bitmapToDrawPaint.setFilterBitmap(true);
+
+        return paints;
+    }
+
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -230,8 +260,11 @@ public class KnitPatternView extends View {
         invalidate();
     }
 
+    // TODO: maybe save paints and stitch bitmaps to file or something.
     public void setPattern(KnitPattern pattern, @Nullable Bitmap bitmap) {
         this.pattern = pattern;
+        stitchPaints = createPaints(pattern.stitchTypes);
+        stitchBitmaps = createStitchBitmaps(pattern.stitchTypes);
         if (bitmap == null) {
             patternBitmap = createPatternBitmap(pattern);
         } else {
