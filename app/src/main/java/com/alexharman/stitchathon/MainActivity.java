@@ -140,6 +140,8 @@ public class MainActivity extends AppCompatActivity
             selectExternalFile("application/json", READ_EXTERNAL_JSON_PATTERN);
         } else if (id == R.id.nav_import_image) {
             importImage();
+        } else if (id == R.id.nav_about_app) {
+            new AppInfoDialog().show(getSupportFragmentManager(), "App info");
         }
 
         item.setChecked(false);

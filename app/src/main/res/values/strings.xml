@@ -34,4 +34,8 @@
     <string name="empty_string_error">Cannot be empty</string>
     <string name="select_image">Select image</string>
     <string name="browse">Browse</string>
+
+    <string name="app_info_text">This app uses <a href="https://github.com/jaredrummler/ColorPicker">Color Picker</a> created by Jared Rummler, licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>.\n\nThe app itself was created by Alexander Harman</string>
+    <string name="about_app_title">About this app</string>
+    <string name="about_app">About app</string>
 </resources>
