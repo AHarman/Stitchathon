@@ -423,13 +423,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class ImportImageTask extends AsyncTask<Void, Void, String> {
+    private class ImportImageTask extends AsyncTask<Void, String, KnitPattern> {
         private Uri imageUri;
         private String patternName;
         private int width;
         private int height;
         private int numColours;
         Bitmap bitmap;
+        Bitmap patternBitmap;
 
         ProgressbarDialog progressbarDialog;
 
@@ -449,23 +450,34 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected String doInBackground(Void... voids) {
+        protected KnitPattern doInBackground(Void... voids) {
             bitmap = readImageFile(imageUri);
             if (bitmap == null) {
-                Log.d("ImportImageTask", "bitmap null");
                 return null;
             }
 
             ImageReader imageReader = new ImageReader();
-            bitmap = imageReader.readImage(bitmap, width, height, numColours);
-
-            return null;
+            KnitPattern pattern = imageReader.readImage(bitmap, patternName, width, height, numColours);
+            if (knitPattern != null) {
+                publishProgress(getString(R.string.progress_bar_creating_bitmap));
+                patternBitmap = patternView.createPatternBitmap(knitPattern);
+            }
+            return pattern;
         }
 
+        protected void onProgressUpdate(String... values) {
+            progressbarDialog.updateText(values[0]);
+        }
+
+
         @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            patternView.setPattern(knitPattern, bitmap);
+        protected void onPostExecute(KnitPattern pattern) {
+            super.onPostExecute(pattern);
+            if (pattern != null) {
+                Log.d("ImportPatternTask", "Imported, going to save and set");
+                setKnitPattern(pattern, patternBitmap);
+                savePatternToFile();
+            }
             progressbarDialog.dismiss();
         }
     }
