@@ -116,6 +116,7 @@ public class KnitPatternParser {
                         }
                     }
                     break;
+                // TODO: simplify "M/M" stitches to just M?
                 case "asymmetric":
                     Log.d("Parse", "asymmetric");
                     ArrayList<ArrayList<String>> reverseSide;
