@@ -54,9 +54,6 @@ class KnitPattern {
                 .toTypedArray()
     }
 
-    // TODO: Combine next couple of functions maybe? Have a "do n stitches?"
-    // TODO: Either way, these two need work
-
     fun increment () {
         if (isFinished)
             return
@@ -71,25 +68,15 @@ class KnitPattern {
         }
     }
 
-    // TODO: Causes outOfBounds exception if only 1 row left to fill
     fun incrementRow(): Int {
-        if (currentRow == stitches.size - 1 && (nextStitchInRow < 0 || nextStitchInRow > stitches[stitches.size - 1].size)) {
+        if (isFinished)
             return 0
-        }
-        var newStitchesDone = 0
-        val direction = rowDirection
-
-        var i = nextStitchInRow
-        while (i * direction <= endOfRow) {
-            newStitchesDone++
-            i += direction
-        }
-
-        totalStitchesDone += newStitchesDone
-        currentRow++
-        nextStitchInRow = startOfRow
-        currentDistanceInRow = 0
-        return newStitchesDone
+        var stitchesDone = 0
+        do {
+            increment()
+            stitchesDone++
+        } while (!isStartOfRow && !isFinished)
+        return stitchesDone
     }
 
     fun undoStitch() {
@@ -118,13 +105,7 @@ class KnitPattern {
 
 
     val isEndOfRow: Boolean
-        get() {
-            return if (rowDirection == 1) {
-                nextStitchInRow == stitches[currentRow].size
-            } else {
-                nextStitchInRow == -1
-            }
-        }
+        get() = if (rowDirection == 1) nextStitchInRow == stitches[currentRow].size else (nextStitchInRow == -1)
 
     val isStartOfRow: Boolean
         get() {
