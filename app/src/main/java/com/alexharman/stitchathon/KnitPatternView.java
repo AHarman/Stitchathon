@@ -17,7 +17,6 @@ import android.view.View;
 import com.alexharman.stitchathon.KnitPackage.KnitPattern;
 import com.alexharman.stitchathon.KnitPackage.Stitch;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -41,8 +40,8 @@ public class KnitPatternView extends View {
     private int doneOverlayColor = 0x80FFFFFF;
     int[] colours = {0xFF0000FF, 0xFF00FF00, 0xFF00FFFF, 0xFFFF0000, 0xFFFF00FF, 0xFFFFFF00, 0x00000000, 0xFFFFFFFF};
 
-    HashMap<String, Bitmap> stitchBitmaps;
-    HashMap<String, Paint> stitchPaints;
+    HashMap<Stitch, Bitmap> stitchBitmaps;
+    HashMap<Stitch, Paint> stitchPaints;
     private Paint bitmapToDrawPaint;
     private Paint doneOverlayPaint;
     Bitmap patternBitmap;
@@ -79,22 +78,22 @@ public class KnitPatternView extends View {
     }
 
     // TODO: Variable width
-    private HashMap<String, Bitmap> createStitchBitmaps(ArrayList<Stitch> stitches) {
-        HashMap<String, Bitmap> stitchBitmaps = new HashMap<>();
+    private HashMap<Stitch, Bitmap> createStitchBitmaps(Stitch[] stitches) {
+        HashMap<Stitch, Bitmap> stitchBitmaps = new HashMap<>();
         Bitmap bitmap;
         int bitmapWidth;
         Stitch currentStitch;
 
-        for (int i = 0; i < stitches.size(); i++) {
-            currentStitch = stitches.get(i);
+        for (int i = 0; i < stitches.length; i++) {
+            currentStitch = stitches[i];
             if (currentStitch.isSplit()) {
                 bitmap = createSplitStitchBitmap(currentStitch);
             } else {
                 bitmapWidth = (int) (stitchSize * currentStitch.getWidth() + (currentStitch.getWidth() - 1) * stitchPad);
                 bitmap = Bitmap.createBitmap(bitmapWidth, (int) stitchSize, Bitmap.Config.ARGB_8888);
-                new Canvas(bitmap).drawPaint(stitchPaints.get(currentStitch.getType()));
+                new Canvas(bitmap).drawPaint(stitchPaints.get(currentStitch));
             }
-            stitchBitmaps.put(stitches.get(i).getType(), bitmap);
+            stitchBitmaps.put(stitches[i], bitmap);
         }
 
         return stitchBitmaps;
@@ -132,9 +131,9 @@ public class KnitPatternView extends View {
         return bitmap;
     }
 
-    private HashMap<String, Paint> createPaints(ArrayList<Stitch> stitches) {
+    private HashMap<Stitch, Paint> createPaints(Stitch[] stitches) {
         Paint p;
-        HashMap<String, Paint> paints = new HashMap<>();
+        HashMap<Stitch, Paint> paints = new HashMap<>();
         int colourCount = 0;
 
         for (Stitch stitch: stitches) {
@@ -142,7 +141,7 @@ public class KnitPatternView extends View {
                 p = new Paint(Paint.ANTI_ALIAS_FLAG);
                 p.setColor(colours[colourCount]);
                 p.setStyle(Paint.Style.FILL);
-                paints.put(stitch.getType(), p);
+                paints.put(stitch, p);
                 colourCount++;
             }
         }
@@ -303,7 +302,7 @@ public class KnitPatternView extends View {
             canvas.save();
             canvas.translate(stitchPad, 0);
             for (int col = 0; col < knitPattern.getPatternWidth(); col++) {
-                drawStitch(canvas, knitPattern.stitches[row][col]);
+                drawStitch(canvas, knitPattern.stitches[row][col], pattern.getCurrentRow() > row && pattern.getNextStitchInRow() > col);
                 canvas.translate(stitchSize+stitchPad, 0);
             }
             canvas.restore();
@@ -311,10 +310,14 @@ public class KnitPatternView extends View {
         }
     }
 
-    private void drawStitch(Canvas canvas, Stitch stitch) {
-        Bitmap b = stitchBitmaps.get(stitch.getType());
-        canvas.drawBitmap(b, 0, 0, stitch.isDone() ? doneOverlayPaint : null);
+    private void drawStitch(Canvas canvas, Stitch stitch, boolean isDone) {
+        Bitmap b = stitchBitmaps.get(stitch);
+        canvas.drawBitmap(b, 0, 0, isDone ? doneOverlayPaint : null);
     }
+
+    // TODO: Fix so works beyond end of row
+    // TODO: I think this breaks if stitches aren't uniform width. Fix that.
+    // TODO: Just redo this function. There's too many problems. Break it down into "mark one stitch done" and "mark n stitches", make it use drawStitch() function. See SetColorFilter for the paint
 
     // Only works until end of row, don't use beyond that
     private void markStitchesDone(int numStitches) {
@@ -332,6 +335,7 @@ public class KnitPatternView extends View {
         }
         canvas.translate(xTranslate, yTranslate);
         xTranslate = pattern.getRowDirection() * (stitchPad + stitchSize);
+
         for (int i = 0; i < numStitches; i++) {
             canvas.drawRect(0, 0, stitchSize, stitchSize, doneOverlayPaint);
             canvas.translate(xTranslate, 0);
@@ -373,7 +377,7 @@ public class KnitPatternView extends View {
             }
             yTranslate = pattern.getCurrentRow() * (stitchPad + stitchSize) + stitchPad;
             canvas.translate(xTranslate, yTranslate);
-            drawStitch(canvas, lastStitch);
+            drawStitch(canvas, lastStitch, false);
             canvas.setMatrix(null);
         }
         updateBitmapToDraw();

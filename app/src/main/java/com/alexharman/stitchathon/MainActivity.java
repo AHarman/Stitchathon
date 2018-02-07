@@ -28,7 +28,6 @@ import com.alexharman.stitchathon.KnitPackage.KnitPattern;
 import com.alexharman.stitchathon.KnitPackage.KnitPatternParser;
 import com.google.gson.Gson;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
 import java.io.BufferedReader;
