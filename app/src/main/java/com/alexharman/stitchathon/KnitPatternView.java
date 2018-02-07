@@ -63,7 +63,7 @@ public class KnitPatternView extends View {
 
     public Bitmap createPatternBitmap(KnitPattern knitPattern) {
         int bitmapWidth = (int) (knitPattern.getPatternWidth() * stitchSize + (knitPattern.getPatternWidth() + 1) * stitchPad);
-        int bitmapHeight = (int) (knitPattern.getRows() * stitchSize + (knitPattern.getRows() + 1) * stitchPad);
+        int bitmapHeight = (int) (knitPattern.getNumRows() * stitchSize + (knitPattern.getNumRows() + 1) * stitchPad);
 
         // TODO: Maybe don't set properties here
         this.stitchPaints = createPaints(knitPattern.stitchTypes);
@@ -239,7 +239,7 @@ public class KnitPatternView extends View {
     }
 
     public void incrementOne() {
-        if (pattern == null) {
+        if (pattern == null || pattern.isFinished()) {
             return;
         }
         undoStack.push(1);
@@ -250,7 +250,7 @@ public class KnitPatternView extends View {
     }
 
     public void incrementRow() {
-        if (pattern == null) {
+        if (pattern == null || pattern.isFinished()) {
             return;
         }
         markStitchesDone(pattern.getStitchesLeftInRow());
@@ -298,7 +298,7 @@ public class KnitPatternView extends View {
 
     private void drawPattern(Canvas canvas, KnitPattern knitPattern) {
         canvas.translate(0, stitchPad);
-        for (int row = 0; row < knitPattern.getRows(); row++) {
+        for (int row = 0; row < knitPattern.getNumRows(); row++) {
             canvas.save();
             canvas.translate(stitchPad, 0);
             for (int col = 0; col < knitPattern.getPatternWidth(); col++) {

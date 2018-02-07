@@ -57,16 +57,14 @@ class KnitPattern {
     // TODO: Combine next couple of functions maybe? Have a "do n stitches?"
     // TODO: Either way, these two need work
 
-
-    fun increment() {
-        if (currentRow == stitches.size - 1 && (nextStitchInRow < 0 || nextStitchInRow > stitches[stitches.size - 1].size)) {
+    fun increment () {
+        if (isFinished)
             return
-        }
-
         currentDistanceInRow += stitches[currentRow][nextStitchInRow].width
         totalStitchesDone++
         nextStitchInRow += rowDirection
-        if (isEndOfRow) {
+
+        if (!isFinished && isEndOfRow) {
             currentRow++
             currentDistanceInRow = 0
             nextStitchInRow = startOfRow
@@ -136,35 +134,20 @@ class KnitPattern {
         }
 
     private val endOfRow: Int
-        get() {
-            return if (rowDirection == 1) {
-                stitches[currentRow].size - 1
-            } else {
-                0
-            }
-        }
+        get() = if (rowDirection == 1) (stitches[currentRow].size - 1) else 0
 
     private val startOfRow: Int
-        get() {
-            return if (rowDirection == 1) {
-                0
-            } else stitches[currentRow].size - 1
-        }
+        get() = if (rowDirection == 1) 0 else (stitches[currentRow].size - 1)
 
     val stitchesLeftInRow: Int
-        get() {
-            return if (rowDirection == 1) {
-                stitches[currentRow].size - nextStitchInRow
-            } else nextStitchInRow + 1
-        }
+        get() = if (rowDirection == 1) (stitches[currentRow].size - nextStitchInRow) else (nextStitchInRow + 1)
 
     val stitchesDoneInRow: Int
-        get() {
-            return if (rowDirection == 1) {
-                nextStitchInRow
-            } else stitches[currentRow].size - nextStitchInRow - 1
-        }
+        get() = if (rowDirection == 1) nextStitchInRow else (stitches[currentRow].size - nextStitchInRow - 1)
 
-    val rows: Int
+    val numRows: Int
         get() = stitches.size
+
+    val isFinished: Boolean
+        get() = currentRow == numRows - 1 && isEndOfRow
 }
