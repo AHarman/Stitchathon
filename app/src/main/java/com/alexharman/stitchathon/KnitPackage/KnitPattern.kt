@@ -80,22 +80,16 @@ class KnitPattern {
     }
 
     fun undoStitch() {
-        if (currentRow == 0 && nextStitchInRow == startOfRow) {
+        if (currentRow == 0 && nextStitchInRow == startOfRow)
             return
-        }
 
         if (isStartOfRow) {
             currentRow--
             nextStitchInRow = endOfRow
-            currentDistanceInRow = 0
-            var c = Math.min(startOfRow, endOfRow)
-            while (c < Math.max(startOfRow, endOfRow)) {
-                currentDistanceInRow += stitches[currentRow][c].width
-                c += 1
-            }
+            currentDistanceInRow = stitches[currentRow].sumBy { it.width } - stitches[currentRow][nextStitchInRow].width
         } else {
-            currentDistanceInRow -= stitches[currentRow][nextStitchInRow].width
             nextStitchInRow -= rowDirection
+            currentDistanceInRow -= stitches[currentRow][nextStitchInRow].width
         }
         totalStitchesDone--
     }
@@ -103,16 +97,11 @@ class KnitPattern {
     val rowDirection: Int
         get() = if (oddRowsOpposite && (currentRow % 2 == 1)) -1 else 1
 
-
     val isEndOfRow: Boolean
         get() = if (rowDirection == 1) nextStitchInRow == stitches[currentRow].size else (nextStitchInRow == -1)
 
     val isStartOfRow: Boolean
-        get() {
-            return if (rowDirection == 1) {
-                nextStitchInRow == 0
-            } else nextStitchInRow == stitches[currentRow].size - 1
-        }
+        get() = if (rowDirection == 1) nextStitchInRow == 0 else (nextStitchInRow == stitches[currentRow].size - 1)
 
     private val endOfRow: Int
         get() = if (rowDirection == 1) (stitches[currentRow].size - 1) else 0
