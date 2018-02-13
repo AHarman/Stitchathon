@@ -55,38 +55,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        patternView = (KnitPatternView) findViewById(R.id.knitView);
-        stitchCount = (TextView) findViewById(R.id.stitch_counter);
-        rowCount = (TextView) findViewById(R.id.row_counter);
-        completeCount = (TextView) findViewById(R.id.complete_counter);
-
-        Button incrementRowButton = (Button) findViewById(R.id.increment_row_button);
-        incrementRowButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                patternView.incrementRow();
-            }
-        });
-        Button undoButton = (Button) findViewById(R.id.undo_button);
-        undoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                patternView.undo();
-            }
-        });
+        setUpUI();
 
         SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
         String knitPatternFP = sharedPreferences.getString("pattern", null);
@@ -98,7 +67,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -142,10 +111,46 @@ public class MainActivity extends AppCompatActivity
         }
 
         item.setChecked(false);
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    void setUpUI() {
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        patternView = findViewById(R.id.knitView);
+        stitchCount = findViewById(R.id.stitch_counter);
+        rowCount = findViewById(R.id.row_counter);
+        completeCount = findViewById(R.id.complete_counter);
+
+        Button incrementRowButton = findViewById(R.id.increment_row_button);
+        incrementRowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                patternView.incrementRow();
+            }
+        });
+        Button undoButton = findViewById(R.id.undo_button);
+        undoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                patternView.undo();
+            }
+        });
+    }
+
 
     void selectInternalPattern() {
         Intent intent = new Intent(this, OpenPattern.class);
@@ -282,7 +287,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onImportImageDialogOK(Uri uri, String name, int width, int height, int numColours) {
+    public void onImportImageDialogOK(@NonNull Uri uri, @NonNull String name, int width, int height, int numColours) {
         Log.d("onImportImageDialogOK", uri.getPath());
         Log.d("onImportImageDialogOK", name);
         Log.d("onImportImageDialogOK", ""+width);

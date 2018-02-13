@@ -9,6 +9,7 @@ import android.provider.OpenableColumns
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import android.widget.NumberPicker
 import com.alexharman.stitchathon.MainActivity.READ_EXTERNAL_IMAGE
@@ -49,9 +50,9 @@ class ImportImageDialog: DialogFragment() {
         numberPicker.value = 2
         numberPicker.wrapSelectorWheel = false
 
-        (dialogView.findViewById(R.id.stitches_wide_edittext) as EditText).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v, hf) })
-        (dialogView.findViewById(R.id.stitches_high_edittext) as EditText).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v, hf) })
-        dialogView.findViewById(R.id.import_image_browse_button).setOnClickListener { (activity as MainActivity).selectExternalFile("image/*", READ_EXTERNAL_IMAGE)}
+        dialogView.findViewById<EditText>(R.id.stitches_wide_edittext).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v, hf) })
+        dialogView.findViewById<EditText>(R.id.stitches_high_edittext).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v, hf) })
+        dialogView.findViewById<Button>(R.id.import_image_browse_button).setOnClickListener( { (activity as MainActivity).selectExternalFile("image/*", READ_EXTERNAL_IMAGE)})
 
         builder.setView(dialogView)
         builder.setCancelable(false)

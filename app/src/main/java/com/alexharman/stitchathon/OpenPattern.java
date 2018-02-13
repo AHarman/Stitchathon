@@ -37,7 +37,7 @@ public class OpenPattern extends AppCompatActivity {
         setContentView(R.layout.activity_open_pattern);
 
         getNamesAndImages();
-        GridView gridview = (GridView) findViewById(R.id.pattern_select_grid);
+        GridView gridview = findViewById(R.id.pattern_select_grid);
         gridview.setAdapter(new myAdaptor(this));
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
@@ -78,7 +78,7 @@ public class OpenPattern extends AppCompatActivity {
         Log.d("Opening", "Filename: " + filename);
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inSampleSize = 2;
-        BitmapRegionDecoder bitmapRegionDecoder = null;
+        BitmapRegionDecoder bitmapRegionDecoder;
         try {
             bitmapRegionDecoder = BitmapRegionDecoder.newInstance(getFilesDir() + "/" + filename, false);
             return bitmapRegionDecoder.decodeRegion(new Rect(0, 0, 500, 500), opts);
@@ -153,9 +153,9 @@ public class OpenPattern extends AppCompatActivity {
 
             if (convertView == null) {
                 gridItem = inflater.inflate(R.layout.grid_item, null);
-                ImageView imageView = (ImageView) gridItem.findViewById(R.id.grid_item_image);
+                ImageView imageView = gridItem.findViewById(R.id.grid_item_image);
                 imageView.setImageBitmap(thumbnails.get(position));
-                TextView textView = (TextView) gridItem.findViewById(R.id.grid_item_text);
+                TextView textView = gridItem.findViewById(R.id.grid_item_text);
                 textView.setText(jsonFilenames.get(position).split("\\.")[0]);
             } else {
                 gridItem = convertView;
