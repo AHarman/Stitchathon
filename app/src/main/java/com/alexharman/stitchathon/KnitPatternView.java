@@ -302,7 +302,8 @@ public class KnitPatternView extends View {
             canvas.save();
             canvas.translate(stitchPad, 0);
             for (int col = 0; col < knitPattern.getPatternWidth(); col++) {
-                drawStitch(canvas, knitPattern.getStitches()[row][col], pattern.getCurrentRow() > row && pattern.getNextStitchInRow() > col);
+                drawStitch(canvas, knitPattern.getStitches()[row][col], knitPattern.getCurrentRow() > row && knitPattern.getNextStitchInRow() > col);
+                drawStitch(canvas, knitPattern.getStitches()[row][col], knitPattern.getCurrentRow() > row && knitPattern.getNextStitchInRow() > col);
                 canvas.translate(stitchSize+stitchPad, 0);
             }
             canvas.restore();

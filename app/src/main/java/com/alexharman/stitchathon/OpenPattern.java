@@ -3,13 +3,9 @@ package com.alexharman.stitchathon;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapRegionDecoder;
-import android.graphics.Rect;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,30 +17,32 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.alexharman.stitchathon.database.AppDatabase;
+
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.lang.ref.WeakReference;
 
 public class OpenPattern extends AppCompatActivity {
-    ArrayList<String> jsonFilenames = new ArrayList<>();
-    ArrayList<String> imageFilenames = new ArrayList<>();
-    ArrayList<Bitmap> thumbnails = new ArrayList<>();
+    String[] patternNames;
+    GridView gridView;
+//    ArrayList<String> imageFilenames = new ArrayList<>();
+//    ArrayList<Bitmap> thumbnails = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_pattern);
-
+        gridView = findViewById(R.id.pattern_select_grid);
         getNamesAndImages();
-        GridView gridview = findViewById(R.id.pattern_select_grid);
-        gridview.setAdapter(new myAdaptor(this));
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+    }
+    private void fillGrid() {
+        gridView.setAdapter(new myAdaptor(this));
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
                 Intent intent = new Intent();
-                intent.putExtra("pattern", Uri.fromFile(new File(getFilesDir() + "/" + jsonFilenames.get(position))));
-                intent.putExtra("image", Uri.fromFile(new File(getFilesDir() + "/" + imageFilenames.get(position))));
+                intent.putExtra("pattern", Uri.fromFile(new File(getFilesDir() + "/" + patternNames[position])));
+//                intent.putExtra("image", Uri.fromFile(new File(getFilesDir() + "/" + imageFilenames[position])));
                 setResult(Activity.RESULT_OK, intent);
                 finish();
             }
@@ -58,40 +56,63 @@ public class OpenPattern extends AppCompatActivity {
         finish();
     }
 
+    // TODO: Get images. Not yet implemented with Room
     private void getNamesAndImages() {
         Log.d("Opening", "in getNamesAndImages");
-        ArrayList<String> filenames = new ArrayList<>(Arrays.asList(fileList()));
-        for (String string : filenames) {
-            Log.d("Opening", "Filename: " + string);
-            if (string.endsWith(".json")) {
-                jsonFilenames.add(string);
-            } else if (string.endsWith(".png")) {
-                imageFilenames.add(string);
-                thumbnails.add(createThumbnail(string));
-            }
-        }
+        new GetNamesAndImagesTask(AppDatabase.Companion.getAppDatabase(getApplicationContext())).execute();
     }
 
-    @Nullable
-    private Bitmap createThumbnail(String filename) {
-        Log.d("Opening", "In createThumbnail");
-        Log.d("Opening", "Filename: " + filename);
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inSampleSize = 2;
-        BitmapRegionDecoder bitmapRegionDecoder;
-        try {
-            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(getFilesDir() + "/" + filename, false);
-            return bitmapRegionDecoder.decodeRegion(new Rect(0, 0, 500, 500), opts);
-        } catch (IOException e) {
-            e.printStackTrace();
+//    (String[] patternNames) {
+//        for (String string : patternNames) {
+//            Log.d("Opening", "Filename: " + string);
+//            if (string.endsWith(".json")) {
+//                jsonFilenames.add(string);
+//            } else if (string.endsWith(".png")) {
+//                imageFilenames.add(string);
+//                thumbnails.add(createThumbnail(string));
+//            }
+//        }
+//    }
+
+//    @Nullable
+//    private Bitmap createThumbnail(String filename) {
+//        Log.d("Opening", "In createThumbnail");
+//        Log.d("Opening", "Filename: " + filename);
+//        BitmapFactory.Options opts = new BitmapFactory.Options();
+//        opts.inSampleSize = 2;
+//        BitmapRegionDecoder bitmapRegionDecoder;
+//        try {
+//            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(getFilesDir() + "/" + filename, false);
+//            return bitmapRegionDecoder.decodeRegion(new Rect(0, 0, 500, 500), opts);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
+//    }
+
+    private class GetNamesAndImagesTask extends AsyncTask<Void, Void, String[]> {
+        private AppDatabase db;
+
+        GetNamesAndImagesTask(AppDatabase db) {
+            this.db = db;
         }
-        return Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
+
+        @Override
+        protected String[] doInBackground(Void... voids) {
+            return db.knitPatternDao().getPatternNames();
+        }
+
+        @Override
+        protected void onPostExecute(String[] strings) {
+            patternNames = strings;
+            fillGrid();
+        }
     }
 
     private class myAdaptor extends BaseAdapter {
         Context context;
 
-        public myAdaptor(Context context) {
+        myAdaptor(Context context) {
             this.context = context;
         }
 
@@ -102,7 +123,7 @@ public class OpenPattern extends AppCompatActivity {
          */
         @Override
         public int getCount() {
-            return jsonFilenames.size();
+            return patternNames.length;
         }
 
         /**
@@ -154,9 +175,9 @@ public class OpenPattern extends AppCompatActivity {
             if (convertView == null) {
                 gridItem = inflater.inflate(R.layout.grid_item, null);
                 ImageView imageView = gridItem.findViewById(R.id.grid_item_image);
-                imageView.setImageBitmap(thumbnails.get(position));
+//                imageView.setImageBitmap(thumbnails.get(position));
                 TextView textView = gridItem.findViewById(R.id.grid_item_text);
-                textView.setText(jsonFilenames.get(position).split("\\.")[0]);
+                textView.setText(patternNames[position]);
             } else {
                 gridItem = convertView;
             }

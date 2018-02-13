@@ -1,7 +1,6 @@
 package com.alexharman.stitchathon;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -26,13 +25,11 @@ import android.widget.TextView;
 
 import com.alexharman.stitchathon.KnitPackage.KnitPattern;
 import com.alexharman.stitchathon.KnitPackage.KnitPatternParser;
-import com.google.gson.Gson;
+import com.alexharman.stitchathon.database.AppDatabase;
 
 import org.json.JSONException;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,6 +44,7 @@ public class MainActivity extends AppCompatActivity
     private KnitPattern knitPattern;
     private KnitPatternView patternView;
     private ImportImageDialog importImageDialog;
+    private AppDatabase db;
 
     static final int READ_EXTERNAL_IMAGE = 42;
     static final int READ_EXTERNAL_JSON_PATTERN = 55;
@@ -57,12 +55,19 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setUpUI();
 
+        db = AppDatabase.Companion.getAppDatabase(getApplicationContext());
+
         SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
-        String knitPatternFP = sharedPreferences.getString("pattern", null);
-        String imageFP = sharedPreferences.getString("image", null);
-        if (knitPatternFP != null) {
-            openPattern(Uri.fromFile(new File(knitPatternFP)), Uri.fromFile(new File(imageFP)));
+        String patternName = sharedPreferences.getString("pattern", null);
+        if (patternName != null) {
+            openPattern(patternName);
         }
+
+//        String imageFP = sharedPreferences.getString("image", null);
+
+//        if (knitPatternFP != null) {
+//            openPattern(Uri.fromFile(new File(knitPatternFP)), Uri.fromFile(new File(imageFP)));
+//        }
     }
 
     @Override
@@ -218,7 +223,7 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         Log.d("LifeCycle", "in onPause");
         if (knitPattern != null) {
-            savePatternToFile();
+            savePattern();
         }
     }
 
@@ -243,8 +248,8 @@ public class MainActivity extends AppCompatActivity
         patternView.setPattern(knitPattern, image);
         updateStitchCounter();
         SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-        editor.putString("pattern", getFilesDir() + "/" + knitPattern.getName() + ".json");
-        editor.putString("image", getFilesDir() + "/" + knitPattern.getName() + ".png");
+        editor.putString("pattern", knitPattern.getName());
+//        editor.putString("image", getFilesDir() + "/" + knitPattern.getName() + ".png");
         editor.apply();
     }
 
@@ -253,16 +258,20 @@ public class MainActivity extends AppCompatActivity
         importImageDialog.show(getSupportFragmentManager(), "Importing image");
     }
 
-    private void openPattern(Uri patternUri, @Nullable Uri imageUri) {
-        new OpenPatternTask().execute(patternUri, imageUri);
+    private void openPattern(String patternName) {
+        new OpenPatternTask().execute(patternName);
     }
 
     private void importFile(Uri uri) {
         new ImportPatternTask().execute(uri);
     }
 
-    private void savePatternToFile() {
-        new SavePatternTask().execute(knitPattern);
+    private void saveNewPattern() {
+        new SavePatternTask(true).execute(knitPattern);
+    }
+
+    private void savePattern() {
+        new SavePatternTask(false).execute(knitPattern);
     }
 
     @Override
@@ -281,7 +290,7 @@ public class MainActivity extends AppCompatActivity
         }
         if (requestCode == OPEN_INTERNAL_PATTERN && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
-                openPattern((Uri) resultData.getParcelableExtra("pattern"), (Uri) resultData.getParcelableExtra("image"));
+                openPattern(resultData.getStringExtra("pattern"));
             }
         }
     }
@@ -297,40 +306,40 @@ public class MainActivity extends AppCompatActivity
     }
 
     private class SavePatternTask extends AsyncTask<KnitPattern, Void, Void> {
+        boolean storeStitches;
+
+        SavePatternTask(boolean storeStitches) {
+            this.storeStitches = storeStitches;
+        }
+
         @Override
         protected Void doInBackground(KnitPattern... knitPatterns) {
             Log.d("SavePatternTask", "In doInBackground");
             KnitPattern knitPattern = knitPatterns[0];
-            Gson gson = new Gson();
-            FileOutputStream outputStream;
-            String gsonOutput = gson.toJson(knitPattern);
-            Bitmap bm = patternView.patternBitmap;
 
-            try {
-                outputStream = openFileOutput(knitPattern.getName() + ".json", Context.MODE_PRIVATE);
-                Log.d("SavePatternTask", "GSON gave us: " + gsonOutput);
-                Log.d("SavePatternTask", "Length: " + gsonOutput.length());
-                outputStream.write(gsonOutput.getBytes());
-                outputStream.close();
-                Log.d("SavePatternTask", "Finished saving pattern");
-            } catch (Exception e) {
-                e.printStackTrace();
+            if(storeStitches) {
+                db.knitPatternDao().saveNewPattern(knitPattern);
+            } else {
+                db.knitPatternDao().savePattern(knitPattern);
             }
 
-            try {
-                outputStream = openFileOutput(knitPattern.getName() + ".png", Context.MODE_PRIVATE);
-                bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                outputStream.close();
-                Log.d("SavePatternTask", "Finished saving image");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//            Gson gson = new Gson();
+//            FileOutputStream outputStream;
+//            String gsonOutput = gson.toJson(knitPattern);
+//            Bitmap bm = patternView.patternBitmap;
+//            try {
+//                outputStream = openFileOutput(knitPattern.getName() + ".png", Context.MODE_PRIVATE);
+//                bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+//                outputStream.close();
+//                Log.d("SavePatternTask", "Finished saving image");
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
             return null;
         }
     }
 
-    private class OpenPatternTask extends AsyncTask<Uri, Void, KnitPattern> {
-        Bitmap patternBitmap = null;
+    private class OpenPatternTask extends AsyncTask<String, Void, KnitPattern> {
         ProgressbarDialog progressbarDialog;
 
         @Override
@@ -341,24 +350,11 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected KnitPattern doInBackground(Uri... uris) {
-            Uri patternUri = uris[0];
-            Uri imageUri = uris[1];
-            Gson gson = new Gson();
+        protected KnitPattern doInBackground(String... strings) {
             Log.d("OpenPatternTask", "in doInBackground()");
-            Log.d("OpenPatternTask", "patternFP = " + patternUri.getPath());
+            Log.d("OpenPatternTask", "patternName = " + strings[0]);
 
-            patternBitmap = readImageFile(imageUri);
-
-            String knitPatternGSON = readTextFile(patternUri);
-            if (knitPatternGSON.length() == 0) {
-                Log.d("OpenPatternTask", "Didn't load in string properly");
-            } else {
-                KnitPattern pattern = gson.fromJson(knitPatternGSON, KnitPattern.class);
-                Log.d("OpenPatternTask", "GSON json is: " + knitPatternGSON);
-                return pattern;
-            }
-            return null;
+            return db.knitPatternDao().getKnitPattern(strings[0]);
         }
 
         @Override
@@ -366,9 +362,9 @@ public class MainActivity extends AppCompatActivity
             super.onPostExecute(knitPattern);
             Log.d("OpenPatternTask", "In onPostExecute");
             if (knitPattern != null) {
-                setKnitPattern(knitPattern, patternBitmap);
+                setKnitPattern(knitPattern);
             } else {
-                Log.d("OpenPatternTask", "Pattern did not load from json");
+                Log.d("OpenPatternTask", "Pattern did not load from database");
             }
             progressbarDialog.dismiss();
         }
@@ -421,7 +417,7 @@ public class MainActivity extends AppCompatActivity
             if (knitPattern != null) {
                 Log.d("ImportPatternTask", "Imported, going to save and set");
                 setKnitPattern(knitPattern, patternBitmap);
-                savePatternToFile();
+                saveNewPattern();
             }
             progressbarDialog.dismiss();
         }
@@ -473,14 +469,13 @@ public class MainActivity extends AppCompatActivity
             progressbarDialog.updateText(values[0]);
         }
 
-
         @Override
         protected void onPostExecute(KnitPattern pattern) {
             super.onPostExecute(pattern);
             if (pattern != null) {
                 Log.d("ImportPatternTask", "Imported, going to save and set");
                 setKnitPattern(pattern, patternBitmap);
-                savePatternToFile();
+                saveNewPattern();
             }
             progressbarDialog.dismiss();
         }
