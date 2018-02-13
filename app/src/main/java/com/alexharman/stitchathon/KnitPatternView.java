@@ -66,8 +66,8 @@ public class KnitPatternView extends View {
         int bitmapHeight = (int) (knitPattern.getNumRows() * stitchSize + (knitPattern.getNumRows() + 1) * stitchPad);
 
         // TODO: Maybe don't set properties here
-        this.stitchPaints = createPaints(knitPattern.stitchTypes);
-        this.stitchBitmaps = createStitchBitmaps(knitPattern.stitchTypes);
+        this.stitchPaints = createPaints(knitPattern.getStitchTypes());
+        this.stitchBitmaps = createStitchBitmaps(knitPattern.getStitchTypes());
 
         Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_4444);
         Canvas canvas = new Canvas(bitmap);
@@ -262,8 +262,8 @@ public class KnitPatternView extends View {
     // TODO: maybe save paints and stitch bitmaps to file or something.
     public void setPattern(KnitPattern pattern, @Nullable Bitmap bitmap) {
         this.pattern = pattern;
-        stitchPaints = createPaints(pattern.stitchTypes);
-        stitchBitmaps = createStitchBitmaps(pattern.stitchTypes);
+        stitchPaints = createPaints(pattern.getStitchTypes());
+        stitchBitmaps = createStitchBitmaps(pattern.getStitchTypes());
         if (bitmap == null) {
             patternBitmap = createPatternBitmap(pattern);
         } else {
@@ -302,7 +302,7 @@ public class KnitPatternView extends View {
             canvas.save();
             canvas.translate(stitchPad, 0);
             for (int col = 0; col < knitPattern.getPatternWidth(); col++) {
-                drawStitch(canvas, knitPattern.stitches[row][col], pattern.getCurrentRow() > row && pattern.getNextStitchInRow() > col);
+                drawStitch(canvas, knitPattern.getStitches()[row][col], pattern.getCurrentRow() > row && pattern.getNextStitchInRow() > col);
                 canvas.translate(stitchSize+stitchPad, 0);
             }
             canvas.restore();
@@ -323,7 +323,7 @@ public class KnitPatternView extends View {
     private void markStitchesDone(int numStitches) {
         int row = pattern.getCurrentRow();
         int col = pattern.getNextStitchInRow();
-        Stitch stitch = pattern.stitches[row][col];
+        Stitch stitch = pattern.getStitches()[row][col];
         Canvas canvas = new Canvas(patternBitmap);
         float yTranslate = stitchPad + row * (stitchPad + stitchSize);
         float xTranslate;
@@ -369,7 +369,7 @@ public class KnitPatternView extends View {
 
         for (int i = 0; i < stitchesToUndo; i++) {
             pattern.undoStitch();
-            lastStitch = pattern.stitches[pattern.getCurrentRow()][pattern.getNextStitchInRow()];
+            lastStitch = pattern.getStitches()[pattern.getCurrentRow()][pattern.getNextStitchInRow()];
             if (pattern.getRowDirection() == 1) {
                 xTranslate = pattern.getCurrentDistanceInRow() * (stitchPad + stitchSize) + stitchPad;
             } else {

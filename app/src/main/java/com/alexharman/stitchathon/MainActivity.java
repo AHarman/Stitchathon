@@ -243,8 +243,8 @@ public class MainActivity extends AppCompatActivity
         patternView.setPattern(knitPattern, image);
         updateStitchCounter();
         SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-        editor.putString("pattern", getFilesDir() + "/" + knitPattern.name + ".json");
-        editor.putString("image", getFilesDir() + "/" + knitPattern.name + ".png");
+        editor.putString("pattern", getFilesDir() + "/" + knitPattern.getName() + ".json");
+        editor.putString("image", getFilesDir() + "/" + knitPattern.getName() + ".png");
         editor.apply();
     }
 
@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity
             Bitmap bm = patternView.patternBitmap;
 
             try {
-                outputStream = openFileOutput(knitPattern.name + ".json", Context.MODE_PRIVATE);
+                outputStream = openFileOutput(knitPattern.getName() + ".json", Context.MODE_PRIVATE);
                 Log.d("SavePatternTask", "GSON gave us: " + gsonOutput);
                 Log.d("SavePatternTask", "Length: " + gsonOutput.length());
                 outputStream.write(gsonOutput.getBytes());
@@ -318,7 +318,7 @@ public class MainActivity extends AppCompatActivity
             }
 
             try {
-                outputStream = openFileOutput(knitPattern.name + ".png", Context.MODE_PRIVATE);
+                outputStream = openFileOutput(knitPattern.getName() + ".png", Context.MODE_PRIVATE);
                 bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
                 outputStream.close();
                 Log.d("SavePatternTask", "Finished saving image");
