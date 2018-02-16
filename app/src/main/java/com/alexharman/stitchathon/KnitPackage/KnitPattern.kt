@@ -51,7 +51,6 @@ class KnitPattern {
         })
     }
 
-
     private fun buildStitchTypes(stitches: Array<Array<Stitch>>) =  stitches
             .flatten()
             .flatMap { if (it.isSplit) it.madeOf.toList() + listOf(it) else listOf(it) }
@@ -112,8 +111,14 @@ class KnitPattern {
         return totalStitchesDone
     }
 
-    private fun findCurrentDistanceInRow(stitches: Array<Array<Stitch>>, currentRow: Int): Int =
-            stitches[currentRow].sliceArray(IntRange(0, nextStitchInRow - 1)).sumBy { it.width }
+    private fun findCurrentDistanceInRow(stitches: Array<Array<Stitch>>, currentRow: Int): Int {
+        val stitchesDone: Array<Stitch>
+        if (currentDistanceInRow == 1)
+            stitchesDone = stitches[currentRow].sliceArray(IntRange(0, nextStitchInRow - 1))
+        else
+            stitchesDone = stitches[currentRow].sliceArray(IntRange(nextStitchInRow + 1, stitches[currentRow].size-1))
+        return stitchesDone.sumBy { it.width }
+    }
 
     val rowDirection: Int
         get() = if (oddRowsOpposite && (currentRow % 2 == 1)) -1 else 1

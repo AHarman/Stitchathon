@@ -302,8 +302,10 @@ public class KnitPatternView extends View {
             canvas.save();
             canvas.translate(stitchPad, 0);
             for (int col = 0; col < knitPattern.getPatternWidth(); col++) {
-                drawStitch(canvas, knitPattern.getStitches()[row][col], knitPattern.getCurrentRow() > row && knitPattern.getNextStitchInRow() > col);
-                drawStitch(canvas, knitPattern.getStitches()[row][col], knitPattern.getCurrentRow() > row && knitPattern.getNextStitchInRow() > col);
+                boolean isDone = row < knitPattern.getCurrentRow() ||
+                        (row == knitPattern.getCurrentRow() && knitPattern.getRowDirection() == 1 && col < knitPattern.getNextStitchInRow()) ||
+                        (row == knitPattern.getCurrentRow() && knitPattern.getRowDirection() == -1 && col > knitPattern.getNextStitchInRow());
+                drawStitch(canvas, knitPattern.getStitches()[row][col], isDone);
                 canvas.translate(stitchSize+stitchPad, 0);
             }
             canvas.restore();
