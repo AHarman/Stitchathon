@@ -6,8 +6,7 @@ import android.arch.persistence.room.RoomDatabase
 import android.arch.persistence.room.TypeConverters
 import android.content.Context
 
-@Database(entities = [KnitPatternInfoEntity::class, KnitPatternStitchesEntity::class], version = 1)
-@TypeConverters(KnitPatternConverters::class)
+@Database(entities = [KnitPatternEntity::class], version = 1)
 internal abstract class AppDatabase : RoomDatabase() {
 
     abstract fun knitPatternDao(): KnitPatternDao

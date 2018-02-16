@@ -1,49 +1,73 @@
 package com.alexharman.stitchathon.database
 
 import android.arch.persistence.room.*
-
+import android.content.Context
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
+import com.google.gson.Gson
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 
 @Dao
 abstract class KnitPatternDao {
+    fun savePatternChanges(knitPattern: KnitPattern) {
+        insertKnitPatternEntity(KnitPatternEntity(knitPattern))
+    }
 
     @Transaction
-    open fun saveNewPattern(knitPattern: KnitPattern) {
-        insertKnitPatternInfoEntity(KnitPatternInfoEntity(knitPattern))
-        insertKnitPatternStitchEntity(KnitPatternStitchesEntity(knitPattern))
+    open fun saveNewPattern(knitPattern: KnitPattern, context: Context) {
+        val kpe = KnitPatternEntity(knitPattern)
+        writeStitchesToFile(knitPattern, kpe.filePath, context)
+        insertKnitPatternEntity(kpe)
     }
 
-    fun savePattern(knitPattern: KnitPattern) {
-        insertKnitPatternInfoEntity(KnitPatternInfoEntity(knitPattern))
-    }
-
-    fun getKnitPattern(name: String): KnitPattern {
+    @Transaction
+    open fun getKnitPattern(name: String, context: Context): KnitPattern {
         val result = selectKnitPattern(name)
-        return KnitPattern(result.name, result.stitches, result.stitchTypes, result.currentRow, result.nextStitchInRow)
+        val stitches = readStitchesFromFile(result.filePath, context)
+        return KnitPattern(result.name, stitches, result.currentRow, result.nextStitchInRow)
+    }
+
+    private fun writeStitchesToFile(knitPattern: KnitPattern, path: String, context: Context) {
+        try {
+            val outputStream = context.openFileOutput(path, Context.MODE_PRIVATE)
+            outputStream.write(Gson().toJson(knitPattern.stitches).toByteArray())
+            outputStream.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            throw e
+        }
+    }
+
+    private fun readStitchesFromFile(path: String, context: Context): Array<Array<Stitch>> {
+        val stringBuilder = StringBuilder()
+        try {
+            val inputStream = context.openFileInput(path)
+            val reader = BufferedReader(InputStreamReader(inputStream))
+
+            for (line in reader.readLine()) {
+                stringBuilder.append(line)
+            }
+            inputStream.close()
+            reader.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            throw e
+        }
+
+        return Gson().fromJson(stringBuilder.toString(), Array<Array<Stitch>>::class.java)
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    internal abstract fun insertKnitPatternInfoEntity(knitPatternInfoEntity: KnitPatternInfoEntity)
-
-    @Insert(onConflict = OnConflictStrategy.ABORT)
-    internal abstract fun insertKnitPatternStitchEntity(knitPatternStitchesEntity: KnitPatternStitchesEntity)
+    internal abstract fun insertKnitPatternEntity(knitPatternEntity: KnitPatternEntity)
 
     @Delete
-    internal abstract fun delete(knitPatternInfoEntity: KnitPatternInfoEntity)
+    internal abstract fun delete(knitPatternEntity: KnitPatternEntity)
 
     @Query("SELECT name FROM pattern_info;")
     abstract fun getPatternNames(): Array<String>
 
-    @Query("SELECT pattern_info.*, pattern_stitches.stitches, pattern_stitches.stitchTypes " +
-            "FROM pattern_info, pattern_stitches " +
-            "WHERE pattern_info.name LIKE :name " +
-            "AND pattern_stitches.name LIKE :name;")
-    protected abstract fun selectKnitPattern(name: String): InfoAndStitches
-
-    protected class InfoAndStitches(val name: String,
-                                    val currentRow: Int,
-                                    val nextStitchInRow: Int,
-                                    val stitches: Array<Array<Stitch>>,
-                                    val stitchTypes: Array<Stitch>)
+    @Query("SELECT * FROM pattern_info WHERE name LIKE :name;")
+    internal abstract fun selectKnitPattern(name: String): KnitPatternEntity
 }

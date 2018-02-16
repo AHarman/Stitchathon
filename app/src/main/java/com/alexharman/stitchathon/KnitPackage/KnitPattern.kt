@@ -21,12 +21,12 @@ class KnitPattern {
     // Assuming doubleknit for now. Will be false for knitting on the round
     val oddRowsOpposite = true
 
-    constructor(name: String, stitches: Array<Array<Stitch>>, stitchTypes: Array<Stitch>, currentRow: Int = 0, nextStitchInRow: Int = 0) {
+    constructor(name: String, stitches: Array<Array<Stitch>>, currentRow: Int = 0, nextStitchInRow: Int = 0) {
         this.name = name
         this.stitches = stitches
-        this.stitchTypes = stitchTypes
         this.currentRow = currentRow
         this.nextStitchInRow = nextStitchInRow
+        stitchTypes = buildStitchTypes(stitches)
         totalStitches = findTotalStitches(stitches)
         patternWidth = findPatternWidth(stitches)
         totalStitchesDone = findTotalStitchesDone(stitches, currentRow)

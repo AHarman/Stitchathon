@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity
     private KnitPattern knitPattern;
     private KnitPatternView patternView;
     private ImportImageDialog importImageDialog;
-    private AppDatabase db;
+    private static AppDatabase db;
 
     static final int READ_EXTERNAL_IMAGE = 42;
     static final int READ_EXTERNAL_JSON_PATTERN = 55;
@@ -62,12 +62,6 @@ public class MainActivity extends AppCompatActivity
         if (patternName != null) {
             openPattern(patternName);
         }
-
-//        String imageFP = sharedPreferences.getString("image", null);
-
-//        if (knitPatternFP != null) {
-//            openPattern(Uri.fromFile(new File(knitPatternFP)), Uri.fromFile(new File(imageFP)));
-//        }
     }
 
     @Override
@@ -196,22 +190,6 @@ public class MainActivity extends AppCompatActivity
         return stringBuilder.toString();
     }
 
-    private Bitmap readImageFile(Uri uri) {
-        Bitmap bitmap = null;
-        if (uri != null) {
-            try {
-                BitmapFactory.Options opts = new BitmapFactory.Options();
-                opts.inMutable = true;
-                InputStream inputStream = getContentResolver().openInputStream(uri);
-                bitmap = BitmapFactory.decodeStream(inputStream, null, opts);
-                inputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return bitmap;
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -249,7 +227,6 @@ public class MainActivity extends AppCompatActivity
         updateStitchCounter();
         SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
         editor.putString("pattern", knitPattern.getName());
-//        editor.putString("image", getFilesDir() + "/" + knitPattern.getName() + ".png");
         editor.apply();
     }
 
@@ -266,12 +243,8 @@ public class MainActivity extends AppCompatActivity
         new ImportPatternTask().execute(uri);
     }
 
-    private void saveNewPattern() {
-        new SavePatternTask(true).execute(knitPattern);
-    }
-
     private void savePattern() {
-        new SavePatternTask(false).execute(knitPattern);
+        new SavePatternChangesTask().execute(knitPattern);
     }
 
     @Override
@@ -290,57 +263,28 @@ public class MainActivity extends AppCompatActivity
         }
         if (requestCode == OPEN_INTERNAL_PATTERN && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
-                openPattern(resultData.getStringExtra("pattern"));
+                openPattern(resultData.getStringExtra("patternName"));
             }
         }
     }
 
     @Override
     public void onImportImageDialogOK(@NonNull Uri uri, @NonNull String name, int width, int height, int numColours) {
-        Log.d("onImportImageDialogOK", uri.getPath());
-        Log.d("onImportImageDialogOK", name);
-        Log.d("onImportImageDialogOK", ""+width);
-        Log.d("onImportImageDialogOK", ""+height);
-        Log.d("onImportImageDialogOK", ""+numColours);
         new ImportImageTask(uri, name, width, height, numColours).execute();
     }
 
-    private class SavePatternTask extends AsyncTask<KnitPattern, Void, Void> {
-        boolean storeStitches;
-
-        SavePatternTask(boolean storeStitches) {
-            this.storeStitches = storeStitches;
-        }
-
+    private static class SavePatternChangesTask extends AsyncTask<KnitPattern, Void, Void> {
         @Override
         protected Void doInBackground(KnitPattern... knitPatterns) {
-            Log.d("SavePatternTask", "In doInBackground");
+            Log.d("SavePatternChangesTask", "In doInBackground");
             KnitPattern knitPattern = knitPatterns[0];
-
-            if(storeStitches) {
-                db.knitPatternDao().saveNewPattern(knitPattern);
-            } else {
-                db.knitPatternDao().savePattern(knitPattern);
-            }
-
-//            Gson gson = new Gson();
-//            FileOutputStream outputStream;
-//            String gsonOutput = gson.toJson(knitPattern);
-//            Bitmap bm = patternView.patternBitmap;
-//            try {
-//                outputStream = openFileOutput(knitPattern.getName() + ".png", Context.MODE_PRIVATE);
-//                bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-//                outputStream.close();
-//                Log.d("SavePatternTask", "Finished saving image");
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
+            db.knitPatternDao().savePatternChanges(knitPattern);
             return null;
         }
     }
 
     private class OpenPatternTask extends AsyncTask<String, Void, KnitPattern> {
-        ProgressbarDialog progressbarDialog;
+        private ProgressbarDialog progressbarDialog;
 
         @Override
         protected void onPreExecute() {
@@ -353,8 +297,7 @@ public class MainActivity extends AppCompatActivity
         protected KnitPattern doInBackground(String... strings) {
             Log.d("OpenPatternTask", "in doInBackground()");
             Log.d("OpenPatternTask", "patternName = " + strings[0]);
-
-            return db.knitPatternDao().getKnitPattern(strings[0]);
+            return db.knitPatternDao().getKnitPattern(strings[0], getApplicationContext());
         }
 
         @Override
@@ -393,8 +336,9 @@ public class MainActivity extends AppCompatActivity
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
             if (knitPattern != null) {
+                publishProgress(getString(R.string.progress_bar_saving_pattern));
+                db.knitPatternDao().saveNewPattern(knitPattern, getApplicationContext());
                 publishProgress(getString(R.string.progress_bar_creating_bitmap));
                 patternBitmap = patternView.createPatternBitmap(knitPattern);
             }
@@ -415,9 +359,8 @@ public class MainActivity extends AppCompatActivity
             Log.d("ImportPatternTask", "In onPostExecute");
             Log.d("ImportPatternTask", "Thread: " + Thread.currentThread().getName());
             if (knitPattern != null) {
-                Log.d("ImportPatternTask", "Imported, going to save and set");
+                Log.d("ImportPatternTask", "Imported, going to set");
                 setKnitPattern(knitPattern, patternBitmap);
-                saveNewPattern();
             }
             progressbarDialog.dismiss();
         }
@@ -429,10 +372,10 @@ public class MainActivity extends AppCompatActivity
         private int width;
         private int height;
         private int numColours;
-        Bitmap bitmap;
-        Bitmap patternBitmap;
+        private Bitmap bitmap;
+        private Bitmap patternBitmap;
 
-        ProgressbarDialog progressbarDialog;
+        private ProgressbarDialog progressbarDialog;
 
         ImportImageTask(Uri uri, String name, int width, int height, int numColours) {
             this.imageUri = uri;
@@ -456,9 +399,10 @@ public class MainActivity extends AppCompatActivity
                 return null;
             }
 
-            ImageReader imageReader = new ImageReader();
-            KnitPattern pattern = imageReader.readImage(bitmap, patternName, width, height, numColours);
+            KnitPattern pattern = new ImageReader().readImage(bitmap, patternName, width, height, numColours);
             if (knitPattern != null) {
+                publishProgress(getString(R.string.progress_bar_saving_pattern));
+                db.knitPatternDao().saveNewPattern(knitPattern, getApplicationContext());
                 publishProgress(getString(R.string.progress_bar_creating_bitmap));
                 patternBitmap = patternView.createPatternBitmap(knitPattern);
             }
@@ -475,9 +419,22 @@ public class MainActivity extends AppCompatActivity
             if (pattern != null) {
                 Log.d("ImportPatternTask", "Imported, going to save and set");
                 setKnitPattern(pattern, patternBitmap);
-                saveNewPattern();
             }
             progressbarDialog.dismiss();
+        }
+
+        private Bitmap readImageFile(@NonNull Uri uri) {
+            Bitmap bitmap = null;
+            try {
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inMutable = true;
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                bitmap = BitmapFactory.decodeStream(inputStream, null, opts);
+                inputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return bitmap;
         }
     }
 }

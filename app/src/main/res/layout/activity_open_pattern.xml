@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.alexharman.stitchathon.OpenPattern">
+    tools:contextRef="com.alexharman.stitchathon.OpenPattern">
     <GridView
         android:id="@+id/pattern_select_grid"
         android:layout_width="match_parent"
