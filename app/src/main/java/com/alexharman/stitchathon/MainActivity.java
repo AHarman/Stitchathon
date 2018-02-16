@@ -172,24 +172,6 @@ public class MainActivity extends AppCompatActivity
         completeCount.setText(s);
     }
 
-    private String readTextFile(Uri uri) {
-        StringBuilder stringBuilder = new StringBuilder();
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-            inputStream.close();
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return stringBuilder.toString();
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -283,8 +265,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class OpenPatternTask extends AsyncTask<String, Void, KnitPattern> {
+    private class OpenPatternTask extends AsyncTask<String, String, KnitPattern> {
         private ProgressbarDialog progressbarDialog;
+        private Bitmap patternBitmap;
 
         @Override
         protected void onPreExecute() {
@@ -297,7 +280,15 @@ public class MainActivity extends AppCompatActivity
         protected KnitPattern doInBackground(String... strings) {
             Log.d("OpenPatternTask", "in doInBackground()");
             Log.d("OpenPatternTask", "patternName = " + strings[0]);
-            return db.knitPatternDao().getKnitPattern(strings[0], getApplicationContext());
+            KnitPattern knitPattern = db.knitPatternDao().getKnitPattern(strings[0], getApplicationContext());
+            publishProgress(getString(R.string.progress_bar_creating_bitmap));
+            patternBitmap = patternView.createPatternBitmap(knitPattern);
+            return knitPattern;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            progressbarDialog.updateText(values[0]);
         }
 
         @Override
@@ -305,7 +296,7 @@ public class MainActivity extends AppCompatActivity
             super.onPostExecute(knitPattern);
             Log.d("OpenPatternTask", "In onPostExecute");
             if (knitPattern != null) {
-                setKnitPattern(knitPattern);
+                setKnitPattern(knitPattern, patternBitmap);
             } else {
                 Log.d("OpenPatternTask", "Pattern did not load from database");
             }
@@ -364,6 +355,25 @@ public class MainActivity extends AppCompatActivity
             }
             progressbarDialog.dismiss();
         }
+
+        private String readTextFile(Uri uri) {
+            StringBuilder stringBuilder = new StringBuilder();
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    stringBuilder.append(line);
+                }
+                inputStream.close();
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return stringBuilder.toString();
+        }
+
     }
 
     private class ImportImageTask extends AsyncTask<Void, String, KnitPattern> {
