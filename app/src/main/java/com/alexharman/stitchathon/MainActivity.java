@@ -382,7 +382,7 @@ public class MainActivity extends AppCompatActivity
         private int width;
         private int height;
         private int numColours;
-        private Bitmap bitmap;
+        private Bitmap sourceImg;
         private Bitmap patternBitmap;
 
         private ProgressbarDialog progressbarDialog;
@@ -404,17 +404,17 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected KnitPattern doInBackground(Void... voids) {
-            bitmap = readImageFile(imageUri);
-            if (bitmap == null) {
+            sourceImg = readImageFile(imageUri);
+            if (sourceImg == null) {
                 return null;
             }
 
-            KnitPattern pattern = new ImageReader().readImage(bitmap, patternName, width, height, numColours);
-            if (knitPattern != null) {
+            KnitPattern pattern = new ImageReader().readImage(sourceImg, patternName, width, height, numColours);
+            if (pattern != null) {
                 publishProgress(getString(R.string.progress_bar_saving_pattern));
-                db.knitPatternDao().saveNewPattern(knitPattern, getApplicationContext());
+                db.knitPatternDao().saveNewPattern(pattern, getApplicationContext());
                 publishProgress(getString(R.string.progress_bar_creating_bitmap));
-                patternBitmap = patternView.createPatternBitmap(knitPattern);
+                patternBitmap = patternView.createPatternBitmap(pattern);
             }
             return pattern;
         }
@@ -427,7 +427,6 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(KnitPattern pattern) {
             super.onPostExecute(pattern);
             if (pattern != null) {
-                Log.d("ImportPatternTask", "Imported, going to save and set");
                 setKnitPattern(pattern, patternBitmap);
             }
             progressbarDialog.dismiss();
