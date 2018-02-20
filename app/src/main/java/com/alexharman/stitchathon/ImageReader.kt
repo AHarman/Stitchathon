@@ -19,10 +19,10 @@ class ImageReader {
     fun readImage(bitmap: Bitmap, name: String, stitchesWide: Int, stitchesHigh: Int, numColours: Int): KnitPattern {
         val sampledBitmap: Bitmap = Bitmap.createScaledBitmap(bitmap, stitchesWide, stitchesHigh, false)
         val colourMap = quantizeColours(sampledBitmap, numColours)
-        return patterFromBitmap(name, sampledBitmap, colourMap)
+        return patternFromBitmap(name, sampledBitmap, colourMap)
     }
 
-    private fun patterFromBitmap(name: String, bitmap: Bitmap, colourMap: HashMap<Int, Int>): KnitPattern {
+    private fun patternFromBitmap(name: String, bitmap: Bitmap, colourMap: HashMap<Int, Int>): KnitPattern {
         val stitches = ArrayList<ArrayList<String>>()
         val colours = colourMap.values.distinct().sortedBy { colour -> colourMap.keys.count { colour == it } }
         colourMap.mapKeys { (_, value) -> colours.indexOf(value) }
