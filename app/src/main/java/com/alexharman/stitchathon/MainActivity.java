@@ -17,7 +17,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -174,30 +173,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d("Lifecycle", "in onStart");
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
-        Log.d("LifeCycle", "in onPause");
         if (knitPattern != null) {
             savePattern();
         }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d("Lifecycle", "in onStop");
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Log.d("Lifecycle", "in onSaveInstanceState");
     }
 
     private void setKnitPattern(KnitPattern knitPattern) {
@@ -233,7 +213,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
-        Log.d("Lifecycle", "In onActivityResult");
         if (requestCode == READ_EXTERNAL_JSON_PATTERN && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
                 importJson(resultData.getData());
@@ -259,7 +238,6 @@ public class MainActivity extends AppCompatActivity
     private static class SavePatternChangesTask extends AsyncTask<KnitPattern, Void, Void> {
         @Override
         protected Void doInBackground(KnitPattern... knitPatterns) {
-            Log.d("SavePatternChangesTask", "In doInBackground");
             KnitPattern knitPattern = knitPatterns[0];
             db.knitPatternDao().savePatternChanges(knitPattern);
             return null;
@@ -272,15 +250,12 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            Log.d("OpenPatternTask", "in onPreExecute");
             progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_load_title), true, getString(R.string.progress_bar_loading_pattern));
             progressbarDialog.show(getSupportFragmentManager(), "Opening");
         }
 
         @Override
         protected KnitPattern doInBackground(String... strings) {
-            Log.d("OpenPatternTask", "in doInBackground()");
-            Log.d("OpenPatternTask", "patternName = " + strings[0]);
             KnitPattern knitPattern = db.knitPatternDao().getKnitPattern(strings[0], getApplicationContext());
             publishProgress(getString(R.string.progress_bar_creating_bitmap));
             patternBitmap = patternView.createPatternBitmap(knitPattern);
@@ -295,11 +270,8 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(KnitPattern knitPattern) {
             super.onPostExecute(knitPattern);
-            Log.d("OpenPatternTask", "In onPostExecute");
             if (knitPattern != null) {
                 setKnitPattern(knitPattern, patternBitmap);
-            } else {
-                Log.d("OpenPatternTask", "Pattern did not load from database");
             }
             progressbarDialog.dismiss();
         }
@@ -310,8 +282,6 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected KnitPattern doInBackground(Uri... uris) {
             Uri uri = uris[0];
-            Log.d("ImportJsonTask", "In doInBackground");
-            Log.d("ImportJsonTask", "Thread: " + Thread.currentThread().getName());
             KnitPattern knitPattern = null;
             try {
                 knitPattern = (KnitPatternParser.createKnitPattern(readTextFile(uri)));
@@ -391,7 +361,6 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            Log.d("ImportImageTask", "In onPreExecute");
             progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_import_title), true, getString(R.string.progress_bar_importing_pattern));
             progressbarDialog.show(getSupportFragmentManager(), "Importing image");
         }
