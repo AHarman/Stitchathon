@@ -222,8 +222,8 @@ public class MainActivity extends AppCompatActivity
         new OpenPatternTask().execute(patternName);
     }
 
-    private void importFile(Uri uri) {
-        new ImportPatternTask().execute(uri);
+    private void importJson(Uri uri) {
+        new ImportJsonTask().execute(uri);
     }
 
     private void savePattern() {
@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity
         Log.d("Lifecycle", "In onActivityResult");
         if (requestCode == READ_EXTERNAL_JSON_PATTERN && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
-                importFile(resultData.getData());
+                importJson(resultData.getData());
             }
         }
         if (requestCode == READ_EXTERNAL_IMAGE && resultCode == Activity.RESULT_OK) {
@@ -305,23 +305,13 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class ImportPatternTask extends AsyncTask<Uri, String, KnitPattern> {
-        private ProgressbarDialog progressbarDialog;
-        private Bitmap patternBitmap;
-
-        @Override
-        protected void onPreExecute() {
-            Log.d("ImportPatternTask", "In onPreExecute");
-            Log.d("ImportPatternTask", "Thread: " + Thread.currentThread().getName());
-            progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_import_title), true, getString(R.string.progress_bar_importing_pattern));
-            progressbarDialog.show(getSupportFragmentManager(), "Importing pattern");
-        }
+    private class ImportJsonTask extends ImportPatternTask<Uri> {
 
         @Override
         protected KnitPattern doInBackground(Uri... uris) {
             Uri uri = uris[0];
-            Log.d("ImportPatternTask", "In doInBackground");
-            Log.d("ImportPatternTask", "Thread: " + Thread.currentThread().getName());
+            Log.d("ImportJsonTask", "In doInBackground");
+            Log.d("ImportJsonTask", "Thread: " + Thread.currentThread().getName());
             KnitPattern knitPattern = null;
             try {
                 knitPattern = (KnitPatternParser.createKnitPattern(readTextFile(uri)));
@@ -329,32 +319,10 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
             if (knitPattern != null) {
-                publishProgress(getString(R.string.progress_bar_creating_bitmap));
-                patternBitmap = patternView.createPatternBitmap(knitPattern);
-                publishProgress(getString(R.string.progress_bar_saving_pattern));
-                db.knitPatternDao().saveNewPattern(knitPattern, ThumbnailUtils.extractThumbnail(patternBitmap, 200, 200), getApplicationContext());
+                saveNewPattern(knitPattern);
             }
 
             return knitPattern;
-        }
-
-        @Override
-        protected void onProgressUpdate(String... values) {
-            Log.d("ImportPatternTask", "In onProgressUpdate");
-            Log.d("ImportPatternTask", "Thread: " + Thread.currentThread().getName());
-            progressbarDialog.updateText(values[0]);
-        }
-
-        @Override
-        protected void onPostExecute(KnitPattern knitPattern) {
-            super.onPostExecute(knitPattern);
-            Log.d("ImportPatternTask", "In onPostExecute");
-            Log.d("ImportPatternTask", "Thread: " + Thread.currentThread().getName());
-            if (knitPattern != null) {
-                Log.d("ImportPatternTask", "Imported, going to set");
-                setKnitPattern(knitPattern, patternBitmap);
-            }
-            progressbarDialog.dismiss();
         }
 
         private String readTextFile(Uri uri) {
@@ -375,16 +343,13 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class ImportImageTask extends AsyncTask<Void, String, KnitPattern> {
+    private class ImportImageTask extends ImportPatternTask<Void> {
         private Uri imageUri;
         private String patternName;
         private int width;
         private int height;
         private int numColours;
         private Bitmap sourceImg;
-        private Bitmap patternBitmap;
-
-        private ProgressbarDialog progressbarDialog;
 
         ImportImageTask(Uri uri, String name, int width, int height, int numColours) {
             this.imageUri = uri;
@@ -395,27 +360,47 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected void onPreExecute() {
-            Log.d("ImportImageTask", "In onPreExecute");
-            progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_import_title), true, getString(R.string.progress_bar_processing_bitmap));
-            progressbarDialog.show(getSupportFragmentManager(), "Importing image");
-        }
-
-        @Override
         protected KnitPattern doInBackground(Void... voids) {
             sourceImg = readImageFile(imageUri);
             if (sourceImg == null) {
                 return null;
             }
-
             KnitPattern knitPattern = new ImageReader().readImage(sourceImg, patternName, width, height, numColours);
-            if (knitPattern != null) {
-                publishProgress(getString(R.string.progress_bar_creating_bitmap));
-                patternBitmap = patternView.createPatternBitmap(knitPattern);
-                publishProgress(getString(R.string.progress_bar_saving_pattern));
-                db.knitPatternDao().saveNewPattern(knitPattern, ThumbnailUtils.extractThumbnail(patternBitmap, 200, 200), getApplicationContext());
-            }
+            saveNewPattern(knitPattern);
             return knitPattern;
+        }
+
+        private Bitmap readImageFile(@NonNull Uri uri) {
+            Bitmap bitmap = null;
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inMutable = true;
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                bitmap = BitmapFactory.decodeStream(inputStream, null, opts);
+                inputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return bitmap;
+        }
+    }
+
+    private abstract class ImportPatternTask<V> extends AsyncTask<V, String, KnitPattern> {
+        ProgressbarDialog progressbarDialog;
+        private Bitmap patternBitmap;
+
+        @Override
+        protected void onPreExecute() {
+            Log.d("ImportImageTask", "In onPreExecute");
+            progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_import_title), true, getString(R.string.progress_bar_importing_pattern));
+            progressbarDialog.show(getSupportFragmentManager(), "Importing image");
+        }
+
+        void saveNewPattern(@NonNull KnitPattern knitPattern) {
+            publishProgress(getString(R.string.progress_bar_creating_bitmap));
+            patternBitmap = patternView.createPatternBitmap(knitPattern);
+            publishProgress(getString(R.string.progress_bar_saving_pattern));
+            db.knitPatternDao().saveNewPattern(knitPattern, ThumbnailUtils.extractThumbnail(patternBitmap, 200, 200), getApplicationContext());
         }
 
         protected void onProgressUpdate(String... values) {
@@ -429,20 +414,6 @@ public class MainActivity extends AppCompatActivity
                 setKnitPattern(pattern, patternBitmap);
             }
             progressbarDialog.dismiss();
-        }
-
-        private Bitmap readImageFile(@NonNull Uri uri) {
-            Bitmap bitmap = null;
-            try {
-                BitmapFactory.Options opts = new BitmapFactory.Options();
-                opts.inMutable = true;
-                InputStream inputStream = getContentResolver().openInputStream(uri);
-                bitmap = BitmapFactory.decodeStream(inputStream, null, opts);
-                inputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return bitmap;
         }
     }
 }
