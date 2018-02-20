@@ -14,8 +14,7 @@
         android:verticalSpacing="10dp"
         android:horizontalSpacing="10dp"
         android:stretchMode="columnWidth"
+        android:paddingTop="10dp"
         android:gravity="center">
-
     </GridView>
-
 </android.support.v7.widget.LinearLayoutCompat>

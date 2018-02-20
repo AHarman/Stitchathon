@@ -4,12 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapRegionDecoder;
-import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,14 +14,16 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.alexharman.stitchathon.database.AppDatabase;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OpenPattern extends AppCompatActivity {
-    String[] patternNames;
     GridView gridView;
 
     @Override
@@ -35,13 +33,13 @@ public class OpenPattern extends AppCompatActivity {
         gridView = findViewById(R.id.pattern_select_grid);
         getNamesAndImages();
     }
-    private void fillGrid() {
-        gridView.setAdapter(new myAdaptor(this));
+    private void fillGrid(HashMap<String, Bitmap> thumbs) {
+        gridView.setAdapter(new MyAdaptor(this, thumbs));
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
                 Intent intent = new Intent();
-                intent.putExtra("patternName", patternNames[position]);
+                intent.putExtra("patternName", (String) gridView.getAdapter().getItem(position));
                 setResult(Activity.RESULT_OK, intent);
                 finish();
             }
@@ -61,23 +59,7 @@ public class OpenPattern extends AppCompatActivity {
         new GetNamesAndImagesTask(AppDatabase.Companion.getAppDatabase(getApplicationContext())).execute();
     }
 
-    @Nullable
-    private Bitmap createThumbnail(String filename) {
-        Log.d("Opening", "In createThumbnail");
-        Log.d("Opening", "Filename: " + filename);
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inSampleSize = 2;
-        BitmapRegionDecoder bitmapRegionDecoder;
-        try {
-            bitmapRegionDecoder = BitmapRegionDecoder.newInstance(getFilesDir() + "/" + filename, false);
-            return bitmapRegionDecoder.decodeRegion(new Rect(0, 0, 500, 500), opts);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
-    }
-
-    private class GetNamesAndImagesTask extends AsyncTask<Void, Void, String[]> {
+    private class GetNamesAndImagesTask extends AsyncTask<Void, Void, HashMap<String, Bitmap>> {
         private AppDatabase db;
 
         GetNamesAndImagesTask(AppDatabase db) {
@@ -85,31 +67,40 @@ public class OpenPattern extends AppCompatActivity {
         }
 
         @Override
-        protected String[] doInBackground(Void... voids) {
-            return db.knitPatternDao().getPatternNames();
+        protected HashMap<String, Bitmap> doInBackground(Void... voids) {
+            return db.knitPatternDao().getThumbnails(getApplicationContext());
         }
 
         @Override
-        protected void onPostExecute(String[] strings) {
-            patternNames = strings;
-            fillGrid();
+        protected void onPostExecute(HashMap<String, Bitmap> thumbs) {
+            fillGrid(thumbs);
         }
     }
 
-    private class myAdaptor extends BaseAdapter {
+    private class MyAdaptor extends BaseAdapter {
         private Context context;
+        private ArrayList<String> patternNames;
+        private ArrayList<Bitmap> bitmaps;
 
-        myAdaptor(Context context) {
+        MyAdaptor(Context context, HashMap<String, Bitmap> thumbs) {
             this.context = context;
+            patternNames = new ArrayList<>();
+            bitmaps = new ArrayList<>();
+
+            for (Map.Entry<String, Bitmap> entry: thumbs.entrySet()) {
+                patternNames.add(entry.getKey());
+                bitmaps.add(entry.getValue());
+            }
         }
+
         @Override
         public int getCount() {
-            return patternNames.length;
+            return patternNames.size();
         }
 
         @Override
         public String getItem(int position) {
-            return patternNames[position];
+            return patternNames.get(position);
         }
 
         @Override
@@ -127,8 +118,10 @@ public class OpenPattern extends AppCompatActivity {
             } else {
                 gridItem = convertView;
             }
+            ImageView imageView = gridItem.findViewById(R.id.grid_item_image);
+            imageView.setImageBitmap(bitmaps.get(position));
             TextView textView = gridItem.findViewById(R.id.grid_item_text);
-            textView.setText(patternNames[position]);
+            textView.setText(patternNames.get(position));
 
             return gridItem;
         }

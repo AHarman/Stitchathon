@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -328,10 +329,10 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
             if (knitPattern != null) {
-                publishProgress(getString(R.string.progress_bar_saving_pattern));
-                db.knitPatternDao().saveNewPattern(knitPattern, getApplicationContext());
                 publishProgress(getString(R.string.progress_bar_creating_bitmap));
                 patternBitmap = patternView.createPatternBitmap(knitPattern);
+                publishProgress(getString(R.string.progress_bar_saving_pattern));
+                db.knitPatternDao().saveNewPattern(knitPattern, ThumbnailUtils.extractThumbnail(patternBitmap, 200, 200), getApplicationContext());
             }
 
             return knitPattern;
@@ -361,7 +362,6 @@ public class MainActivity extends AppCompatActivity
             try {
                 InputStream inputStream = getContentResolver().openInputStream(uri);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
                 String line;
                 while ((line = reader.readLine()) != null) {
                     stringBuilder.append(line);
@@ -373,7 +373,6 @@ public class MainActivity extends AppCompatActivity
             }
             return stringBuilder.toString();
         }
-
     }
 
     private class ImportImageTask extends AsyncTask<Void, String, KnitPattern> {
@@ -409,14 +408,14 @@ public class MainActivity extends AppCompatActivity
                 return null;
             }
 
-            KnitPattern pattern = new ImageReader().readImage(sourceImg, patternName, width, height, numColours);
-            if (pattern != null) {
-                publishProgress(getString(R.string.progress_bar_saving_pattern));
-                db.knitPatternDao().saveNewPattern(pattern, getApplicationContext());
+            KnitPattern knitPattern = new ImageReader().readImage(sourceImg, patternName, width, height, numColours);
+            if (knitPattern != null) {
                 publishProgress(getString(R.string.progress_bar_creating_bitmap));
-                patternBitmap = patternView.createPatternBitmap(pattern);
+                patternBitmap = patternView.createPatternBitmap(knitPattern);
+                publishProgress(getString(R.string.progress_bar_saving_pattern));
+                db.knitPatternDao().saveNewPattern(knitPattern, ThumbnailUtils.extractThumbnail(patternBitmap, 200, 200), getApplicationContext());
             }
-            return pattern;
+            return knitPattern;
         }
 
         protected void onProgressUpdate(String... values) {
