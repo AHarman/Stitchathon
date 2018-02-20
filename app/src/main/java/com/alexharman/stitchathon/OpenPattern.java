@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.alexharman.stitchathon.database.AppDatabase;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +34,7 @@ public class OpenPattern extends AppCompatActivity {
         gridView = findViewById(R.id.pattern_select_grid);
         getNamesAndImages();
     }
+
     private void fillGrid(HashMap<String, Bitmap> thumbs) {
         gridView.setAdapter(new MyAdaptor(this, thumbs));
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -56,24 +58,26 @@ public class OpenPattern extends AppCompatActivity {
     // TODO: Get images. Not yet implemented with Room
     private void getNamesAndImages() {
         Log.d("Opening", "in getNamesAndImages");
-        new GetNamesAndImagesTask(AppDatabase.Companion.getAppDatabase(getApplicationContext())).execute();
+        new GetNamesAndImagesTask(AppDatabase.Companion.getAppDatabase(getApplicationContext()), this).execute();
     }
 
-    private class GetNamesAndImagesTask extends AsyncTask<Void, Void, HashMap<String, Bitmap>> {
+    private static class GetNamesAndImagesTask extends AsyncTask<Void, Void, HashMap<String, Bitmap>> {
         private AppDatabase db;
+        private WeakReference<OpenPattern> context;
 
-        GetNamesAndImagesTask(AppDatabase db) {
+        GetNamesAndImagesTask(AppDatabase db, OpenPattern context) {
             this.db = db;
+            this.context = new WeakReference<>(context);
         }
 
         @Override
         protected HashMap<String, Bitmap> doInBackground(Void... voids) {
-            return db.knitPatternDao().getThumbnails(getApplicationContext());
+            return db.knitPatternDao().getThumbnails(context.get());
         }
 
         @Override
         protected void onPostExecute(HashMap<String, Bitmap> thumbs) {
-            fillGrid(thumbs);
+            context.get().fillGrid(thumbs);
         }
     }
 
