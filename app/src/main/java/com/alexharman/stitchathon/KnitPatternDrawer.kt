@@ -1,7 +1,6 @@
 package com.alexharman.stitchathon
 
 import android.graphics.*
-import android.util.Log
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import java.util.*
@@ -13,7 +12,6 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern) {
 
     // TODO: Create colour changer and pass this in from preferences
     private val backgroundColor = -0x7f7f80
-    private val doneOverlayColor = -0x7f000001
     private var colours = intArrayOf(-0x10000, -0xffff01, -0xff0100)
 
     private var stitchBitmaps: HashMap<Stitch, Bitmap>
@@ -25,9 +23,8 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern) {
     init {
         stitchPaints = createStitchPaints(knitPattern.stitchTypes)
         doneOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        doneOverlayPaint.color = doneOverlayColor
         doneOverlayPaint.style = Paint.Style.FILL
-
+        doneOverlayPaint.colorFilter = LightingColorFilter(0x00FFFFFF, 0x00888888)
         stitchBitmaps = createStitchBitmaps(knitPattern.stitchTypes)
         patternBitmap = createPatternBitmap(knitPattern)
     }
@@ -125,7 +122,7 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern) {
                         row == knitPattern.currentRow && knitPattern.rowDirection == 1 && col < knitPattern.nextStitchInRow ||
                         row == knitPattern.currentRow && knitPattern.rowDirection == -1 && col > knitPattern.nextStitchInRow
                 drawStitch(canvas, knitPattern.stitches[row][col], isDone)
-                canvas.translate(stitchSize + stitchPad, 0f)
+                canvas.translate((stitchSize + stitchPad) * knitPattern.stitches[row][col].width, 0f)
             }
             canvas.restore()
             canvas.translate(0f, stitchSize + stitchPad)
@@ -137,62 +134,37 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern) {
         canvas.drawBitmap(b, 0f, 0f, if (isDone) doneOverlayPaint else null)
     }
 
-    fun undoStitches(numStitches: Int) {
+    private fun drawNextStitch(isDone: Boolean) {
         val canvas = Canvas(patternBitmap)
-        var lastStitch: Stitch
-        var xTranslate: Float
-        var yTranslate: Float
+        val stitch = knitPattern.stitches[knitPattern.currentRow][knitPattern.nextStitchInRow]
+        val xTranslate =
+                if (knitPattern.rowDirection == 1) {
+                    knitPattern.currentDistanceInRow * (stitchPad + stitchSize) + stitchPad
+                } else {
+                    patternBitmap.width - (knitPattern.currentDistanceInRow + stitch.width) * (stitchPad + stitchSize)
+                }
+        val yTranslate = knitPattern.currentRow * (stitchPad + stitchSize) + stitchPad
+        canvas.translate(xTranslate, yTranslate)
+        drawStitch(canvas, stitch, isDone)
+    }
 
+    fun undoStitches(numStitches: Int) {
         for (i in 0 until numStitches) {
             knitPattern.undoStitch()
-            lastStitch = knitPattern.stitches[knitPattern.currentRow][knitPattern.nextStitchInRow]
-            if (knitPattern.rowDirection == 1) {
-                xTranslate = knitPattern.currentDistanceInRow * (stitchPad + stitchSize) + stitchPad
-            } else {
-                xTranslate = patternBitmap.width - (knitPattern.currentDistanceInRow + 1) * (stitchPad + stitchSize)
-            }
-            yTranslate = knitPattern.currentRow * (stitchPad + stitchSize) + stitchPad
-            canvas.translate(xTranslate, yTranslate)
-            drawStitch(canvas, lastStitch, false)
-            canvas.matrix = null
+            drawNextStitch(false)
         }
     }
 
-    fun increment() {
-        if (knitPattern.isFinished) {
-            return
+    fun increment(numStitches: Int = 1) {
+        for (i in 0 until numStitches) {
+            drawNextStitch(true)
+            knitPattern.increment()
         }
-        markStitchDone()
-        knitPattern.increment()
-    }
-
-    // TODO: Fix so works beyond end of row
-    // TODO: I think this breaks if stitches aren't uniform width. Fix that.
-    // TODO: Just redo this function. There's too many problems. Break it down into "mark one stitch done" and "mark n stitches", make it use drawStitch() function. See SetColorFilter for the paint
-
-    // Only works until end of row, don't use beyond that
-    private fun markStitchesDone(numStitches: Int) {
-    }
-
-    private fun markStitchDone(canvas: Canvas = Canvas(patternBitmap)) {
-        val row = knitPattern.currentRow
-        val col = knitPattern.nextStitchInRow
-        val stitch = knitPattern.stitches[row][col]
-        val yTranslate = stitchPad + row * (stitchPad + stitchSize)
-        val xTranslate =
-                if (knitPattern.rowDirection == 1)
-                    stitchPad + knitPattern.currentDistanceInRow * (stitchPad + stitchSize)
-                else
-                    patternBitmap.width - (knitPattern.currentDistanceInRow + stitch.width) * (stitchPad + stitchSize)
-        Log.d("markStitchDone", "Row: $row col: $col currentDistanceInRow ${knitPattern.currentDistanceInRow}")
-        Log.d("markStitchDone", "x: $xTranslate y: $yTranslate")
-        Log.d("markStitchDone", "currentDistanceInRow: ${knitPattern.currentDistanceInRow}")
-        canvas.translate(xTranslate, yTranslate)
-        drawStitch(canvas, stitch, true)
     }
 
     fun incrementRow(): Int {
-        markStitchesDone(knitPattern.stitchesLeftInRow)
-        return knitPattern.incrementRow()
+        val stitchesDone = knitPattern.stitchesLeftInRow
+        increment(stitchesDone)
+        return stitchesDone
     }
 }
