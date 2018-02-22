@@ -172,7 +172,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         if (knitPatternDrawer == null )
             return
 
-        undoStack.push(knitPatternDrawer!!.markRowDone())
+        undoStack.push(knitPatternDrawer!!.incrementRow())
         (context as MainActivity).updateStitchCounter()
         updateBitmapToDraw()
     }

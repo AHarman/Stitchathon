@@ -57,17 +57,20 @@ class KnitPattern {
             .distinct()
             .toTypedArray()
 
-    fun increment () {
-        if (isFinished)
-            return
-        currentDistanceInRow += stitches[currentRow][nextStitchInRow].width
-        totalStitchesDone++
-        nextStitchInRow += rowDirection
+    fun increment (numStitches: Int = 1) {
+        for (i in 0 until numStitches) {
+            if (isFinished)
+                return
 
-        if (!isFinished && isEndOfRow) {
-            currentRow++
-            currentDistanceInRow = 0
-            nextStitchInRow = startOfRow
+            currentDistanceInRow += stitches[currentRow][nextStitchInRow].width
+            totalStitchesDone++
+            nextStitchInRow += rowDirection
+
+            if (!isFinished && isEndOfRow) {
+                currentRow++
+                currentDistanceInRow = 0
+                nextStitchInRow = startOfRow
+            }
         }
     }
 
@@ -113,7 +116,7 @@ class KnitPattern {
 
     private fun findCurrentDistanceInRow(stitches: Array<Array<Stitch>>, currentRow: Int): Int {
         val stitchesDone: Array<Stitch>
-        if (currentDistanceInRow == 1)
+        if (rowDirection == 1)
             stitchesDone = stitches[currentRow].sliceArray(IntRange(0, nextStitchInRow - 1))
         else
             stitchesDone = stitches[currentRow].sliceArray(IntRange(nextStitchInRow + 1, stitches[currentRow].size-1))
