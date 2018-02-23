@@ -1,6 +1,7 @@
 package com.alexharman.stitchathon
 
 import android.graphics.Bitmap
+import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -15,17 +16,33 @@ import kotlin.math.sqrt
  */
 
 class ImageReader {
-    fun readImage(bitmap: Bitmap, stitchesWide: Int, stitchesHigh: Int, numColours: Int): Bitmap {
-        val sampledBitmap = Bitmap.createScaledBitmap(bitmap, stitchesWide, stitchesHigh, false)
-        return quantizeColours(sampledBitmap, numColours)
+    fun readImage(bitmap: Bitmap, name: String, stitchesWide: Int, stitchesHigh: Int, numColours: Int): KnitPattern {
+        val sampledBitmap: Bitmap = Bitmap.createScaledBitmap(bitmap, stitchesWide, stitchesHigh, false)
+        val colourMap = quantizeColours(sampledBitmap, numColours)
+        return patternFromBitmap(name, sampledBitmap, colourMap)
+    }
+
+    private fun patternFromBitmap(name: String, bitmap: Bitmap, colourMap: HashMap<Int, Int>): KnitPattern {
+        val stitches = ArrayList<ArrayList<String>>()
+        val colours = colourMap.values.distinct().sortedBy { colour -> colourMap.keys.count { colour == it } }
+        colourMap.mapKeys { (_, value) -> colours.indexOf(value) }
+
+        for (row in 0 until bitmap.height) {
+            val newRow = ArrayList<String>()
+            for (col in 0 until bitmap.width) {
+                newRow.add("C${colourMap[bitmap.getPixel(col, row)]}")
+            }
+            stitches.add(newRow)
+        }
+        return KnitPattern(stitches, name)
     }
 
     // TODO: selectively use colourReduce in countColours() method if too many colours
-    private fun quantizeColours(bitmap: Bitmap, numColours: Int): Bitmap {
-        val colours = bitmapToColours(bitmap)
-        if (colours.distinct().size <= numColours) return bitmap
-        val colourMap = groupColours(colours, numColours)
-        return replaceColours(bitmap, colourMap)
+    // Returns a mapping of colours to apply to image
+    private fun quantizeColours(bitmap: Bitmap, numColours: Int): HashMap<Int, Int> {
+        val colours = bitmapToPixels(bitmap)
+        if (colours.distinct().size <= numColours) return colours.distinct().associate { Pair(it.toArgb(), it.toArgb()) } as HashMap<Int, Int>
+        return groupColours(colours, numColours)
     }
 
     private fun replaceColours(bitmap: Bitmap, colourMap: HashMap<Int, Int>): Bitmap {
@@ -37,7 +54,7 @@ class ImageReader {
         return bitmap
     }
 
-    private fun bitmapToColours(bitmap: Bitmap): ArrayList<Colour> {
+    private fun bitmapToPixels(bitmap: Bitmap): ArrayList<Colour> {
         val arr = IntArray(bitmap.width * bitmap.height)
         bitmap.getPixels(arr, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
         return arr.map { Colour(it) } as ArrayList<Colour>

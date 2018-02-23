@@ -43,7 +43,7 @@ public class ProgressbarDialog extends DialogFragment {
         builder.setTitle(getArguments().getString("title"));
         Dialog dialog = builder.create();
 
-        progressBar = (ProgressBar) dialogView.findViewById(R.id.progress_dialog_bar);
+        progressBar = dialogView.findViewById(R.id.progress_dialog_bar);
         progressBar.setIndeterminate(getArguments().getBoolean("indeterminate"));
         ((TextView) dialogView.findViewById(R.id.progress_dialog_text)).setText(getArguments().getString("label"));
 
