@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.alexharman.stitchathon.KnitPackage.KnitPattern;
@@ -177,11 +179,18 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void setKnitPattern(@NonNull KnitPattern knitPattern, @NonNull KnitPatternDrawer knitPatternDrawer) {
+    private void setKnitPattern(@NonNull KnitPattern knitPattern, @NonNull KnitPatternDrawer knitPatternDrawer, @Nullable Bitmap thumbnail) {
         this.knitPattern = knitPattern;
         patternView.setPattern(knitPatternDrawer);
         updateStitchCounter();
         SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+        ((TextView) findViewById(R.id.nav_drawer_pattern_name)).setText(knitPattern.getName());
+        if (thumbnail != null) {
+            ((ImageView) findViewById(R.id.nav_drawer_image)).setImageBitmap(thumbnail);
+        } else {
+            ((ImageView) findViewById(R.id.nav_drawer_image)).setImageResource(R.drawable.logo);
+        }
+
         editor.putString("pattern", knitPattern.getName());
         editor.apply();
     }
@@ -241,6 +250,7 @@ public class MainActivity extends AppCompatActivity
         private ProgressbarDialog progressbarDialog;
         private KnitPatternDrawer knitPatternDrawer;
         private WeakReference<MainActivity> context;
+        private Bitmap thumbnail;
 
         OpenPatternTask(MainActivity context) {
             this.context = new WeakReference<>(context);
@@ -255,6 +265,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected KnitPattern doInBackground(String... strings) {
             KnitPattern knitPattern = db.knitPatternDao().getKnitPattern(strings[0], context.get().getApplicationContext());
+            thumbnail = db.knitPatternDao().getThumbnail(context.get(), knitPattern.getName());
             publishProgress(context.get().getString(R.string.progress_bar_creating_bitmap));
             knitPatternDrawer = new KnitPatternDrawer(knitPattern);
             return knitPattern;
@@ -269,7 +280,7 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(KnitPattern knitPattern) {
             super.onPostExecute(knitPattern);
             if (knitPattern != null) {
-                context.get().setKnitPattern(knitPattern, knitPatternDrawer);
+                context.get().setKnitPattern(knitPattern, knitPatternDrawer, thumbnail);
             }
             progressbarDialog.dismiss();
         }
@@ -358,9 +369,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private static abstract class ImportPatternTask<V> extends AsyncTask<V, String, KnitPattern> {
-        ProgressbarDialog progressbarDialog;
+        private ProgressbarDialog progressbarDialog;
         private KnitPatternDrawer knitPatternDrawer;
         WeakReference<MainActivity> context;
+        private Bitmap thumbnail;
 
         ImportPatternTask(MainActivity context) {
             this.context = new WeakReference<>(context);
@@ -375,8 +387,9 @@ public class MainActivity extends AppCompatActivity
         void saveNewPattern(@NonNull KnitPattern knitPattern) {
             publishProgress(context.get().getString(R.string.progress_bar_creating_bitmap));
             knitPatternDrawer = new KnitPatternDrawer(knitPattern);
+            thumbnail = ThumbnailUtils.extractThumbnail(knitPatternDrawer.getPatternBitmap(), 200, 200);
             publishProgress(context.get().getString(R.string.progress_bar_saving_pattern));
-            db.knitPatternDao().saveNewPattern(knitPattern, ThumbnailUtils.extractThumbnail(knitPatternDrawer.getPatternBitmap(), 200, 200), context.get().getApplicationContext());
+            db.knitPatternDao().saveNewPattern(knitPattern, thumbnail, context.get().getApplicationContext());
         }
 
         protected void onProgressUpdate(String... values) {
@@ -387,7 +400,7 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(KnitPattern pattern) {
             super.onPostExecute(pattern);
             if (pattern != null) {
-                context.get().setKnitPattern(pattern, knitPatternDrawer);
+                context.get().setKnitPattern(pattern, knitPatternDrawer, thumbnail);
             }
             progressbarDialog.dismiss();
         }
