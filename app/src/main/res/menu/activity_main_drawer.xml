@@ -1,39 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/open_pattern_group">
         <item
             android:id="@+id/nav_open"
             android:icon="@drawable/ic_folder_black_24dp"
-            android:title="@string/open_pattern"
-            android:checkable="false" />
+            android:title="@string/open_pattern" />
         <item
             android:id="@+id/nav_import_pattern"
             android:icon="@drawable/ic_create_new_folder_black_24dp"
-            android:title="@string/import_pattern"
-            android:checkable="false" />
+            android:title="@string/import_pattern" />
         <item
             android:id="@+id/nav_import_image"
             android:icon="@drawable/ic_image_black_24dp"
-            android:title="@string/import_image"
-            android:checkable="false" />
+            android:title="@string/import_image" />
     </group>
 
-    <item android:title="More">
-        <menu>
-            <item
-                android:id="@+id/nav_settings"
-                android:icon="@drawable/ic_settings_black_24dp"
-                android:title="@string/app_options" />
-            <item
-                android:id="@+id/nav_about_app"
-                android:icon="@drawable/ic_info_black_24dp"
-                android:title="@string/about_app" />
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share"
-                android:checkable="false" />
-        </menu>
-    </item>
+    <group
+        android:id="@+id/misc_options_group">
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/app_options" />
+        <item
+            android:id="@+id/nav_about_app"
+            android:icon="@drawable/ic_info_black_24dp"
+            android:title="@string/about_app" />
+        <item
+            android:id="@+id/nav_share"
+            android:icon="@drawable/ic_menu_share"
+            android:title="Share"
+            android:checkable="false" />
+    </group>
 </menu>
