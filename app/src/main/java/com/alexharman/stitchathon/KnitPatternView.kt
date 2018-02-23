@@ -114,10 +114,6 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     }
 
     // TODO: maybe save paints and stitch bitmaps and pattern bitmaps to file or something.
-    fun setPattern(knitPattern: KnitPattern) {
-        setPattern(KnitPatternDrawer(knitPattern))
-    }
-
     fun setPattern(knitPatternDrawer: KnitPatternDrawer) {
         this.knitPatternDrawer = knitPatternDrawer
         if (viewWidth > 0) {

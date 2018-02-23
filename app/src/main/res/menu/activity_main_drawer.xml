@@ -5,19 +5,23 @@
         <item
             android:id="@+id/nav_open"
             android:icon="@drawable/ic_folder_black_24dp"
-            android:title="@string/open_pattern" />
+            android:title="@string/open_pattern"
+            android:checkable="false" />
         <item
             android:id="@+id/nav_import_pattern"
             android:icon="@drawable/ic_create_new_folder_black_24dp"
-            android:title="@string/import_pattern" />
+            android:title="@string/import_pattern"
+            android:checkable="false" />
         <item
             android:id="@+id/nav_import_image"
             android:icon="@drawable/ic_image_black_24dp"
-            android:title="@string/import_image" />
+            android:title="@string/import_image"
+            android:checkable="false" />
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:title="Tools"
+            android:checkable="false" />
     </group>
 
     <item android:title="Communicate">
@@ -25,12 +29,13 @@
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:title="Share"
+                android:checkable="false" />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:title="Send"
+                android:checkable="false" />
         </menu>
     </item>
-
 </menu>
