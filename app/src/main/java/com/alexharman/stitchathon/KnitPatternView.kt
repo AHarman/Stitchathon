@@ -27,11 +27,10 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     private val mGestureDetector: GestureDetector
     private val undoStack = Stack<Int>()
 
-    //TODO: Rename "currentView" or something.
-    private lateinit var bitmapToDraw: Bitmap
+    private lateinit var currentView: Bitmap
 
     init {
-        mGestureDetector = GestureDetector(this.context, gestureListener())
+        mGestureDetector = GestureDetector(this.context, MyGestureListener())
         bitmapToDrawPaint = Paint()
         bitmapToDrawPaint.isAntiAlias = true
         bitmapToDrawPaint.isFilterBitmap = true
@@ -41,11 +40,11 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         super.onSizeChanged(w, h, oldW, oldH)
         viewHeight = h
         viewWidth = w
-        bitmapToDraw = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444)
+        currentView = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444)
         if (knitPatternDrawer != null) {
             updatePatternSrcRectangle()
             updatePatternDstRectangle()
-            updateBitmapToDraw()
+            updateCurrentView()
         }
     }
 
@@ -53,22 +52,18 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         if (knitPatternDrawer == null)
             return
 
-        var left: Int
+        var left = 0
         var right: Int
-        var top: Int
+        var top = 0
         var bottom: Int
         val patternBitmap = knitPatternDrawer!!.patternBitmap
 
         if (fitPatternWidth) {
-            left = 0
             right = patternBitmap.width
-            top = 0
             val ratio = patternBitmap.width.toFloat() / viewWidth.toFloat()
             bottom = Math.min(patternBitmap.height, (viewHeight.toFloat() * ratio).toInt())
         } else {
-            left = 0
             right = Math.min(patternBitmap.width, viewWidth)
-            top = 0
             bottom = Math.min(patternBitmap.height, viewHeight)
             left += xOffset
             right += xOffset
@@ -115,7 +110,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         xOffset = 0
         updatePatternSrcRectangle()
         updatePatternDstRectangle()
-        updateBitmapToDraw()
+        updateCurrentView()
     }
 
     // TODO: maybe save paints and stitch bitmaps and pattern bitmaps to file or something.
@@ -128,18 +123,18 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         if (viewWidth > 0) {
             updatePatternSrcRectangle()
             updatePatternDstRectangle()
-            bitmapToDraw = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444)
-            updateBitmapToDraw()
+            currentView = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444)
+            updateCurrentView()
         }
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawBitmap(bitmapToDraw, 0f, 0f, null)
+        canvas.drawBitmap(currentView, 0f, 0f, null)
     }
 
-    private fun updateBitmapToDraw() {
-        val canvas = Canvas(bitmapToDraw)
+    private fun updateCurrentView() {
+        val canvas = Canvas(currentView)
         if (viewWidth > patternDstRectangle!!.width() || viewHeight > patternDstRectangle!!.height()) {
             canvas.drawARGB(0xFF, 0xFF, 0xFF, 0xFF)
         }
@@ -156,7 +151,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         xOffset = Math.min(Math.max(distanceX * ratio + xOffset, 0f), (patternBitmap.width - patternSrcRectangle!!.width()).toFloat()).toInt()
         yOffset = Math.min(Math.max(distanceY * ratio + yOffset, 0f), (patternBitmap.height - patternSrcRectangle!!.height()).toFloat()).toInt()
         updatePatternSrcRectangle()
-        updateBitmapToDraw()
+        updateCurrentView()
     }
 
     fun incrementOne() {
@@ -164,7 +159,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
             undoStack.push(1)
             knitPatternDrawer?.increment()
             (context as MainActivity).updateStitchCounter()
-            updateBitmapToDraw()
+            updateCurrentView()
         }
     }
 
@@ -174,7 +169,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
         undoStack.push(knitPatternDrawer!!.incrementRow())
         (context as MainActivity).updateStitchCounter()
-        updateBitmapToDraw()
+        updateCurrentView()
     }
 
     fun undo() {
@@ -183,14 +178,14 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
         knitPatternDrawer?.undoStitches(undoStack.pop())
         (context as MainActivity).updateStitchCounter()
-        updateBitmapToDraw()
+        updateCurrentView()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return mGestureDetector.onTouchEvent(event)
     }
 
-    private inner class gestureListener : GestureDetector.SimpleOnGestureListener() {
+    private inner class MyGestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
             incrementOne()
             return true

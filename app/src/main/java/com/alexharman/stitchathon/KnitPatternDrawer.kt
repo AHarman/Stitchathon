@@ -29,56 +29,43 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern) {
         patternBitmap = createPatternBitmap(knitPattern)
     }
 
-    fun createPatternBitmap(knitPattern: KnitPattern): Bitmap {
+    private fun createPatternBitmap(knitPattern: KnitPattern): Bitmap {
         val bitmapWidth = (knitPattern.patternWidth * stitchSize + (knitPattern.patternWidth + 1) * stitchPad).toInt()
         val bitmapHeight = (knitPattern.numRows * stitchSize + (knitPattern.numRows + 1) * stitchPad).toInt()
-
         val bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_4444)
         val canvas = Canvas(bitmap)
         canvas.drawColor(backgroundColor)
         drawPattern(canvas, knitPattern)
-
         return bitmap
     }
 
-    // TODO: Variable width
     private fun createStitchBitmaps(stitches: Array<Stitch>): HashMap<Stitch, Bitmap> {
         val stitchBitmaps = HashMap<Stitch, Bitmap>()
         var bitmap: Bitmap
         var bitmapWidth: Int
-        var currentStitch: Stitch
 
-        for (i in stitches.indices) {
-            currentStitch = stitches[i]
-            if (currentStitch.isSplit) {
-                bitmap = createSplitStitchBitmap(currentStitch)
+        for (stitch in stitches) {
+            bitmapWidth = (stitchSize * stitch.width + (stitch.width - 1) * stitchPad).toInt()
+            bitmap = Bitmap.createBitmap(bitmapWidth, stitchSize.toInt(), Bitmap.Config.ARGB_8888)
+            if (stitch.isSplit) {
+                bitmap = createSplitStitchBitmap(stitch, bitmap)
             } else {
-                bitmapWidth = (stitchSize * currentStitch.width + (currentStitch.width - 1) * stitchPad).toInt()
-                bitmap = Bitmap.createBitmap(bitmapWidth, stitchSize.toInt(), Bitmap.Config.ARGB_8888)
-                Canvas(bitmap).drawPaint(stitchPaints[currentStitch])
+                Canvas(bitmap).drawPaint(stitchPaints[stitch])
             }
-            stitchBitmaps[stitches[i]] = bitmap
+            stitchBitmaps[stitch] = bitmap
         }
 
         return stitchBitmaps
     }
 
-    // TODO: Variable width
-    // We're going to assume that there's only 2 colours
-    private fun createSplitStitchBitmap(stitch: Stitch): Bitmap {
-        val bitmapWidth = (stitchSize * stitch.width + (stitch.width - 1) * stitchPad).toInt()
-        val bitmap = Bitmap.createBitmap(bitmapWidth, stitchSize.toInt(), Bitmap.Config.ARGB_8888)
+    private fun createSplitStitchBitmap(stitch: Stitch, bitmap: Bitmap): Bitmap {
         val canvas = Canvas(bitmap)
-        val leftSide: Path
+        val leftSide = Path()
         val rightSide: Path
+        val startX = bitmap.width * 7 / 10
+        val stopX = bitmap.width * 3 / 10
+        val matrix = Matrix()
 
-        // Can't think of better names for these
-        // Basically they define the diagonal
-        val startX = stitchSize * 7 / 10
-        val stopX = stitchSize * 3 / 10
-        val matrix: Matrix
-
-        leftSide = Path()
         leftSide.fillType = Path.FillType.EVEN_ODD
         leftSide.lineTo(startX - 1.0f, 0f)
         leftSide.lineTo(stopX - 1.0f, stitchSize)
@@ -86,7 +73,6 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern) {
         leftSide.close()
 
         rightSide = Path(leftSide)
-        matrix = Matrix()
         matrix.postRotate(180f, (bitmap.width / 2).toFloat(), (bitmap.height / 2).toFloat())
         rightSide.transform(matrix)
 
@@ -100,14 +86,12 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern) {
         val paints = HashMap<Stitch, Paint>()
         var colourCount = 0
 
-        for (stitch in stitches) {
-            if (!stitch.isSplit) {
-                p = Paint(Paint.ANTI_ALIAS_FLAG)
-                p.color = colours[colourCount]
-                p.style = Paint.Style.FILL
-                paints[stitch] = p
-                colourCount++
-            }
+        for (stitch in stitches.filter { !it.isSplit }) {
+            p = Paint(Paint.ANTI_ALIAS_FLAG)
+            p.color = colours[colourCount]
+            p.style = Paint.Style.FILL
+            paints[stitch] = p
+            colourCount++
         }
         return paints
     }
