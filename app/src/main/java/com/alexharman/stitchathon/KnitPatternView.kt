@@ -6,13 +6,13 @@ import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
-import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import java.util.*
 
 
 class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var knitPatternDrawer: KnitPatternDrawer? = null
+    private val backgroundColor = 0xFF808080
 
     private var fitPatternWidth = true
     private var viewHeight: Int = 0
@@ -131,9 +131,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
     private fun updateCurrentView() {
         val canvas = Canvas(currentView)
-        if (viewWidth > patternDstRectangle!!.width() || viewHeight > patternDstRectangle!!.height()) {
-            canvas.drawARGB(0xFF, 0xFF, 0xFF, 0xFF)
-        }
+        canvas.drawColor(backgroundColor)
         canvas.drawBitmap(knitPatternDrawer?.patternBitmap, patternSrcRectangle, patternDstRectangle!!, bitmapToDrawPaint)
         invalidate()
     }
@@ -201,4 +199,8 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
             return true
         }
     }
+}
+
+private fun Canvas.drawColor(color: Long) {
+    drawColor(color.toInt())
 }

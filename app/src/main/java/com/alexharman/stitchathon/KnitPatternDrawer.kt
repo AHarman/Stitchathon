@@ -6,13 +6,11 @@ import com.alexharman.stitchathon.KnitPackage.Stitch
 import java.util.*
 
 class KnitPatternDrawer(private val knitPattern: KnitPattern) {
-    // So far only built for two-color double knits.
     private val stitchSize = 10f
     private val stitchPad = 2f
 
     // TODO: Create colour changer and pass this in from preferences
-    private val backgroundColor = -0x7f7f80
-    private var colours = intArrayOf(-0x10000, -0xffff01, -0xff0100)
+    private var colours = longArrayOf(0xFFFF0000, 0xFF0000FF, 0xFF00FF00)
 
     private var stitchBitmaps: HashMap<Stitch, Bitmap>
     private var stitchPaints: HashMap<Stitch, Paint>
@@ -34,7 +32,7 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern) {
         val bitmapHeight = (knitPattern.numRows * stitchSize + (knitPattern.numRows + 1) * stitchPad).toInt()
         val bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_4444)
         val canvas = Canvas(bitmap)
-        canvas.drawColor(backgroundColor)
+        canvas.drawARGB(0x00, 1, 2, 3)
         drawPattern(canvas, knitPattern)
         return bitmap
     }
@@ -88,7 +86,7 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern) {
 
         for (stitch in stitches.filter { !it.isSplit }) {
             p = Paint(Paint.ANTI_ALIAS_FLAG)
-            p.color = colours[colourCount]
+            p.color = colours[colourCount].toInt()
             p.style = Paint.Style.FILL
             paints[stitch] = p
             colourCount++
