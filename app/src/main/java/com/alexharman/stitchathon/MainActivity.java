@@ -33,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -148,7 +149,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-
     void selectInternalPattern() {
         Intent intent = new Intent(this, OpenPattern.class);
         startActivityForResult(intent, OPEN_INTERNAL_PATTERN);
@@ -197,11 +197,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void openPattern(String patternName) {
-        new OpenPatternTask().execute(patternName);
+        new OpenPatternTask(this).execute(patternName);
     }
 
     private void importJson(Uri uri) {
-        new ImportJsonTask().execute(uri);
+        new ImportJsonTask(this).execute(uri);
     }
 
     private void savePattern() {
@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onImportImageDialogOK(@NonNull Uri uri, @NonNull String name, int width, int height, int numColours) {
-        new ImportImageTask(uri, name, width, height, numColours).execute();
+        new ImportImageTask(this, uri, name, width, height, numColours).execute();
     }
 
     private static class SavePatternChangesTask extends AsyncTask<KnitPattern, Void, Void> {
@@ -242,21 +242,26 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class OpenPatternTask extends AsyncTask<String, String, KnitPattern> {
+    private static class OpenPatternTask extends AsyncTask<String, String, KnitPattern> {
         private ProgressbarDialog progressbarDialog;
         private Bitmap patternBitmap;
+        private WeakReference<MainActivity> context;
+
+        OpenPatternTask(MainActivity context) {
+            this.context = new WeakReference<>(context);
+        }
 
         @Override
         protected void onPreExecute() {
-            progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_load_title), true, getString(R.string.progress_bar_loading_pattern));
-            progressbarDialog.show(getSupportFragmentManager(), "Opening");
+            progressbarDialog = ProgressbarDialog.newInstance(context.get().getString(R.string.progress_dialog_load_title), true, context.get().getString(R.string.progress_bar_loading_pattern));
+            progressbarDialog.show(context.get().getSupportFragmentManager(), "Opening");
         }
 
         @Override
         protected KnitPattern doInBackground(String... strings) {
-            KnitPattern knitPattern = db.knitPatternDao().getKnitPattern(strings[0], getApplicationContext());
-            publishProgress(getString(R.string.progress_bar_creating_bitmap));
-            patternBitmap = patternView.createPatternBitmap(knitPattern);
+            KnitPattern knitPattern = db.knitPatternDao().getKnitPattern(strings[0], context.get().getApplicationContext());
+            publishProgress(context.get().getString(R.string.progress_bar_creating_bitmap));
+            patternBitmap = context.get().patternView.createPatternBitmap(knitPattern);
             return knitPattern;
         }
 
@@ -269,13 +274,16 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(KnitPattern knitPattern) {
             super.onPostExecute(knitPattern);
             if (knitPattern != null) {
-                setKnitPattern(knitPattern, patternBitmap);
+                context.get().setKnitPattern(knitPattern, patternBitmap);
             }
             progressbarDialog.dismiss();
         }
     }
 
-    private class ImportJsonTask extends ImportPatternTask<Uri> {
+    private static class ImportJsonTask extends ImportPatternTask<Uri> {
+        ImportJsonTask(MainActivity context) {
+            super(context);
+        }
 
         @Override
         protected KnitPattern doInBackground(Uri... uris) {
@@ -296,7 +304,7 @@ public class MainActivity extends AppCompatActivity
         private String readTextFile(Uri uri) {
             StringBuilder stringBuilder = new StringBuilder();
             try {
-                InputStream inputStream = getContentResolver().openInputStream(uri);
+                InputStream inputStream = context.get().getContentResolver().openInputStream(uri);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -311,7 +319,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class ImportImageTask extends ImportPatternTask<Void> {
+    private static class ImportImageTask extends ImportPatternTask<Void> {
         private Uri imageUri;
         private String patternName;
         private int width;
@@ -319,7 +327,8 @@ public class MainActivity extends AppCompatActivity
         private int numColours;
         private Bitmap sourceImg;
 
-        ImportImageTask(Uri uri, String name, int width, int height, int numColours) {
+        ImportImageTask(MainActivity context, Uri uri, String name, int width, int height, int numColours) {
+            super(context);
             this.imageUri = uri;
             this.patternName = name;
             this.width = width;
@@ -343,7 +352,7 @@ public class MainActivity extends AppCompatActivity
             BitmapFactory.Options opts = new BitmapFactory.Options();
             opts.inMutable = true;
             try {
-                InputStream inputStream = getContentResolver().openInputStream(uri);
+                InputStream inputStream = context.get().getContentResolver().openInputStream(uri);
                 bitmap = BitmapFactory.decodeStream(inputStream, null, opts);
                 inputStream.close();
             } catch (Exception e) {
@@ -353,21 +362,26 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private abstract class ImportPatternTask<V> extends AsyncTask<V, String, KnitPattern> {
+    private static abstract class ImportPatternTask<V> extends AsyncTask<V, String, KnitPattern> {
         ProgressbarDialog progressbarDialog;
         private Bitmap patternBitmap;
+        WeakReference<MainActivity> context;
+
+        ImportPatternTask(MainActivity context) {
+            this.context = new WeakReference<>(context);
+        }
 
         @Override
         protected void onPreExecute() {
-            progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_import_title), true, getString(R.string.progress_bar_importing_pattern));
-            progressbarDialog.show(getSupportFragmentManager(), "Importing image");
+            progressbarDialog = ProgressbarDialog.newInstance(context.get().getString(R.string.progress_dialog_import_title), true, context.get().getString(R.string.progress_bar_importing_pattern));
+            progressbarDialog.show(context.get().getSupportFragmentManager(), "Importing image");
         }
 
         void saveNewPattern(@NonNull KnitPattern knitPattern) {
-            publishProgress(getString(R.string.progress_bar_creating_bitmap));
-            patternBitmap = patternView.createPatternBitmap(knitPattern);
-            publishProgress(getString(R.string.progress_bar_saving_pattern));
-            db.knitPatternDao().saveNewPattern(knitPattern, ThumbnailUtils.extractThumbnail(patternBitmap, 200, 200), getApplicationContext());
+            publishProgress(context.get().getString(R.string.progress_bar_creating_bitmap));
+            patternBitmap = context.get().patternView.createPatternBitmap(knitPattern);
+            publishProgress(context.get().getString(R.string.progress_bar_saving_pattern));
+            db.knitPatternDao().saveNewPattern(knitPattern, ThumbnailUtils.extractThumbnail(patternBitmap, 200, 200), context.get().getApplicationContext());
         }
 
         protected void onProgressUpdate(String... values) {
@@ -378,7 +392,7 @@ public class MainActivity extends AppCompatActivity
         protected void onPostExecute(KnitPattern pattern) {
             super.onPostExecute(pattern);
             if (pattern != null) {
-                setKnitPattern(pattern, patternBitmap);
+                context.get().setKnitPattern(pattern, patternBitmap);
             }
             progressbarDialog.dismiss();
         }
