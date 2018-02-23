@@ -100,7 +100,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
         if (id == R.id.nav_open) {
             selectInternalPattern();
         } else if (id == R.id.nav_import_pattern) {
@@ -109,7 +108,6 @@ public class MainActivity extends AppCompatActivity
             importImage();
         }
 
-        item.setChecked(false);
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
