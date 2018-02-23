@@ -50,8 +50,8 @@ class ImportImageDialog: DialogFragment() {
         numberPicker.value = 2
         numberPicker.wrapSelectorWheel = false
 
-        dialogView.findViewById<EditText>(R.id.stitches_wide_edittext).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v, hf) })
-        dialogView.findViewById<EditText>(R.id.stitches_high_edittext).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v, hf) })
+        dialogView.findViewById<EditText>(R.id.stitches_wide_edittext).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v as EditText, hf) })
+        dialogView.findViewById<EditText>(R.id.stitches_high_edittext).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v as EditText, hf) })
         dialogView.findViewById<Button>(R.id.import_image_browse_button).setOnClickListener( { (activity as MainActivity).selectExternalFile("image/*", READ_EXTERNAL_IMAGE)})
 
         builder.setView(dialogView)
@@ -66,10 +66,10 @@ class ImportImageDialog: DialogFragment() {
         return dialog
     }
 
-    private fun emptyTextCheck(v: View, hasFocus: Boolean) {
-        if (!hasFocus && (v as EditText).text.trim().isEmpty()) {
+    private fun emptyTextCheck(v: EditText, hasFocus: Boolean) {
+        if (!hasFocus && v.text.trim().isEmpty()) {
             v.error = getString(R.string.empty_string_error)
-        } else if (!(v as EditText).text.trim().isEmpty()) {
+        } else if (!v.text.trim().isEmpty()) {
             v.error = null
         }
     }
@@ -80,7 +80,7 @@ class ImportImageDialog: DialogFragment() {
         val widthView = dialogView.findViewById(R.id.stitches_wide_edittext) as EditText
         val width = widthView.text.toString().toIntOrNull()
         val heightView = dialogView.findViewById(R.id.stitches_high_edittext) as EditText
-        val height = widthView.text.toString().toIntOrNull()
+        val height = heightView.text.toString().toIntOrNull()
         val numPicker = dialogView.findViewById(R.id.import_image_numpicker) as NumberPicker
         val numColours = numPicker.value
         var formNotFull = false
