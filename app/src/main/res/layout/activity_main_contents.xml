@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:contextRef="com.alexharman.stitchathon.MainActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.alexharman.stitchathon.KnitPatternView
+            android:id="@+id/knitView"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_above="@+id/bottom_section"/>
+        <LinearLayout
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentBottom="true"
+            android:id="@id/bottom_section">
+            <LinearLayout
+                android:id="@+id/pattern_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp">
+                <TextView
+                    style="@android:style/TextAppearance.DeviceDefault.Medium"
+                    android:id="@+id/stitch_counter"
+                    android:text="@string/stitch_counter"
+                    android:textAlignment="textStart"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"/>
+                <TextView
+                    style="@android:style/TextAppearance.DeviceDefault.Medium"
+                    android:id="@+id/row_counter"
+                    android:text="@string/row_counter"
+                    android:textAlignment="textStart"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"/>
+                <TextView
+                    style="@android:style/TextAppearance.DeviceDefault.Medium"
+                    android:id="@+id/complete_counter"
+                    android:text="@string/complete_counter"
+                    android:textAlignment="textStart"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"/>
+            </LinearLayout>
+            <LinearLayout
+                style="?android:attr/buttonBarStyle"
+                android:id="@+id/bottom_buttons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:id="@+id/increment_row_button"
+                    android:text="@string/increment_row_button"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"/>
+                <Button
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:id="@+id/undo_button"
+                    android:text="@string/undo_button"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+</LinearLayout>
