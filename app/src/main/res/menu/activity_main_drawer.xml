@@ -1,41 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/open_pattern_group">
         <item
             android:id="@+id/nav_open"
             android:icon="@drawable/ic_folder_black_24dp"
-            android:title="@string/open_pattern"
-            android:checkable="false" />
+            android:title="@string/open_pattern" />
         <item
             android:id="@+id/nav_import_pattern"
             android:icon="@drawable/ic_create_new_folder_black_24dp"
-            android:title="@string/import_pattern"
-            android:checkable="false" />
+            android:title="@string/import_pattern" />
         <item
             android:id="@+id/nav_import_image"
             android:icon="@drawable/ic_image_black_24dp"
-            android:title="@string/import_image"
-            android:checkable="false" />
+            android:title="@string/import_image" />
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Tools"
+            android:title="Tools" />
+    </group>
+    <group
+        android:id="@+id/misc_options_group">
+        <item
+            android:id="@+id/nav_share"
+            android:icon="@drawable/ic_menu_share"
+            android:title="Share"
+            android:checkable="false" />
+        <item
+            android:id="@+id/nav_send"
+            android:icon="@drawable/ic_menu_send"
+            android:title="Send"
             android:checkable="false" />
     </group>
-
-    <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share"
-                android:checkable="false" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send"
-                android:checkable="false" />
-        </menu>
-    </item>
 </menu>
