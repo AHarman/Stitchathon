@@ -1,7 +1,6 @@
 package com.alexharman.stitchathon;
 
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -110,11 +109,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_about_app) {
             new AppInfoDialog().show(getSupportFragmentManager(), "App info");
         } else if (id == R.id.nav_settings) {
-            getFragmentManager().beginTransaction()
-                    .addToBackStack(null)
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .replace(android.R.id.content, new SettingsFragment())
-                    .commit();
+            openOptions();
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -160,6 +155,11 @@ public class MainActivity extends AppCompatActivity
     void selectInternalPattern() {
         Intent intent = new Intent(this, OpenPattern.class);
         startActivityForResult(intent, OPEN_INTERNAL_PATTERN);
+    }
+
+    void openOptions() {
+        Intent intent = new Intent(this, AppOptionsActivity.class);
+        startActivity(intent);
     }
 
     void selectExternalFile(String type, int requestCode) {
