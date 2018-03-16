@@ -38,5 +38,17 @@
     <string name="app_info_text">This app uses <a href="https://github.com/jaredrummler/ColorPicker">Color Picker</a> created by Jared Rummler, licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>.\n\nThe app itself was created by Alexander Harman</string>
     <string name="about_app_title">About this app</string>
     <string name="about_app">About app</string>
+
     <string name="app_options">App Options</string>
+    <string name="options_bg_colour_title">Background Colour</string>
+    <string name="options_stitch_colour_title_1">Stitch Colour 1</string>
+    <string name="options_stitch_colour_title_2">Stitch Colour 2</string>
+    <string name="options_stitch_colour_title_3">Stitch Colour 3</string>
+    <string name="app_options_stitch_options_title">Stitch options</string>
+    <string name="app_options_stitch_size_title">Stitch size</string>
+    <string name="app_options_stitch_pad_title">Stitch padding</string>
+    <string name="app_options_stitch_pad_summary">Space between stitches</string>
+    <string name="app_options_colour_options_title">Pattern colours</string>
+    <string name="app_options_other_options_title">Other options</string>
+    <string name="app_options_delete_all_title">Clear patterns</string>
 </resources>
