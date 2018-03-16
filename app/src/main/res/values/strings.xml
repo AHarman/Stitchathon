@@ -47,8 +47,15 @@
     <string name="app_options_stitch_options_title">Stitch options</string>
     <string name="app_options_stitch_size_title">Stitch size</string>
     <string name="app_options_stitch_pad_title">Stitch padding</string>
-    <string name="app_options_stitch_pad_summary">Space between stitches</string>
     <string name="app_options_colour_options_title">Pattern colours</string>
     <string name="app_options_other_options_title">Other options</string>
     <string name="app_options_delete_all_title">Clear patterns</string>
+    <string name="app_options_stitch_size_key">stitch_size</string>
+    <string name="app_options_stitch_pad_key">stitch_padding</string>
+    <string name="app_options_bg_colour_key">bg_colour</string>
+    <string name="app_options_stitch_colour_key_1">colour_1</string>
+    <string name="app_options_stitch_colour_key_2">colour_2</string>
+    <string name="app_options_stitch_colour_key_3">colour_3</string>
+    <string name="app_options_delete_all_key">delete_all</string>
+    <string name="app_options_delete_all_summary">Delete every pattern stored on device</string>
 </resources>

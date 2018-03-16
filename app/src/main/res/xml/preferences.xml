@@ -3,40 +3,40 @@
     <PreferenceCategory
         android:title="@string/app_options_stitch_options_title">
         <EditTextPreference
-            android:defaultValue="10"
-            android:key="app_options_stitch_size"
+            android:defaultValue="@integer/default_stitch_size"
+            android:key="@string/app_options_stitch_size_key"
             android:title="@string/app_options_stitch_size_title"
             android:inputType="numberDecimal" />
         <EditTextPreference
-            android:defaultValue="2"
-            android:key="app_options_stitch_padding"
+            android:defaultValue="@integer/default_stitch_pad"
+            android:key="@string/app_options_stitch_pad_key"
             android:title="@string/app_options_stitch_pad_title"
-            android:summary="@string/app_options_stitch_pad_summary"
             android:inputType="numberDecimal" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/app_options_colour_options_title">
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_pattern_background_colour"
-            android:key="app_options_background_colour"
+            android:key="@string/app_options_bg_colour_key"
             android:title="@string/options_bg_colour_title" />
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_stitch_colour_1"
-            android:key="app_options_stitch_colour_1"
+            android:key="@string/app_options_stitch_colour_key_1"
             android:title="@string/options_stitch_colour_title_1" />
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_stitch_colour_2"
-            android:key="app_options_stitch_colour_2"
+            android:key="@string/app_options_stitch_colour_key_2"
             android:title="@string/options_stitch_colour_title_2" />
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_stitch_colour_3"
-            android:key="app_options_stitch_colour_3"
+            android:key="@string/app_options_stitch_colour_key_3"
             android:title="@string/options_stitch_colour_title_3" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/app_options_other_options_title">
         <Preference
             android:title="@string/app_options_delete_all_title"
-            android:summary="Delete every pattern stored on device" />
+            android:summary="@string/app_options_delete_all_summary"
+            android:key="@string/app_options_delete_all_key"/>
     </PreferenceCategory>
 </PreferenceScreen>
