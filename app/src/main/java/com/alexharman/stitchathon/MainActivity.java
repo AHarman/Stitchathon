@@ -3,6 +3,7 @@ package com.alexharman.stitchathon;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -37,7 +38,7 @@ import java.lang.ref.WeakReference;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        ImportImageDialog.ImportImageDialogListener{
+        ImportImageDialog.ImportImageDialogListener {
 
     private TextView stitchCount;
     private TextView rowCount;
@@ -46,6 +47,8 @@ public class MainActivity extends AppCompatActivity
     private KnitPatternView patternView;
     private ImportImageDialog importImageDialog;
     private static AppDatabase db;
+    private OnSharedPreferenceChangeListener preferenceListener = new MySharedPreferenceListener();
+
 
     static final int READ_EXTERNAL_IMAGE = 42;
     static final int READ_EXTERNAL_JSON_PATTERN = 55;
@@ -59,7 +62,8 @@ public class MainActivity extends AppCompatActivity
         db = AppDatabase.Companion.getAppDatabase(getApplicationContext());
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceListener);
         String patternName = sharedPreferences.getString("pattern", null);
         if (patternName != null) {
             openPattern(patternName);
@@ -172,6 +176,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void updateStitchCounter() {
+        if (knitPattern == null) {
+            stitchCount.setText("");
+            rowCount.setText("");
+            completeCount.setText("");
+            return;
+        }
         String s = getString(R.string.stitch_counter) + knitPattern.getStitchesDoneInRow();
         stitchCount.setText(s);
         s = getString(R.string.row_counter) + (knitPattern.getCurrentRow() + 1);
@@ -188,12 +198,25 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void setKnitPattern(@NonNull KnitPattern knitPattern) {
+        setKnitPattern(knitPattern, new KnitPatternDrawer(knitPattern));
+    }
+
     private void setKnitPattern(@NonNull KnitPattern knitPattern, @NonNull KnitPatternDrawer knitPatternDrawer) {
         this.knitPattern = knitPattern;
         patternView.setPattern(knitPatternDrawer);
         updateStitchCounter();
-        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
         editor.putString("pattern", knitPattern.getName());
+        editor.apply();
+    }
+
+    private void clearKnitPattern() {
+        this.knitPattern = null;
+        patternView.clearPattern();
+        updateStitchCounter();
+        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+        editor.remove("pattern");
         editor.apply();
     }
 
@@ -202,7 +225,7 @@ public class MainActivity extends AppCompatActivity
         importImageDialog.show(getSupportFragmentManager(), "Importing image");
     }
 
-    private void openPattern(String patternName) {
+    private void openPattern(@NonNull String patternName) {
         new OpenPatternTask(this).execute(patternName);
     }
 
@@ -401,6 +424,17 @@ public class MainActivity extends AppCompatActivity
                 context.get().setKnitPattern(pattern, knitPatternDrawer);
             }
             progressbarDialog.dismiss();
+        }
+    }
+
+    private class MySharedPreferenceListener implements OnSharedPreferenceChangeListener {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals("pattern") && sharedPreferences.contains("pattern")) {
+                setKnitPattern(knitPattern);
+            } else if(key.equals("pattern")) {
+                clearKnitPattern();
+            }
         }
     }
 }

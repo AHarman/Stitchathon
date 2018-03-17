@@ -15,6 +15,7 @@ import java.io.InputStreamReader
 
 @Dao
 abstract class KnitPatternDao {
+
     fun savePatternChanges(knitPattern: KnitPattern) {
         insertKnitPatternEntity(KnitPatternEntity(knitPattern))
     }
@@ -39,6 +40,20 @@ abstract class KnitPatternDao {
         val hashmap = HashMap<String, Bitmap>()
         selectAllKnitPatterns().forEach { kpe: KnitPatternEntity -> hashmap[kpe.name] = readBitmapFromFile(kpe.thumbnailFilePath, context) }
         return hashmap
+    }
+
+    @Transaction
+    open fun deleteAllPatterns(context: Context) {
+        val kpes = selectAllKnitPatterns()
+        for (kpe in kpes) {
+            deleteFiles(context, kpe)
+            deleteKPE(kpe)
+        }
+    }
+
+    private fun deleteFiles(context: Context, kpe: KnitPatternEntity) {
+        File(context.filesDir, kpe.stitchesFilePath).delete()
+        File(context.filesDir, kpe.thumbnailFilePath).delete()
     }
 
     private fun writeStitchesToFile(knitPattern: KnitPattern, path: String, context: Context) {
@@ -102,7 +117,7 @@ abstract class KnitPatternDao {
     internal abstract fun insertKnitPatternEntity(knitPatternEntity: KnitPatternEntity)
 
     @Delete
-    internal abstract fun delete(knitPatternEntity: KnitPatternEntity)
+    internal abstract fun deleteKPE(knitPatternEntity: KnitPatternEntity)
 
     @Query("SELECT name FROM pattern_info;")
     abstract fun getPatternNames(): Array<String>

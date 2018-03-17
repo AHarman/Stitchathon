@@ -6,5 +6,5 @@
     <color name="default_pattern_background_colour">#FFFFFFFF</color>
     <color name="default_stitch_colour_1">#FFFF0000</color>
     <color name="default_stitch_colour_2">#FF0000FF</color>
-    <color name="default_stitch_colour_3">#FF00FFFF</color>
+    <color name="default_stitch_colour_3">#FF00BF00</color>
 </resources>

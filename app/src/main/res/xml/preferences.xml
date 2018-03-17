@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
         android:title="@string/app_options_stitch_options_title">
         <EditTextPreference
@@ -18,25 +19,34 @@
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_pattern_background_colour"
             android:key="@string/app_options_bg_colour_key"
-            android:title="@string/options_bg_colour_title" />
+            android:title="@string/options_bg_colour_title"
+            app:cpv_colorShape="square" />
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_stitch_colour_1"
             android:key="@string/app_options_stitch_colour_key_1"
-            android:title="@string/options_stitch_colour_title_1" />
+            android:title="@string/options_stitch_colour_title_1"
+            app:cpv_colorShape="square" />
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_stitch_colour_2"
             android:key="@string/app_options_stitch_colour_key_2"
-            android:title="@string/options_stitch_colour_title_2" />
+            android:title="@string/options_stitch_colour_title_2"
+            app:cpv_colorShape="square" />
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_stitch_colour_3"
             android:key="@string/app_options_stitch_colour_key_3"
-            android:title="@string/options_stitch_colour_title_3" />
+            android:title="@string/options_stitch_colour_title_3"
+            app:cpv_colorShape="square" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/app_options_other_options_title">
         <Preference
             android:title="@string/app_options_delete_all_title"
             android:summary="@string/app_options_delete_all_summary"
-            android:key="@string/app_options_delete_all_key"/>
+            android:key="@string/app_options_delete_all_key" />
+        <Preference
+            android:title="@string/app_options_reset_prefs_title"
+            android:summary="@string/app_options_reset_prefs_summary"
+            android:key="@string/app_options_reset_prefs_key">
+        </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

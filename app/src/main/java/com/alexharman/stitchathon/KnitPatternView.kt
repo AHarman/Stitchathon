@@ -124,6 +124,12 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         }
     }
 
+    fun clearPattern() {
+        this.knitPatternDrawer = null
+        Canvas(currentView).drawColor(backgroundColor)
+        invalidate()
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawBitmap(currentView, 0f, 0f, null)
