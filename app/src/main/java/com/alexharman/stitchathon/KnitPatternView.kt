@@ -1,7 +1,9 @@
 package com.alexharman.stitchathon
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.*
+import android.preference.PreferenceManager
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -11,8 +13,11 @@ import java.util.*
 
 class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
+    private var backgroundColor: Int = 0
+        @JvmName("_getBackgroundColour") get() {return field}
+        @JvmName("_setBackgroundColour") set(color) { field = color }
+
     private var knitPatternDrawer: KnitPatternDrawer? = null
-    private val backgroundColor = 0xFF808080
 
     private var fitPatternWidth = true
     private var viewHeight: Int = 0
@@ -25,11 +30,16 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     private var patternSrcRectangle: Rect? = null
 
     private val mGestureDetector: GestureDetector
+    private val preferenceListener = MySharedPreferenceListener()
+
     private val undoStack = Stack<Int>()
 
     private lateinit var currentView: Bitmap
 
     init {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        prefs.registerOnSharedPreferenceChangeListener(preferenceListener)
+        backgroundColor = prefs.getInt(context.getString(R.string.app_options_bg_colour_key), 0xFFFFFFFF)
         mGestureDetector = GestureDetector(this.context, MyGestureListener())
         bitmapToDrawPaint = Paint()
         bitmapToDrawPaint.isAntiAlias = true
@@ -114,6 +124,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     }
 
     // TODO: maybe save paints and stitch bitmaps and pattern bitmaps to file or something.
+    // TODO: Move to kotlin's fancy setters
     fun setPattern(knitPatternDrawer: KnitPatternDrawer) {
         this.knitPatternDrawer = knitPatternDrawer
         if (viewWidth > 0) {
@@ -205,8 +216,21 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
             return true
         }
     }
+
+    inner class MySharedPreferenceListener: SharedPreferences.OnSharedPreferenceChangeListener {
+        override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+            if (key == context.getString(R.string.app_options_bg_colour_key)) {
+                backgroundColor = sharedPreferences.getInt(key,  backgroundColor)
+                updateCurrentView()
+            }
+        }
+    }
 }
 
 private fun Canvas.drawColor(color: Long) {
     drawColor(color.toInt())
+}
+
+private fun SharedPreferences.getInt(key: String, default: Long): Int {
+    return getInt(key, default.toInt())
 }
