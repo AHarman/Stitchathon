@@ -65,4 +65,5 @@
     <string name="delete_all_patterns_dialog_message">This operation can not be undone</string>
     <string name="reset_application_preferences_message">This operation can not be undone</string>
     <string name="reset_application_preferences_title">Reset application preferences</string>
+    <string name="open_pattern_title">Select pattern</string>
 </resources>
