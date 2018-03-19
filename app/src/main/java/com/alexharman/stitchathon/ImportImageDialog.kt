@@ -12,7 +12,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.NumberPicker
-import com.alexharman.stitchathon.MainActivity.READ_EXTERNAL_IMAGE
+import com.alexharman.stitchathon.MainActivity.Companion.READ_EXTERNAL_IMAGE
 
 /**
  * Created by Alex on 08/01/2018.
