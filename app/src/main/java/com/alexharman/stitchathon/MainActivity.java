@@ -57,14 +57,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         setUpUI();
 
-        db = AppDatabase.Companion.getAppDatabase(getApplicationContext());
-
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceListener);
         String patternName = sharedPreferences.getString("pattern", null);
+
+        db = AppDatabase.Companion.getAppDatabase(getApplicationContext());
         if (patternName != null) {
             openPattern(patternName);
         }
