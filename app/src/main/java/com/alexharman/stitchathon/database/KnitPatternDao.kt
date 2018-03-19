@@ -56,6 +56,10 @@ abstract class KnitPatternDao {
         File(context.filesDir, kpe.thumbnailFilePath).delete()
     }
 
+    open fun getThumbnail(context: Context, name: String): Bitmap {
+        return readBitmapFromFile(selectThumbnailFilePath(name), context)
+    }
+
     private fun writeStitchesToFile(knitPattern: KnitPattern, path: String, context: Context) {
         try {
             val outputStream = context.openFileOutput(path, Context.MODE_PRIVATE)
@@ -118,6 +122,9 @@ abstract class KnitPatternDao {
 
     @Delete
     internal abstract fun deleteKPE(knitPatternEntity: KnitPatternEntity)
+
+    @Query("SELECT thumbnailFilePath FROM pattern_info WHERE name LIKE :name")
+    internal abstract fun selectThumbnailFilePath(name: String): String
 
     @Query("SELECT name FROM pattern_info;")
     abstract fun getPatternNames(): Array<String>

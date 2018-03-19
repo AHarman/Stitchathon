@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -20,7 +19,6 @@ public class ProgressbarDialog extends DialogFragment {
     View dialogView;
 
     public static ProgressbarDialog newInstance(String title, boolean indeterminate, String label) {
-        Log.d("Dialog", "In newInstance");
         ProgressbarDialog fragment = new ProgressbarDialog();
         Bundle args = new Bundle();
         args.putString("title", title);
@@ -34,7 +32,6 @@ public class ProgressbarDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Log.d("Dialog", "In onCreateDialog");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         dialogView = inflater.inflate(R.layout.progress_dialog, null);
