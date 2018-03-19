@@ -118,7 +118,6 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         this.knitPatternDrawer = knitPatternDrawer
         if (viewWidth > 0) {
             updatePatternSrcRectangle()
-            updatePatternDstRectangle()
             currentView = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444)
             updateCurrentView()
         }

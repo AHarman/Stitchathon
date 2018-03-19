@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +31,7 @@ public class OpenPattern extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_pattern);
         gridView = findViewById(R.id.pattern_select_grid);
-        getNamesAndImages();
+        new GetNamesAndImagesTask(AppDatabase.Companion.getAppDatabase(getApplicationContext()), this).execute();
     }
 
     private void fillGrid(HashMap<String, Bitmap> thumbs) {
@@ -53,12 +52,6 @@ public class OpenPattern extends AppCompatActivity {
         super.onBackPressed();
         setResult(Activity.RESULT_CANCELED);
         finish();
-    }
-
-    // TODO: Get images. Not yet implemented with Room
-    private void getNamesAndImages() {
-        Log.d("Opening", "in getNamesAndImages");
-        new GetNamesAndImagesTask(AppDatabase.Companion.getAppDatabase(getApplicationContext()), this).execute();
     }
 
     private static class GetNamesAndImagesTask extends AsyncTask<Void, Void, HashMap<String, Bitmap>> {
