@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     void selectInternalPattern() {
-        Intent intent = new Intent(this, OpenPattern.class);
+        Intent intent = new Intent(this, OpenPatternActivity.class);
         startActivityForResult(intent, OPEN_INTERNAL_PATTERN);
     }
 

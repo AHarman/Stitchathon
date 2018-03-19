@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OpenPattern extends AppCompatActivity {
+public class OpenPatternActivity extends AppCompatActivity {
     GridView gridView;
 
     @Override
@@ -56,9 +56,9 @@ public class OpenPattern extends AppCompatActivity {
 
     private static class GetNamesAndImagesTask extends AsyncTask<Void, Void, HashMap<String, Bitmap>> {
         private AppDatabase db;
-        private WeakReference<OpenPattern> context;
+        private WeakReference<OpenPatternActivity> context;
 
-        GetNamesAndImagesTask(AppDatabase db, OpenPattern context) {
+        GetNamesAndImagesTask(AppDatabase db, OpenPatternActivity context) {
             this.db = db;
             this.context = new WeakReference<>(context);
         }
