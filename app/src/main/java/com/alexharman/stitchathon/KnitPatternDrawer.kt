@@ -1,17 +1,16 @@
 package com.alexharman.stitchathon
 
+import android.content.Context
 import android.graphics.*
+import android.preference.PreferenceManager
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import java.util.*
 
-class KnitPatternDrawer(private val knitPattern: KnitPattern) {
-    private val stitchSize = 10f
-    private val stitchPad = 2f
-
-    // TODO: Create colour changer and pass this in from preferences
-    private var colours = longArrayOf(0xFFFF0000, 0xFF0000FF, 0xFF00FF00)
-
+class KnitPatternDrawer(private val knitPattern: KnitPattern, context: Context) {
+    private val stitchSize: Float
+    private val stitchPad: Float
+    private val colours: IntArray
     private var stitchBitmaps: HashMap<Stitch, Bitmap>
     private var stitchPaints: HashMap<Stitch, Paint>
     private var doneOverlayPaint: Paint
@@ -19,6 +18,14 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern) {
         private set
 
     init {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        colours = IntArray(3)
+        colours[0] = prefs.getInt(context.getString(R.string.app_options_stitch_colour_key_1), -1)
+        colours[1] = prefs.getInt(context.getString(R.string.app_options_stitch_colour_key_2), -1)
+        colours[2] = prefs.getInt(context.getString(R.string.app_options_stitch_colour_key_3), -1)
+        stitchSize = prefs.getString(context.getString(R.string.app_options_stitch_size_key), "").toFloat()
+        stitchPad = prefs.getString(context.getString(R.string.app_options_stitch_pad_key), "").toFloat()
+
         stitchPaints = createStitchPaints(knitPattern.stitchTypes)
         doneOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         doneOverlayPaint.style = Paint.Style.FILL
@@ -86,7 +93,7 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern) {
 
         for (stitch in stitches.filter { !it.isSplit }) {
             p = Paint(Paint.ANTI_ALIAS_FLAG)
-            p.color = colours[colourCount].toInt()
+            p.color = colours[colourCount]
             p.style = Paint.Style.FILL
             paints[stitch] = p
             colourCount++

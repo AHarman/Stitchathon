@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setKnitPattern(@NonNull KnitPattern knitPattern) {
-        setKnitPattern(knitPattern, new KnitPatternDrawer(knitPattern));
+        setKnitPattern(knitPattern, new KnitPatternDrawer(knitPattern, this));
     }
 
     private void setKnitPattern(@NonNull KnitPattern knitPattern, @NonNull KnitPatternDrawer knitPatternDrawer) {
@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity
         protected KnitPattern doInBackground(String... strings) {
             KnitPattern knitPattern = db.knitPatternDao().getKnitPattern(strings[0], context.get().getApplicationContext());
             publishProgress(context.get().getString(R.string.progress_bar_creating_bitmap));
-            knitPatternDrawer = new KnitPatternDrawer(knitPattern);
+            knitPatternDrawer = new KnitPatternDrawer(knitPattern, context.get());
             return knitPattern;
         }
 
@@ -408,7 +408,7 @@ public class MainActivity extends AppCompatActivity
 
         void saveNewPattern(@NonNull KnitPattern knitPattern) {
             publishProgress(context.get().getString(R.string.progress_bar_creating_bitmap));
-            knitPatternDrawer = new KnitPatternDrawer(knitPattern);
+            knitPatternDrawer = new KnitPatternDrawer(knitPattern, context.get());
             publishProgress(context.get().getString(R.string.progress_bar_saving_pattern));
             db.knitPatternDao().saveNewPattern(knitPattern, ThumbnailUtils.extractThumbnail(knitPatternDrawer.getPatternBitmap(), 200, 200), context.get().getApplicationContext());
         }
