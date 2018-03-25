@@ -6,10 +6,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.ThumbnailUtils
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.NavigationView
@@ -24,18 +22,16 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
-import com.alexharman.stitchathon.KnitPackage.KnitPatternParser
 import com.alexharman.stitchathon.database.AppDatabase
-import org.json.JSONException
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
-import java.lang.ref.WeakReference
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.ImportImageTask
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.ImportJsonTask
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.OpenPatternTask
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.SavePatternChangesTask
 
 class MainActivity :
         AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
-        ImportImageDialog.ImportImageDialogListener {
+        ImportImageDialog.ImportImageDialogListener, com.alexharman.stitchathon.databaseAccessAsyncTasks.OpenPattern {
 
     private lateinit var stitchCount: TextView
     private lateinit var rowCount: TextView
@@ -46,7 +42,7 @@ class MainActivity :
     private val preferenceListener = MySharedPreferenceListener()
 
     companion object {
-        private lateinit var db: AppDatabase
+        internal lateinit var db: AppDatabase
         const val READ_EXTERNAL_IMAGE = 42
         const val READ_EXTERNAL_JSON_PATTERN = 55
         const val OPEN_INTERNAL_PATTERN = 1234
@@ -107,6 +103,10 @@ class MainActivity :
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onPatternReturned(knitPattern: KnitPattern, knitPatternDrawer: KnitPatternDrawer, thumbnail: Bitmap) {
+        setKnitPattern(knitPattern, knitPatternDrawer, thumbnail)
     }
 
     private fun setUpUI() {
@@ -200,11 +200,11 @@ class MainActivity :
     }
 
     private fun openPattern(patternName: String) {
-        OpenPatternTask(this).execute(patternName)
+        OpenPatternTask(this, this).execute(patternName)
     }
 
     private fun importJson(uri: Uri?) {
-        ImportJsonTask(this).execute(uri)
+        ImportJsonTask(this, this).execute(uri)
     }
 
     private fun savePattern() {
@@ -231,138 +231,7 @@ class MainActivity :
     }
 
     override fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, numColours: Int) {
-        ImportImageTask(this, imageUri, name, width, height, numColours).execute()
-    }
-
-    private class SavePatternChangesTask : AsyncTask<KnitPattern, Void, Void>() {
-        override fun doInBackground(vararg knitPatterns: KnitPattern): Void? {
-            db.knitPatternDao().savePatternChanges(knitPatterns[0])
-            return null
-        }
-    }
-
-    private class OpenPatternTask(context: MainActivity) : AsyncTask<String, String, KnitPattern>() {
-        private var progressbarDialog = ProgressbarDialog.newInstance(context.getString(R.string.progress_dialog_load_title), true, context.getString(R.string.progress_bar_loading_pattern))
-        private lateinit var knitPatternDrawer: KnitPatternDrawer
-        private lateinit var thumbnail: Bitmap
-        private val context: WeakReference<MainActivity> = WeakReference(context)
-
-        override fun onPreExecute() {
-            progressbarDialog.show(context.get()!!.supportFragmentManager, "Opening")
-        }
-
-        override fun doInBackground(vararg strings: String): KnitPattern {
-            val knitPattern = db.knitPatternDao().getKnitPattern(strings[0], context.get()!!)
-            thumbnail = db.knitPatternDao().getThumbnail(context.get()!!, knitPattern.name)
-            publishProgress(context.get()!!.getString(R.string.progress_bar_creating_bitmap))
-            knitPatternDrawer = KnitPatternDrawer(knitPattern, context.get()!!)
-            return knitPattern
-        }
-
-        override fun onProgressUpdate(vararg values: String) {
-            progressbarDialog.updateText(values[0])
-        }
-
-        override fun onPostExecute(knitPattern: KnitPattern) {
-            super.onPostExecute(knitPattern)
-            context.get()!!.setKnitPattern(knitPattern, knitPatternDrawer, thumbnail)
-            progressbarDialog.dismiss()
-        }
-    }
-
-    private class ImportJsonTask(context: MainActivity) : ImportPatternTask<Uri>(context) {
-
-        override fun doInBackground(vararg uris: Uri): KnitPattern? {
-            var knitPattern: KnitPattern? = null
-            try {
-                knitPattern = KnitPatternParser.createKnitPattern(readTextFile(uris[0]))
-                saveNewPattern(knitPattern)
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-            return knitPattern
-        }
-
-        private fun readTextFile(uri: Uri): String {
-            val stringBuilder = StringBuilder()
-            try {
-                val inputStream = context.get()!!.contentResolver.openInputStream(uri)
-                val reader = BufferedReader(InputStreamReader(inputStream))
-                var line: String
-                while (true) {
-                    line = reader.readLine() ?: break
-                    stringBuilder.append(line)
-                }
-                inputStream.close()
-                reader.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-
-            return stringBuilder.toString()
-        }
-    }
-
-    private class ImportImageTask(context: MainActivity,
-                                  private val imageUri: Uri,
-                                  private val patternName: String,
-                                  private val width: Int,
-                                  private val height: Int,
-                                  private val numColours: Int) : ImportPatternTask<Void>(context) {
-
-        private lateinit var sourceImg: Bitmap
-
-        override fun doInBackground(vararg voids: Void): KnitPattern {
-            sourceImg = readImageFile(imageUri)!!
-            val knitPattern = ImageReader().readImage(sourceImg, patternName, width, height, numColours)
-            saveNewPattern(knitPattern)
-            return knitPattern
-        }
-
-        private fun readImageFile(uri: Uri): Bitmap? {
-            var bitmap: Bitmap? = null
-            val opts = BitmapFactory.Options()
-            opts.inMutable = true
-            try {
-                val inputStream = context.get()!!.contentResolver.openInputStream(uri)
-                bitmap = BitmapFactory.decodeStream(inputStream, null, opts)
-                inputStream.close()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            return bitmap
-        }
-    }
-
-    private abstract class ImportPatternTask<V> internal constructor(context: MainActivity) : AsyncTask<V, String, KnitPattern>() {
-        private var progressbarDialog = ProgressbarDialog.newInstance(context.getString(R.string.progress_dialog_import_title), true, context.getString(R.string.progress_bar_importing_pattern))
-        internal var context: WeakReference<MainActivity> = WeakReference(context)
-        private lateinit var knitPatternDrawer: KnitPatternDrawer
-        private lateinit var thumbnail: Bitmap
-
-        override fun onPreExecute() {
-            progressbarDialog.show(context.get()!!.supportFragmentManager, "Importing image")
-        }
-
-        internal fun saveNewPattern(knitPattern: KnitPattern) {
-            publishProgress(context.get()!!.getString(R.string.progress_bar_creating_bitmap))
-            knitPatternDrawer = KnitPatternDrawer(knitPattern, context.get()!!)
-            thumbnail = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)
-            publishProgress(context.get()!!.getString(R.string.progress_bar_saving_pattern))
-            db.knitPatternDao().saveNewPattern(knitPattern, thumbnail, context.get()!!)
-        }
-
-        override fun onProgressUpdate(vararg values: String) {
-            progressbarDialog.updateText(values[0])
-        }
-
-        override fun onPostExecute(pattern: KnitPattern?) {
-            super.onPostExecute(pattern)
-            if (pattern != null) {
-                context.get()!!.setKnitPattern(pattern, knitPatternDrawer, thumbnail)
-            }
-            progressbarDialog.dismiss()
-        }
+        ImportImageTask(this, this, imageUri, name, width, height, numColours).execute()
     }
 
     private inner class MySharedPreferenceListener : OnSharedPreferenceChangeListener {

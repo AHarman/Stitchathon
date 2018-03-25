@@ -3,9 +3,7 @@ package com.alexharman.stitchathon
 import android.app.AlertDialog
 import android.app.Dialog
 import android.app.DialogFragment
-import android.content.Context
 import android.content.SharedPreferences
-import android.os.AsyncTask
 import android.os.Bundle
 import android.preference.Preference.OnPreferenceClickListener
 import android.preference.PreferenceFragment
@@ -15,9 +13,8 @@ import android.support.v4.content.res.ResourcesCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.alexharman.stitchathon.database.AppDatabase
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.DeleteAllPatternsTask
 import com.jaredrummler.android.colorpicker.ColorPreference
-import java.lang.ref.WeakReference
 
 class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -100,7 +97,7 @@ class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferen
             val editor = PreferenceManager.getDefaultSharedPreferences(activity).edit()
             editor.remove("pattern")
             editor.apply()
-            DeleteAllAsyncTask(activity).execute()
+            DeleteAllPatternsTask(activity).execute()
         } else if (opcode == RESET_ALL_PREFS) {
             PreferenceManager.getDefaultSharedPreferences(activity)
                     .edit()
@@ -120,14 +117,5 @@ class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferen
                     .setPositiveButton(R.string.OK, { _, _ -> (targetFragment as SettingsFragment).onDialogConfirm(targetRequestCode) })
             return builder.create()
         }
-    }
-
-    private class DeleteAllAsyncTask(context: Context) : AsyncTask<Void, Void, Void>() {
-        var context: WeakReference<Context> = WeakReference(context)
-        override fun doInBackground(vararg params: Void): Void? {
-            AppDatabase.getAppDatabase(context.get()!!).knitPatternDao().deleteAllPatterns(context.get()!!)
-            return null
-        }
-
     }
 }

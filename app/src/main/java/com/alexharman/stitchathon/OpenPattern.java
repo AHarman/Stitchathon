@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -16,14 +15,16 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.alexharman.stitchathon.database.AppDatabase;
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.GetNamesAndImagesTask;
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.GetNamesAndThumbnails;
 
-import java.lang.ref.WeakReference;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OpenPattern extends AppCompatActivity {
+public class OpenPattern extends AppCompatActivity implements GetNamesAndThumbnails {
     GridView gridView;
 
     @Override
@@ -31,20 +32,7 @@ public class OpenPattern extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_pattern);
         gridView = findViewById(R.id.pattern_select_grid);
-        new GetNamesAndImagesTask(AppDatabase.Companion.getAppDatabase(getApplicationContext()), this).execute();
-    }
-
-    private void fillGrid(HashMap<String, Bitmap> thumbs) {
-        gridView.setAdapter(new MyAdaptor(this, thumbs));
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    int position, long id) {
-                Intent intent = new Intent();
-                intent.putExtra("patternName", (String) gridView.getAdapter().getItem(position));
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-            }
-        });
+        new GetNamesAndImagesTask(this, this).execute();
     }
 
     @Override
@@ -54,24 +42,18 @@ public class OpenPattern extends AppCompatActivity {
         finish();
     }
 
-    private static class GetNamesAndImagesTask extends AsyncTask<Void, Void, HashMap<String, Bitmap>> {
-        private AppDatabase db;
-        private WeakReference<OpenPattern> context;
-
-        GetNamesAndImagesTask(AppDatabase db, OpenPattern context) {
-            this.db = db;
-            this.context = new WeakReference<>(context);
-        }
-
-        @Override
-        protected HashMap<String, Bitmap> doInBackground(Void... voids) {
-            return db.knitPatternDao().getThumbnails(context.get());
-        }
-
-        @Override
-        protected void onPostExecute(HashMap<String, Bitmap> thumbs) {
-            context.get().fillGrid(thumbs);
-        }
+    @Override
+    public void onNamesAndThumbnailsReturn(@NotNull HashMap<String, Bitmap> map) {
+        gridView.setAdapter(new MyAdaptor(this, map));
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+                Intent intent = new Intent();
+                intent.putExtra("patternName", (String) gridView.getAdapter().getItem(position));
+                setResult(Activity.RESULT_OK, intent);
+                finish();
+            }
+        });
     }
 
     private class MyAdaptor extends BaseAdapter {
