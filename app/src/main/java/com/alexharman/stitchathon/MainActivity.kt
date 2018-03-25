@@ -169,17 +169,15 @@ class MainActivity :
             savePattern()
     }
 
-    private fun setKnitPattern(knitPattern: KnitPattern, knitPatternDrawer: KnitPatternDrawer, thumbnail: Bitmap?) {
+    private fun setKnitPattern(knitPattern: KnitPattern,
+                               knitPatternDrawer: KnitPatternDrawer = KnitPatternDrawer(knitPattern, this),
+                               thumbnail: Bitmap = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)) {
         this.knitPattern = knitPattern
         patternView.setPattern(knitPatternDrawer)
         updateStitchCounter()
         val editor = PreferenceManager.getDefaultSharedPreferences(this).edit()
         findViewById<TextView>(R.id.nav_drawer_pattern_name).setText(knitPattern.name)
-        if (thumbnail != null) {
-            findViewById<ImageView>(R.id.nav_drawer_image).setImageBitmap(thumbnail)
-        } else {
-            findViewById<ImageView>(R.id.nav_drawer_image).setImageResource(R.drawable.logo)
-        }
+        findViewById<ImageView>(R.id.nav_drawer_image).setImageBitmap(thumbnail)
 
         editor.putString("pattern", knitPattern.name)
         editor.apply()
@@ -188,6 +186,8 @@ class MainActivity :
     private fun clearKnitPattern() {
         this.knitPattern = null
         patternView.clearPattern()
+        findViewById<ImageView>(R.id.nav_drawer_image).setImageResource(R.drawable.logo)
+        findViewById<TextView>(R.id.nav_drawer_pattern_name).setText("")
         updateStitchCounter()
         getPreferences(Context.MODE_PRIVATE).edit()
                 .remove("pattern")
