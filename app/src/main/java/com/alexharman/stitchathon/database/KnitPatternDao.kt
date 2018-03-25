@@ -51,6 +51,13 @@ abstract class KnitPatternDao {
         }
     }
 
+    @Transaction
+    open fun deletePattern(name: String, context: Context) {
+        val kpe = selectKnitPattern(name)
+        deleteFiles(context, kpe)
+        deleteKPE(kpe)
+    }
+
     private fun deleteFiles(context: Context, kpe: KnitPatternEntity) {
         File(context.filesDir, kpe.stitchesFilePath).delete()
         File(context.filesDir, kpe.thumbnailFilePath).delete()

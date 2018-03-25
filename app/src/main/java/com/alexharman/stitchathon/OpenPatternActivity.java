@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.alexharman.stitchathon.database.AppDatabase;
+import com.alexharman.stitchathon.database.KnitPatternDao;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -73,13 +74,16 @@ public class OpenPatternActivity extends AppCompatActivity {
 
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                Log.d("Foo", "onActionItemClicked");
                 if (item.getItemId() == R.id.delete_button) {
-                    Log.d("Foo", "Pressed delete!");
                     SparseBooleanArray checked = gridView.getCheckedItemPositions();
+                    ArrayList<String> toBeDeleted = new ArrayList<>();
                     for (int i = 0; i < checked.size(); i++) {
-                        Log.d("Foo",  + checked.keyAt(i) + ": " + (checked.get(checked.keyAt(i)) ? "selected" : "not selected"));
+                        if (checked.get(checked.keyAt(i))) {
+                            toBeDeleted.add((String) gridView.getAdapter().getItem(checked.keyAt(i)));
+                            ((MyAdaptor)gridView.getAdapter()).removeItem(checked.keyAt(i));
+                        }
                     }
+                    new DeletePatternAsyncTask(OpenPatternActivity.this).execute(toBeDeleted.toArray(new String[]{}));
                     mode.finish();
                     return true;
                 }
@@ -91,7 +95,6 @@ public class OpenPatternActivity extends AppCompatActivity {
                 Log.d("Foo", "onDestroyActionMode");
             }
         });
-
     }
 
     private void fillGrid(HashMap<String, Bitmap> thumbs) {
@@ -122,6 +125,23 @@ public class OpenPatternActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(HashMap<String, Bitmap> thumbs) {
             context.get().fillGrid(thumbs);
+        }
+    }
+
+    private static class DeletePatternAsyncTask extends AsyncTask<String, Void, Void> {
+        WeakReference<OpenPatternActivity> context;
+
+        DeletePatternAsyncTask(OpenPatternActivity context) {
+            this.context = new WeakReference<>(context);
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            KnitPatternDao dao = AppDatabase.Companion.getAppDatabase(context.get()).knitPatternDao();
+            for (String name: strings) {
+                dao.deletePattern(name, context.get());
+            }
+            return null;
         }
     }
 
@@ -172,6 +192,12 @@ public class OpenPatternActivity extends AppCompatActivity {
             textView.setText(patternNames.get(position));
 
             return gridItem;
+        }
+
+        void removeItem(int position) {
+            patternNames.remove(position);
+            bitmaps.remove(position);
+            notifyDataSetChanged();
         }
     }
 }
