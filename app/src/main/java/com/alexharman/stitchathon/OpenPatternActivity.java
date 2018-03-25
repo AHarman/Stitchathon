@@ -7,10 +7,15 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
@@ -31,13 +36,13 @@ public class OpenPatternActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_open_pattern);
-        setSupportActionBar((Toolbar) findViewById(R.id.open_pattern_toolbar));
-        gridView = findViewById(R.id.pattern_select_grid);
+        setUpGridView();
+
         new GetNamesAndImagesTask(AppDatabase.Companion.getAppDatabase(getApplicationContext()), this).execute();
     }
 
-    private void fillGrid(HashMap<String, Bitmap> thumbs) {
-        gridView.setAdapter(new MyAdaptor(this, thumbs));
+    private void setUpGridView() {
+        gridView = findViewById(R.id.pattern_select_grid);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
@@ -47,6 +52,50 @@ public class OpenPatternActivity extends AppCompatActivity {
                 finish();
             }
         });
+        gridView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+            @Override
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                gridView.getChildAt(position).setActivated(checked);
+            }
+
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                Log.d("Foo", "onCreateActionMode");
+                mode.getMenuInflater().inflate(R.menu.delete_button, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                Log.d("Foo", "onPrepareActionMode");
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                Log.d("Foo", "onActionItemClicked");
+                if (item.getItemId() == R.id.delete_button) {
+                    Log.d("Foo", "Pressed delete!");
+                    SparseBooleanArray checked = gridView.getCheckedItemPositions();
+                    for (int i = 0; i < checked.size(); i++) {
+                        Log.d("Foo",  + checked.keyAt(i) + ": " + (checked.get(checked.keyAt(i)) ? "selected" : "not selected"));
+                    }
+                    mode.finish();
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                Log.d("Foo", "onDestroyActionMode");
+            }
+        });
+
+    }
+
+    private void fillGrid(HashMap<String, Bitmap> thumbs) {
+        gridView.setAdapter(new MyAdaptor(this, thumbs));
     }
 
     @Override

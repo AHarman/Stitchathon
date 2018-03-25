@@ -3,6 +3,8 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="select_pressed">#403F51B5</color>
+    <color name="select_selected">#803F51B5</color>
     <color name="default_pattern_background_colour">#FFFFFFFF</color>
     <color name="default_stitch_colour_1">#FFFF0000</color>
     <color name="default_stitch_colour_2">#FF0000FF</color>

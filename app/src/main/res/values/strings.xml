@@ -14,7 +14,7 @@
     <string name="row_counter">Row: </string>
     <string name="stitch_counter">Stitches: </string>
     <string name="complete_counter">Complete: </string>
-    <string name="open_pattern">Open Pattern</string>
+    <string name="open_pattern">Patterns</string>
     <string name="import_pattern">Import Pattern</string>
     <string name="progress_bar_loading_pattern">Loading pattern</string>
     <string name="progress_bar_importing_pattern">Importing pattern</string>
@@ -66,4 +66,6 @@
     <string name="reset_application_preferences_message">This operation can not be undone</string>
     <string name="reset_application_preferences_title">Reset application preferences</string>
     <string name="open_pattern_title">Select pattern</string>
+    <string name="thumbnail">thumbnail</string>
+    <string name="delete">Delete</string>
 </resources>
