@@ -19,7 +19,7 @@ abstract class KnitPatternDao {
 
     fun savePatternChanges(knitPattern: KnitPattern) {
         Log.v("Database", "savePatternChanges: ${knitPattern.name}")
-        insertKnitPatternEntity(KnitPatternEntity(knitPattern))
+        updateKnitPatternEntity(KnitPatternEntity(knitPattern))
     }
 
     @Transaction
@@ -130,6 +130,9 @@ abstract class KnitPatternDao {
         }
         return bitmap
     }
+
+    @Update
+    internal abstract fun updateKnitPatternEntity(knitPatternEntity: KnitPatternEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     internal abstract fun insertKnitPatternEntity(knitPatternEntity: KnitPatternEntity)
