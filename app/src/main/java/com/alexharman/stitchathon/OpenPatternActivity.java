@@ -77,12 +77,12 @@ public class OpenPatternActivity extends AppCompatActivity {
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 if (item.getItemId() == R.id.delete_button) {
-                    SparseBooleanArray checked = gridView.getCheckedItemPositions();
+                    MyAdaptor adaptor = (MyAdaptor)gridView.getAdapter();
                     ArrayList<String> toBeDeleted = new ArrayList<>();
-                    for (int i = 0; i < checked.size(); i++) {
-                        if (checked.get(checked.keyAt(i))) {
-                            toBeDeleted.add((String) gridView.getAdapter().getItem(checked.keyAt(i)));
-                            ((MyAdaptor)gridView.getAdapter()).removeItem(checked.keyAt(i));
+                    for (int i = adaptor.getCount(); i >= 0; i--) {
+                        if (gridView.isItemChecked(i)) {
+                            toBeDeleted.add(adaptor.getItem(i));
+                            adaptor.removeItem(i);
                         }
                     }
                     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(OpenPatternActivity.this);
