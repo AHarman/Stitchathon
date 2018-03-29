@@ -55,6 +55,7 @@ public class OpenPatternActivity extends AppCompatActivity {
                 finish();
             }
         });
+
         gridView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
             @Override
             public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
@@ -63,14 +64,13 @@ public class OpenPatternActivity extends AppCompatActivity {
 
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                Log.d("Foo", "onCreateActionMode");
                 mode.getMenuInflater().inflate(R.menu.delete_button, menu);
+                mode.setTitle(R.string.select_patterns);
                 return true;
             }
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                Log.d("Foo", "onPrepareActionMode");
                 return false;
             }
 
@@ -99,7 +99,6 @@ public class OpenPatternActivity extends AppCompatActivity {
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
-                Log.d("Foo", "onDestroyActionMode");
             }
         });
     }
