@@ -1,6 +1,7 @@
 package com.alexharman.stitchathon
 
 import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
@@ -13,9 +14,9 @@ import android.widget.TextView
 
 class AppInfoDialog : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(activity)
-        val view = activity.layoutInflater.inflate(R.layout.app_info_dialog, null)
-        val textView = (view.findViewById(R.id.app_info_textview) as TextView)
+        val builder = AlertDialog.Builder(activity as Context)
+        val view = activity?.layoutInflater?.inflate(R.layout.app_info_dialog, null)
+        val textView = (view?.findViewById(R.id.app_info_textview) as TextView)
         textView.movementMethod = LinkMovementMethod.getInstance()
 
         builder.setView(view)

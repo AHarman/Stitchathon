@@ -40,8 +40,8 @@ class ImportImageDialog: DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog: AlertDialog
-        val inflater = activity.layoutInflater
-        val builder = AlertDialog.Builder(activity)
+        val inflater = activity!!.layoutInflater
+        val builder = AlertDialog.Builder(activity as Context)
         dialogView = inflater.inflate(R.layout.import_image_dialog, null)
 
         val numberPicker: NumberPicker = dialogView.findViewById(R.id.import_image_numpicker) as NumberPicker
@@ -104,7 +104,7 @@ class ImportImageDialog: DialogFragment() {
     private fun getFileDisplayName(uri: Uri): String {
         var fileName = ""
         if (uri.scheme == "content") {
-            val cursor = activity.contentResolver.query(uri, null, null, null, null)
+            val cursor = activity!!.contentResolver.query(uri, null, null, null, null)
             cursor.use {
                 if (cursor.moveToFirst()) {
                     fileName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
