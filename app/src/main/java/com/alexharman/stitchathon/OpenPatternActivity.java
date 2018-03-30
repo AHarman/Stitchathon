@@ -9,8 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -46,6 +44,9 @@ public class OpenPatternActivity extends AppCompatActivity {
 
     private void setUpGridView() {
         gridView = findViewById(R.id.pattern_select_grid);
+        gridView.setAdapter(new MyAdaptor());
+        gridView.setEmptyView(findViewById(R.id.empty_view));
+
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
@@ -104,7 +105,7 @@ public class OpenPatternActivity extends AppCompatActivity {
     }
 
     private void fillGrid(HashMap<String, Bitmap> thumbs) {
-        gridView.setAdapter(new MyAdaptor(this, thumbs));
+        ((MyAdaptor) gridView.getAdapter()).addItems(thumbs);
     }
 
     @Override
@@ -152,20 +153,8 @@ public class OpenPatternActivity extends AppCompatActivity {
     }
 
     private class MyAdaptor extends BaseAdapter {
-        private Context context;
-        private ArrayList<String> patternNames;
-        private ArrayList<Bitmap> bitmaps;
-
-        MyAdaptor(Context context, HashMap<String, Bitmap> thumbs) {
-            this.context = context;
-            patternNames = new ArrayList<>();
-            bitmaps = new ArrayList<>();
-
-            for (Map.Entry<String, Bitmap> entry: thumbs.entrySet()) {
-                patternNames.add(entry.getKey());
-                bitmaps.add(entry.getValue());
-            }
-        }
+        private ArrayList<String> patternNames = new ArrayList<>();
+        private ArrayList<Bitmap> bitmaps = new ArrayList<>();
 
         @Override
         public int getCount() {
@@ -177,6 +166,7 @@ public class OpenPatternActivity extends AppCompatActivity {
             return patternNames.get(position);
         }
 
+        // Don't use this, the items don't have numerical IDs
         @Override
         public long getItemId(int position) {
             return position;
@@ -184,7 +174,7 @@ public class OpenPatternActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater inflater = (LayoutInflater) OpenPatternActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View gridItem;
 
             if (convertView == null) {
@@ -203,6 +193,14 @@ public class OpenPatternActivity extends AppCompatActivity {
         void removeItem(int position) {
             patternNames.remove(position);
             bitmaps.remove(position);
+            notifyDataSetChanged();
+        }
+
+        void addItems(HashMap<String, Bitmap> thumbs) {
+            for (Map.Entry<String, Bitmap> entry: thumbs.entrySet()) {
+                patternNames.add(entry.getKey());
+                bitmaps.add(entry.getValue());
+            }
             notifyDataSetChanged();
         }
     }

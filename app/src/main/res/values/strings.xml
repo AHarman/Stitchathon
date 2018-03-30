@@ -69,4 +69,5 @@
     <string name="thumbnail">thumbnail</string>
     <string name="delete">Delete</string>
     <string name="select_patterns">Select patterns</string>
+    <string name="no_patterns_found">Nothing to see here! Import a pattern first.</string>
 </resources>
