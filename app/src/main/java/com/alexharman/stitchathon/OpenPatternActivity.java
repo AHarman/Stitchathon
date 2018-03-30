@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -22,14 +21,12 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.DeletePatternsTask;
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.GetNamesAndImagesTask;
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.GetNamesAndThumbnails;
 
 import org.jetbrains.annotations.NotNull;
-import com.alexharman.stitchathon.database.AppDatabase;
-import com.alexharman.stitchathon.database.KnitPatternDao;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -107,7 +104,7 @@ public class OpenPatternActivity extends AppCompatActivity implements GetNamesAn
                         prefs.edit().remove("pattern").apply();
                     }
 
-                    new DeletePatternAsyncTask(OpenPatternActivity.this).execute(toBeDeleted.toArray(new String[]{}));
+                    new DeletePatternsTask(OpenPatternActivity.this).execute(toBeDeleted.toArray(new String[]{}));
                     mode.finish();
                     return true;
                 }
@@ -118,24 +115,6 @@ public class OpenPatternActivity extends AppCompatActivity implements GetNamesAn
             public void onDestroyActionMode(ActionMode mode) {
             }
         });
-    }
-
-
-    private static class DeletePatternAsyncTask extends AsyncTask<String, Void, Void> {
-        WeakReference<OpenPatternActivity> context;
-
-        DeletePatternAsyncTask(OpenPatternActivity context) {
-            this.context = new WeakReference<>(context);
-        }
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            KnitPatternDao dao = AppDatabase.Companion.getAppDatabase(context.get()).knitPatternDao();
-            for (String name: strings) {
-                dao.deletePattern(name, context.get());
-            }
-            return null;
-        }
     }
 
     private class MyAdaptor extends BaseAdapter {
