@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import com.google.gson.Gson
@@ -17,11 +18,13 @@ import java.io.InputStreamReader
 abstract class KnitPatternDao {
 
     fun savePatternChanges(knitPattern: KnitPattern) {
-        insertKnitPatternEntity(KnitPatternEntity(knitPattern))
+        Log.v("Database", "savePatternChanges: ${knitPattern.name}")
+        updateKnitPatternEntity(KnitPatternEntity(knitPattern))
     }
 
     @Transaction
     open fun saveNewPattern(knitPattern: KnitPattern, thumbnail: Bitmap, context: Context) {
+        Log.v("Database", "saveNewPattern: ${knitPattern.name}")
         val kpe = KnitPatternEntity(knitPattern)
         writeStitchesToFile(knitPattern, kpe.stitchesFilePath, context)
         writeBitmapToFile(thumbnail, kpe.thumbnailFilePath, context)
@@ -30,6 +33,7 @@ abstract class KnitPatternDao {
 
     @Transaction
     open fun getKnitPattern(name: String, context: Context): KnitPattern {
+        Log.v("Database", "getKnitPattern: $name")
         val result = selectKnitPattern(name)
         val stitches = readStitchesFromFile(result.stitchesFilePath, context)
         return KnitPattern(result.name, stitches, result.currentRow, result.nextStitchInRow)
@@ -37,6 +41,7 @@ abstract class KnitPatternDao {
 
     @Transaction
     open fun getThumbnails(context: Context): HashMap<String, Bitmap> {
+        Log.v("Database", "Getting all thumbnails")
         val hashmap = HashMap<String, Bitmap>()
         selectAllKnitPatterns().forEach { kpe: KnitPatternEntity -> hashmap[kpe.name] = readBitmapFromFile(kpe.thumbnailFilePath, context) }
         return hashmap
@@ -44,20 +49,29 @@ abstract class KnitPatternDao {
 
     @Transaction
     open fun deleteAllPatterns(context: Context) {
-        val kpes = selectAllKnitPatterns()
-        for (kpe in kpes) {
-            deleteFiles(context, kpe)
-            deleteKPE(kpe)
+        Log.v("Database", "Deleting all patterns")
+        for (kpe in selectAllKnitPatterns()) {
+            deletePattern(kpe.name, context)
         }
+    }
+
+    @Transaction
+    open fun deletePattern(name: String, context: Context) {
+        Log.v("Database", "Deleting $name")
+        val kpe = selectKnitPattern(name)
+        deleteFiles(context, kpe)
+        deleteKPE(kpe)
+    }
+
+    @Transaction
+    open fun getThumbnail(context: Context, name: String): Bitmap {
+        Log.v("Database", "Getting thumbnail for $name")
+        return readBitmapFromFile(selectThumbnailFilePath(name), context)
     }
 
     private fun deleteFiles(context: Context, kpe: KnitPatternEntity) {
         File(context.filesDir, kpe.stitchesFilePath).delete()
         File(context.filesDir, kpe.thumbnailFilePath).delete()
-    }
-
-    open fun getThumbnail(context: Context, name: String): Bitmap {
-        return readBitmapFromFile(selectThumbnailFilePath(name), context)
     }
 
     private fun writeStitchesToFile(knitPattern: KnitPattern, path: String, context: Context) {
@@ -116,6 +130,9 @@ abstract class KnitPatternDao {
         }
         return bitmap
     }
+
+    @Update
+    internal abstract fun updateKnitPatternEntity(knitPatternEntity: KnitPatternEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     internal abstract fun insertKnitPatternEntity(knitPatternEntity: KnitPatternEntity)

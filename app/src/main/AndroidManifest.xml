@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".OpenPattern"
+            android:name=".OpenPatternActivity"
             android:parentActivityName=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

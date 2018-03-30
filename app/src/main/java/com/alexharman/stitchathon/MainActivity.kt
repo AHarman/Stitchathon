@@ -132,7 +132,7 @@ class MainActivity :
     }
 
     private fun selectInternalPattern() {
-        val intent = Intent(this, OpenPattern::class.java)
+        val intent = Intent(this, OpenPatternActivity::class.java)
         startActivityForResult(intent, OPEN_INTERNAL_PATTERN)
     }
 
