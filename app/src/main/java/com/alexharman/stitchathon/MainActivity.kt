@@ -128,8 +128,8 @@ class MainActivity :
         rowCount = findViewById(R.id.row_counter)
         completeCount = findViewById(R.id.complete_counter)
 
-        findViewById<Button>(R.id.increment_row_button).setOnClickListener { knitPatternDrawer?.incrementRow(); knitPatternView.updateCurrentView() }
-        findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.updateCurrentView() }
+        findViewById<Button>(R.id.increment_row_button).setOnClickListener { knitPatternDrawer?.incrementRow(); knitPatternView.updateCurrentView(); updateStitchCounter() }
+        findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.updateCurrentView(); updateStitchCounter() }
         knitPatternViewGestureDetector = GestureDetectorCompat(this, KnitPatternViewGestureListener())
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event)}
     }
@@ -241,7 +241,12 @@ class MainActivity :
     }
 
     override fun onGoToStitchReturn(row: Int, col: Int) {
-        Log.d("Go to", "onGoToStitchReturn. Row: $row, col: $col")
+        val knitPattern = knitPatternDrawer?.knitPattern ?: return
+        val myRow = if (row < 0) knitPattern.currentRow else min(knitPattern.numRows - 1, row)
+        val myCol = if (col < 0) min(knitPattern.stitchesDoneInRow, knitPattern.stitches[myRow].size - 1) else min(knitPattern.stitches[myRow].size - 1, col)
+        knitPatternDrawer?.markStitchesTo(myRow, myCol)
+        knitPatternView.updateCurrentView()
+        updateStitchCounter()
     }
 
     private inner class MySharedPreferenceListener : OnSharedPreferenceChangeListener {

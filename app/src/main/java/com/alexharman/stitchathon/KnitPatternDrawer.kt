@@ -141,12 +141,21 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
     }
 
     fun undo() {
-        if (undoStack.size == 0)
+        if (undoStack.size == 0) {
+            undoRow()
             return
+        }
         for (i in 0 until undoStack.pop()) {
             knitPattern.undoStitch()
             drawNextStitch(false)
         }
+    }
+
+    private fun undoRow() {
+        do {
+            knitPattern.undoStitch()
+            drawNextStitch(false)
+        } while (!knitPattern.isStartOfRow)
     }
 
     fun increment(numStitches: Int = 1) {
@@ -157,9 +166,26 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
         }
     }
 
-    fun incrementRow(): Int {
-        val stitchesDone = knitPattern.stitchesLeftInRow
-        increment(stitchesDone)
-        return stitchesDone
+    fun incrementRow() {
+        increment(knitPattern.stitchesLeftInRow)
+    }
+
+    fun markStitchesTo(row: Int, col: Int) {
+        Log.d("Go to", "markStitchesTo() - Row: $row, col: $col")
+        undoStack.clear()
+        while (row > knitPattern.currentRow) {
+            incrementRow()
+        }
+        while (row < knitPattern.currentRow) {
+            undoRow()
+        }
+        while (col > knitPattern.stitchesDoneInRow) {
+            increment()
+        }
+        while (col < knitPattern.stitchesDoneInRow) {
+            knitPattern.undoStitch()
+            drawNextStitch(false)
+        }
+        undoStack.clear()
     }
 }
