@@ -11,13 +11,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.NavigationView
+import android.support.v4.view.GestureDetectorCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.view.Menu
-import android.view.MenuItem
+import android.view.*
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -36,10 +36,12 @@ class MainActivity :
     private lateinit var stitchCount: TextView
     private lateinit var rowCount: TextView
     private lateinit var completeCount: TextView
-    private lateinit var patternView: KnitPatternView
-    private var knitPattern: KnitPattern? = null
+    private lateinit var knitPatternView: KnitPatternView
+    private lateinit var knitPatternViewGestureDetector: GestureDetectorCompat
+    private var knitPatternDrawer: KnitPatternDrawer? = null
     private var importImageDialog: ImportImageDialog? = null
     private val preferenceListener = MySharedPreferenceListener()
+
 
     companion object {
         internal lateinit var db: AppDatabase
@@ -86,7 +88,6 @@ class MainActivity :
         return if (id == R.id.action_settings) {
             true
         } else super.onOptionsItemSelected(item)
-
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -122,13 +123,15 @@ class MainActivity :
 
         findViewById<NavigationView>(R.id.nav_view).setNavigationItemSelectedListener(this)
 
-        patternView = findViewById(R.id.knitView)
+        knitPatternView = findViewById(R.id.knitView)
         stitchCount = findViewById(R.id.stitch_counter)
         rowCount = findViewById(R.id.row_counter)
         completeCount = findViewById(R.id.complete_counter)
 
-        findViewById<Button>(R.id.increment_row_button).setOnClickListener { patternView.incrementRow() }
-        findViewById<Button>(R.id.undo_button).setOnClickListener { patternView.undo() }
+        findViewById<Button>(R.id.increment_row_button).setOnClickListener { knitPatternDrawer?.incrementRow(); knitPatternView.updateCurrentView() }
+        findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.updateCurrentView() }
+        knitPatternViewGestureDetector = GestureDetectorCompat(this, KnitPatternViewGestureListener())
+        knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event)}
     }
 
     private fun selectInternalPattern() {
@@ -149,34 +152,33 @@ class MainActivity :
     }
 
     fun updateStitchCounter() {
-        if (knitPattern == null) {
+        val pattern = knitPatternDrawer?.knitPattern
+        if (pattern == null) {
             stitchCount.text = ""
             rowCount.text = ""
             completeCount.text = ""
             return
         }
-        var s = getString(R.string.stitch_counter) + knitPattern!!.stitchesDoneInRow
-        stitchCount.text = s
-        s = getString(R.string.row_counter) + (knitPattern!!.currentRow + 1)
-        rowCount.text = s
-        s = getString(R.string.complete_counter) + 100 * knitPattern!!.totalStitchesDone / knitPattern!!.totalStitches + "%"
-        completeCount.text = s
+
+        stitchCount.text = getString(R.string.stitch_counter, pattern.stitchesDoneInRow)
+        rowCount.text = getString(R.string.row_counter, pattern.currentRow + 1)
+        completeCount.text = getString(R.string.complete_counter, 100 * pattern.totalStitchesDone / pattern.totalStitches)
     }
 
     override fun onPause() {
         super.onPause()
-        if (knitPattern != null)
+        if (knitPatternDrawer != null)
             savePattern()
     }
 
     private fun setKnitPattern(knitPattern: KnitPattern,
                                knitPatternDrawer: KnitPatternDrawer = KnitPatternDrawer(knitPattern, this),
                                thumbnail: Bitmap = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)) {
-        this.knitPattern = knitPattern
-        patternView.setPattern(knitPatternDrawer)
+        this.knitPatternDrawer = knitPatternDrawer
+        knitPatternView.setPattern(knitPatternDrawer)
         updateStitchCounter()
         val editor = PreferenceManager.getDefaultSharedPreferences(this).edit()
-        findViewById<TextView>(R.id.nav_drawer_pattern_name).setText(knitPattern.name)
+        findViewById<TextView>(R.id.nav_drawer_pattern_name).text = knitPattern.name
         findViewById<ImageView>(R.id.nav_drawer_image).setImageBitmap(thumbnail)
 
         editor.putString("pattern", knitPattern.name)
@@ -184,10 +186,10 @@ class MainActivity :
     }
 
     private fun clearKnitPattern() {
-        this.knitPattern = null
-        patternView.clearPattern()
+        this.knitPatternDrawer = null
+        knitPatternView.clearPattern()
         findViewById<ImageView>(R.id.nav_drawer_image).setImageResource(R.drawable.logo)
-        findViewById<TextView>(R.id.nav_drawer_pattern_name).setText("")
+        findViewById<TextView>(R.id.nav_drawer_pattern_name).text = ""
         updateStitchCounter()
         getPreferences(Context.MODE_PRIVATE).edit()
                 .remove("pattern")
@@ -208,7 +210,7 @@ class MainActivity :
     }
 
     private fun savePattern() {
-        SavePatternChangesTask().execute(knitPattern)
+        SavePatternChangesTask().execute(knitPatternDrawer?.knitPattern)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
@@ -239,6 +241,29 @@ class MainActivity :
             if (key == "pattern" && !sharedPreferences.contains("pattern")) {
                 clearKnitPattern()
             }
+        }
+    }
+
+    private inner class KnitPatternViewGestureListener : GestureDetector.SimpleOnGestureListener() {
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+            knitPatternDrawer?.increment()
+            updateStitchCounter()
+            knitPatternView.updateCurrentView()
+            return true
+        }
+
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            knitPatternView.zoomPattern()
+            return true
+        }
+
+        override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+            knitPatternView.scroll(distanceX, distanceY)
+            return true
+        }
+
+        override fun onDown(e: MotionEvent): Boolean {
+            return true
         }
     }
 }

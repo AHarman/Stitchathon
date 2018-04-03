@@ -11,9 +11,9 @@
     <string name="action_settings">Settings</string>
     <string name="increment_row_button">Increment Row</string>
     <string name="undo_button">Undo</string>
-    <string name="row_counter">Row: </string>
-    <string name="stitch_counter">Stitches: </string>
-    <string name="complete_counter">Complete: </string>
+    <string name="row_counter">Row: %d</string>
+    <string name="stitch_counter">Stitches: %d</string>
+    <string name="complete_counter">Complete: %,d%%</string>
     <string name="open_pattern">Patterns</string>
     <string name="import_pattern">Import Pattern</string>
     <string name="progress_bar_loading_pattern">Loading pattern</string>

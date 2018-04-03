@@ -3,17 +3,20 @@ package com.alexharman.stitchathon
 import android.content.Context
 import android.graphics.*
 import android.preference.PreferenceManager
+import android.util.Log
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import java.util.*
 
-class KnitPatternDrawer(private val knitPattern: KnitPattern, context: Context) {
+class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
     private val stitchSize: Float
     private val stitchPad: Float
     private val colours: IntArray
     private var stitchBitmaps: HashMap<Stitch, Bitmap>
     private var stitchPaints: HashMap<Stitch, Paint>
     private var doneOverlayPaint: Paint
+    private val undoStack = Stack<Int>()
+
     var patternBitmap: Bitmap
         private set
 
@@ -137,14 +140,17 @@ class KnitPatternDrawer(private val knitPattern: KnitPattern, context: Context) 
         drawStitch(canvas, stitch, isDone)
     }
 
-    fun undoStitches(numStitches: Int) {
-        for (i in 0 until numStitches) {
+    fun undo() {
+        if (undoStack.size == 0)
+            return
+        for (i in 0 until undoStack.pop()) {
             knitPattern.undoStitch()
             drawNextStitch(false)
         }
     }
 
     fun increment(numStitches: Int = 1) {
+        undoStack.push(numStitches)
         for (i in 0 until numStitches) {
             drawNextStitch(true)
             knitPattern.increment()

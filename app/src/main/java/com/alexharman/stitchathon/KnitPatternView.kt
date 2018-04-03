@@ -5,10 +5,7 @@ import android.content.SharedPreferences
 import android.graphics.*
 import android.preference.PreferenceManager
 import android.util.AttributeSet
-import android.view.GestureDetector
-import android.view.MotionEvent
 import android.view.View
-import java.util.*
 
 
 class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -28,19 +25,14 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     private var bitmapToDrawPaint: Paint
     private var patternDstRectangle: RectF? = null
     private var patternSrcRectangle: Rect? = null
-
-    private val mGestureDetector: GestureDetector
-    private val preferenceListener = MySharedPreferenceListener()
-
-    private val undoStack = Stack<Int>()
-
     private lateinit var currentView: Bitmap
+
+    private val preferenceListener = MySharedPreferenceListener()
 
     init {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.registerOnSharedPreferenceChangeListener(preferenceListener)
         backgroundColor = prefs.getInt(context.getString(R.string.app_options_bg_colour_key), 0xFFFFFFFF)
-        mGestureDetector = GestureDetector(this.context, MyGestureListener())
         bitmapToDrawPaint = Paint()
         bitmapToDrawPaint.isAntiAlias = true
         bitmapToDrawPaint.isFilterBitmap = true
@@ -112,7 +104,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         patternDstRectangle = RectF(left, top, right, bottom)
     }
 
-    private fun zoomPattern() {
+    internal fun zoomPattern() {
         if (knitPatternDrawer == null)
             return
 
@@ -146,14 +138,14 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         canvas.drawBitmap(currentView, 0f, 0f, null)
     }
 
-    private fun updateCurrentView() {
+    fun updateCurrentView() {
         val canvas = Canvas(currentView)
         canvas.drawColor(backgroundColor)
         canvas.drawBitmap(knitPatternDrawer?.patternBitmap, patternSrcRectangle, patternDstRectangle!!, bitmapToDrawPaint)
         invalidate()
     }
 
-    private fun scroll(distanceX: Float, distanceY: Float) {
+    internal fun scroll(distanceX: Float, distanceY: Float) {
         if (knitPatternDrawer == null)
             return
 
@@ -165,56 +157,9 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         updateCurrentView()
     }
 
-    fun incrementOne() {
-        if (knitPatternDrawer != null) {
-            undoStack.push(1)
-            knitPatternDrawer?.increment()
-            (context as MainActivity).updateStitchCounter()
-            updateCurrentView()
-        }
-    }
-
-    fun incrementRow() {
-        if (knitPatternDrawer == null )
-            return
-
-        undoStack.push(knitPatternDrawer!!.incrementRow())
-        (context as MainActivity).updateStitchCounter()
-        updateCurrentView()
-    }
-
-    fun undo() {
-        if (undoStack.size == 0)
-            return
-
-        knitPatternDrawer?.undoStitches(undoStack.pop())
-        (context as MainActivity).updateStitchCounter()
-        updateCurrentView()
-    }
-
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        return mGestureDetector.onTouchEvent(event)
-    }
-
-    private inner class MyGestureListener : GestureDetector.SimpleOnGestureListener() {
-        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-            incrementOne()
-            return true
-        }
-
-        override fun onDoubleTap(e: MotionEvent): Boolean {
-            zoomPattern()
-            return true
-        }
-
-        override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
-            scroll(distanceX, distanceY)
-            return true
-        }
-
-        override fun onDown(e: MotionEvent): Boolean {
-            return true
-        }
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
     }
 
     inner class MySharedPreferenceListener: SharedPreferences.OnSharedPreferenceChangeListener {
@@ -225,10 +170,6 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
             }
         }
     }
-}
-
-private fun Canvas.drawColor(color: Long) {
-    drawColor(color.toInt())
 }
 
 private fun SharedPreferences.getInt(key: String, default: Long): Int {
