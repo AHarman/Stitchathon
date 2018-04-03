@@ -47,7 +47,7 @@
                 <TextView
                     style="@android:style/TextAppearance.DeviceDefault.Medium"
                     android:id="@+id/stitch_counter"
-                    android:text="@string/stitch_counter"
+                    android:text="@string/stitches_done"
                     android:textAlignment="textStart"
                     android:layout_height="wrap_content"
                     android:layout_width="0dp"
@@ -55,7 +55,7 @@
                 <TextView
                     style="@android:style/TextAppearance.DeviceDefault.Medium"
                     android:id="@+id/row_counter"
-                    android:text="@string/row_counter"
+                    android:text="@string/rows_done"
                     android:textAlignment="textStart"
                     android:layout_height="wrap_content"
                     android:layout_width="0dp"

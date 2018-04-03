@@ -17,21 +17,24 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.view.*
+import android.view.GestureDetector
+import android.view.Menu
+import android.view.MenuItem
+import android.view.MotionEvent
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.database.AppDatabase
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.ImportImageTask
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.ImportJsonTask
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.OpenPatternTask
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.SavePatternChangesTask
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.*
+import kotlin.math.min
 
 class MainActivity :
         AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
-        ImportImageDialog.ImportImageDialogListener, com.alexharman.stitchathon.databaseAccessAsyncTasks.OpenPattern {
+        ImportImageDialog.ImportImageDialogListener,
+        GoToStitchDialog.GoToStitchDialogListener,
+        OpenPattern {
 
     private lateinit var stitchCount: TextView
     private lateinit var rowCount: TextView
@@ -80,14 +83,11 @@ class MainActivity :
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
-
-        return if (id == R.id.action_settings) {
-            true
-        } else super.onOptionsItemSelected(item)
+        return when (item.itemId){
+            R.id.action_settings -> true
+            R.id.go_to_stitch_button -> { gotToStitch(); true }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -134,6 +134,10 @@ class MainActivity :
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event)}
     }
 
+    private fun gotToStitch() {
+        GoToStitchDialog().show(supportFragmentManager, "Go to stitch")
+    }
+
     private fun selectInternalPattern() {
         val intent = Intent(this, OpenPatternActivity::class.java)
         startActivityForResult(intent, OPEN_INTERNAL_PATTERN)
@@ -160,8 +164,8 @@ class MainActivity :
             return
         }
 
-        stitchCount.text = getString(R.string.stitch_counter, pattern.stitchesDoneInRow)
-        rowCount.text = getString(R.string.row_counter, pattern.currentRow + 1)
+        stitchCount.text = getString(R.string.stitches_done, pattern.stitchesDoneInRow)
+        rowCount.text = getString(R.string.rows_done, pattern.currentRow)
         completeCount.text = getString(R.string.complete_counter, 100 * pattern.totalStitchesDone / pattern.totalStitches)
     }
 
@@ -234,6 +238,10 @@ class MainActivity :
 
     override fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, numColours: Int) {
         ImportImageTask(this, this, imageUri, name, width, height, numColours).execute()
+    }
+
+    override fun onGoToStitchReturn(row: Int, col: Int) {
+        Log.d("Go to", "onGoToStitchReturn. Row: $row, col: $col")
     }
 
     private inner class MySharedPreferenceListener : OnSharedPreferenceChangeListener {
