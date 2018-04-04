@@ -70,10 +70,10 @@
     <string name="delete">Delete</string>
     <string name="select_patterns">Select patterns</string>
     <string name="no_patterns_found">Nothing to see here! Import a pattern first.</string>
-    <string name="go_to_stitch">Go to stitch</string>
-    <string name="rows_to_mark_done">Rows</string>
-    <string name="stitches_to_mark_done_in_row">Stitches in row</string>
+    <string name="go_to_stitch_label">Go to stitch</string>
     <string name="negative_number_error">Must be positive</string>
     <string name="go_to_dialog_title">Mark stitches done</string>
     <string name="go_to_dialog_message">Enter the number of rows and stitches in row to mark done. Leave blank to use the current.</string>
+    <string name="rows">Rows</string>
+    <string name="stitches">Stitches</string>
 </resources>

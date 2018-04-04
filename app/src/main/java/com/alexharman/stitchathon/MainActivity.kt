@@ -135,7 +135,9 @@ class MainActivity :
     }
 
     private fun gotToStitch() {
-        GoToStitchDialog().show(supportFragmentManager, "Go to stitch")
+        val pattern = knitPatternDrawer?.knitPattern ?: return
+        GoToStitchDialog.newInstance(pattern.currentRow, pattern.stitchesDoneInRow)
+                .show(supportFragmentManager, "Go to stitch")
     }
 
     private fun selectInternalPattern() {

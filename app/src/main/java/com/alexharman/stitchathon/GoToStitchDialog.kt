@@ -16,6 +16,17 @@ class GoToStitchDialog: DialogFragment() {
     private lateinit var listener: GoToStitchDialogListener
     private lateinit var dialogView: View
 
+    companion object {
+        fun newInstance(row: Int, col: Int): GoToStitchDialog {
+            val dialog = GoToStitchDialog()
+            val args = Bundle()
+            args.putInt("row", row)
+            args.putInt("col", col)
+            dialog.arguments = args
+            return dialog
+        }
+    }
+
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         try {
@@ -26,9 +37,13 @@ class GoToStitchDialog: DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        super.onCreate(savedInstanceState)
         val dialog: AlertDialog
         val builder = AlertDialog.Builder(activity as Context)
         dialogView = activity!!.layoutInflater.inflate(R.layout.go_to_stitch_dialog, null)
+
+        dialogView.findViewById<EditText>(R.id.go_to_stitch_row_edittext).hint = (arguments?.getInt("row") ?: 0).toString()
+        dialogView.findViewById<EditText>(R.id.go_to_stitch_col_edittext).hint = (arguments?.getInt("col") ?: 0).toString()
 
         builder.setView(dialogView)
         builder.setCancelable(false)
@@ -43,8 +58,10 @@ class GoToStitchDialog: DialogFragment() {
     }
 
     private fun returnValues() {
-        val row = dialogView.findViewById<EditText>(R.id.go_to_stitch_row_edittext)?.text.toString().toIntOrNull() ?: -1
-        val col = dialogView.findViewById<EditText>(R.id.go_to_stitch_col_edittext)?.text.toString().toIntOrNull() ?: -1
+        val rowEditText = dialogView.findViewById<EditText>(R.id.go_to_stitch_row_edittext)
+        val colEditText = dialogView.findViewById<EditText>(R.id.go_to_stitch_col_edittext)
+        val row = rowEditText.text.toString().toIntOrNull() ?: rowEditText.hint.toString().toIntOrNull() ?: -1
+        val col = colEditText.text.toString().toIntOrNull() ?: colEditText.hint.toString().toIntOrNull() ?: -1
 
         listener.onGoToStitchReturn(row, col)
         dialog.dismiss()

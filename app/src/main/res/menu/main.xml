@@ -4,7 +4,7 @@
     <item
         android:id="@+id/go_to_stitch_button"
         android:icon="@drawable/ic_forward_white_24dp"
-        android:title="@string/go_to_stitch"
+        android:title="@string/go_to_stitch_label"
         app:showAsAction="ifRoom"
         android:orderInCategory="2"/>
     <item
