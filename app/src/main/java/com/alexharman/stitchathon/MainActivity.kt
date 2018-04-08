@@ -86,6 +86,7 @@ class MainActivity :
         return when (item.itemId){
             R.id.action_settings -> true
             R.id.go_to_stitch_button -> { gotToStitch(); true }
+            R.id.lock_button -> { lockButtonPressed(); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -138,6 +139,15 @@ class MainActivity :
         val pattern = knitPatternDrawer?.knitPattern ?: return
         GoToStitchDialog.newInstance(pattern.currentRow, pattern.stitchesDoneInRow)
                 .show(supportFragmentManager, "Go to stitch")
+    }
+
+    private fun lockButtonPressed() {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val currentVal = preferences.getBoolean("lock", false)
+        preferences
+                .edit()
+                .putBoolean("lock", !currentVal)
+                .apply()
     }
 
     private fun selectInternalPattern() {
