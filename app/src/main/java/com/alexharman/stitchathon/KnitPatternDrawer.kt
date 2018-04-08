@@ -188,4 +188,11 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
         }
         undoStack.clear()
     }
+
+    fun positionOfNextStitch(): Pair<Float, Float> {
+        val x = knitPattern.currentDistanceInRow * (stitchSize + stitchPad) * knitPattern.rowDirection +
+                if (knitPattern.rowDirection == -1) patternBitmap.width else 0
+        val y = knitPattern.currentRow * (stitchSize + stitchPad)
+        return Pair(x, y)
+    }
 }
