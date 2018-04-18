@@ -79,12 +79,17 @@ class MainActivity :
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fit_pattern_width", false)) {
+            menu.findItem(R.id.zoom_button).isChecked = true
+            menu.findItem(R.id.zoom_button).icon.alpha = 0x88
+        }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId){
             R.id.action_settings -> true
+            R.id.zoom_button -> { zoomButtonPressed(item); true }
             R.id.go_to_stitch_button -> { gotToStitch(); true }
             R.id.lock_button -> { lockButtonPressed(); true }
             else -> super.onOptionsItemSelected(item)
@@ -133,6 +138,19 @@ class MainActivity :
         findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.updateCurrentView(); updateStitchCounter() }
         knitPatternViewGestureDetector = GestureDetectorCompat(this, KnitPatternViewGestureListener())
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event)}
+    }
+
+    private fun zoomButtonPressed(item: MenuItem) {
+        item.isChecked = !item.isChecked
+        if (item.isChecked) {
+            item.icon.alpha = 0xFF
+        } else {
+            item.icon.alpha = 0x88
+        }
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putBoolean("fit_pattern_width", item.isChecked)
+                .apply()
     }
 
     private fun gotToStitch() {
@@ -270,16 +288,16 @@ class MainActivity :
     }
 
     private inner class KnitPatternViewGestureListener : GestureDetector.SimpleOnGestureListener() {
-        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
             knitPatternDrawer?.increment()
             updateStitchCounter()
             knitPatternView.updateCurrentView()
             return true
         }
 
+        // Double taps get counted twice this way, letting users "spam" the screen
         override fun onDoubleTap(e: MotionEvent): Boolean {
-            knitPatternView.zoomPattern()
-            return true
+            return onSingleTapUp(e)
         }
 
         override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {

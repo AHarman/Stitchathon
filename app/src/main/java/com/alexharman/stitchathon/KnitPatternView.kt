@@ -36,6 +36,8 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         prefs.registerOnSharedPreferenceChangeListener(preferenceListener)
         backgroundColor = prefs.getInt(context.getString(R.string.app_options_bg_colour_key), 0xFFFFFFFF)
         lockToScreen = prefs.getBoolean("lock_to_screen", false)
+        fitPatternWidth = prefs.getBoolean("fit_pattern_width", false)
+        zoomPattern(fitPatternWidth)
         bitmapToDrawPaint = Paint()
         bitmapToDrawPaint.isAntiAlias = true
         bitmapToDrawPaint.isFilterBitmap = true
@@ -138,11 +140,10 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         moveSrcRectAndCheckBounds(0, 0)
     }
 
-    internal fun zoomPattern() {
+    private fun zoomPattern(fitPatternWidth: Boolean) {
+        this.fitPatternWidth = fitPatternWidth
         if (knitPatternDrawer == null)
             return
-
-        fitPatternWidth = !fitPatternWidth
         zoomSrcRect()
         updatePatternDstRectangle()
         updateCurrentView()
@@ -205,6 +206,9 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
             if (key == "lock") {
                 lockToScreen = sharedPreferences.getBoolean(key, lockToScreen)
                 updateCurrentView()
+            }
+            if (key == "fit_pattern_width") {
+                zoomPattern(sharedPreferences.getBoolean(key, false))
             }
         }
     }

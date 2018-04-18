@@ -2,6 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/zoom_button"
+        android:icon="@drawable/ic_horizontal_fit_white_24px"
+        android:title="@string/fit_pattern_width"
+        android:checkable="true"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="0" />
+    <item
         android:id="@+id/lock_button"
         android:icon="@drawable/ic_lock_white_24dp"
         android:title="@string/lock_button_label"
