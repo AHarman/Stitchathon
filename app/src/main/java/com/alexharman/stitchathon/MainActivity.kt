@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.NavigationView
+import android.support.v4.content.ContextCompat
 import android.support.v4.view.GestureDetectorCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -79,9 +80,13 @@ class MainActivity :
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
+        val zoomButton = menu.findItem(R.id.zoom_button)
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fit_pattern_width", false)) {
-            menu.findItem(R.id.zoom_button).isChecked = true
-            menu.findItem(R.id.zoom_button).icon.alpha = 0x88
+            zoomButton.isChecked = true
+            zoomButton.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_selected)
+        } else {
+            zoomButton.isChecked = false
+            zoomButton.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_unselected)
         }
         return true
     }
@@ -143,9 +148,9 @@ class MainActivity :
     private fun zoomButtonPressed(item: MenuItem) {
         item.isChecked = !item.isChecked
         if (item.isChecked) {
-            item.icon.alpha = 0xFF
+            item.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_selected)
         } else {
-            item.icon.alpha = 0x88
+            item.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_unselected)
         }
         PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()

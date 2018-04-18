@@ -2,4 +2,6 @@
 <resources>
     <integer name="default_stitch_size">10</integer>
     <integer name="default_stitch_pad">2</integer>
+    <integer name="icon_alpha_selected">0xFF</integer>
+    <integer name="icon_alpha_unselected">0x89</integer>
 </resources>
