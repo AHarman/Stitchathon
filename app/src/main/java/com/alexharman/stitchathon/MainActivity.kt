@@ -215,6 +215,7 @@ class MainActivity :
         val editor = PreferenceManager.getDefaultSharedPreferences(this).edit()
         findViewById<TextView>(R.id.nav_drawer_pattern_name).text = knitPattern.name
         findViewById<ImageView>(R.id.nav_drawer_image).setImageBitmap(thumbnail)
+        findViewById<Toolbar>(R.id.toolbar)?.title = knitPattern.name
 
         editor.putString("pattern", knitPattern.name)
         editor.apply()
@@ -225,6 +226,7 @@ class MainActivity :
         knitPatternView.clearPattern()
         findViewById<ImageView>(R.id.nav_drawer_image).setImageResource(R.drawable.logo)
         findViewById<TextView>(R.id.nav_drawer_pattern_name).text = ""
+        findViewById<Toolbar>(R.id.toolbar).title = getString(R.string.title_activity_main)
         updateStitchCounter()
         getPreferences(Context.MODE_PRIVATE).edit()
                 .remove("pattern")
