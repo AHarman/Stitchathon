@@ -80,13 +80,11 @@ class MainActivity :
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
         val zoomButton = menu.findItem(R.id.zoom_button)
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fit_pattern_width", false)) {
-            zoomButton.isChecked = true
-            zoomButton.icon.alpha = resources.getInteger(R.integer.icon_alpha_selected)
-        } else {
-            zoomButton.isChecked = false
-            zoomButton.icon.alpha = resources.getInteger(R.integer.icon_alpha_unselected)
-        }
+        val lockButton = menu.findItem(R.id.lock_button)
+        lockButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("lock", false)
+        lockButton.icon = getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
+        zoomButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fit_pattern_width", false)
+        zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         return true
     }
 
@@ -95,7 +93,7 @@ class MainActivity :
             R.id.action_settings -> true
             R.id.zoom_button -> { zoomButtonPressed(item); true }
             R.id.go_to_stitch_button -> { gotToStitch(); true }
-            R.id.lock_button -> { lockButtonPressed(); true }
+            R.id.lock_button -> { lockButtonPressed(item); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -147,16 +145,12 @@ class MainActivity :
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event)}
     }
 
-    private fun zoomButtonPressed(item: MenuItem) {
-        item.isChecked = !item.isChecked
-        if (item.isChecked) {
-            item.icon.alpha = resources.getInteger(R.integer.icon_alpha_selected)
-        } else {
-            item.icon.alpha = resources.getInteger(R.integer.icon_alpha_unselected)
-        }
+    private fun zoomButtonPressed(zoomButton: MenuItem) {
+        zoomButton.isChecked = !zoomButton.isChecked
+        zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()
-                .putBoolean("fit_pattern_width", item.isChecked)
+                .putBoolean("fit_pattern_width", zoomButton.isChecked)
                 .apply()
     }
 
@@ -166,12 +160,12 @@ class MainActivity :
                 .show(supportFragmentManager, "Go to stitch")
     }
 
-    private fun lockButtonPressed() {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val currentVal = preferences.getBoolean("lock", false)
-        preferences
+    private fun lockButtonPressed(lockButton: MenuItem) {
+        lockButton.isChecked = !lockButton.isChecked
+        lockButton.icon = getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
+        PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()
-                .putBoolean("lock", !currentVal)
+                .putBoolean("lock", lockButton.isChecked)
                 .apply()
     }
 
