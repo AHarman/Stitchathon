@@ -185,7 +185,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     }
 
     internal fun scroll(distanceX: Float, distanceY: Float) {
-        if (lockToScreen) return
+        if (lockToScreen || knitPatternDrawer == null) return
         val ratio = patternSrcRectangle.width().toFloat() / patternDstRectangle!!.width()
 
         moveSrcRectAndCheckBounds((distanceX * ratio).toInt(),(distanceY * ratio).toInt())
