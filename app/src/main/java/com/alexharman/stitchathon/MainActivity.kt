@@ -11,7 +11,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.NavigationView
-import android.support.v4.content.ContextCompat
 import android.support.v4.view.GestureDetectorCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -83,10 +82,10 @@ class MainActivity :
         val zoomButton = menu.findItem(R.id.zoom_button)
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fit_pattern_width", false)) {
             zoomButton.isChecked = true
-            zoomButton.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_selected)
+            zoomButton.icon.alpha = resources.getInteger(R.integer.icon_alpha_selected)
         } else {
             zoomButton.isChecked = false
-            zoomButton.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_unselected)
+            zoomButton.icon.alpha = resources.getInteger(R.integer.icon_alpha_unselected)
         }
         return true
     }
@@ -151,9 +150,9 @@ class MainActivity :
     private fun zoomButtonPressed(item: MenuItem) {
         item.isChecked = !item.isChecked
         if (item.isChecked) {
-            item.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_selected)
+            item.icon.alpha = resources.getInteger(R.integer.icon_alpha_selected)
         } else {
-            item.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_unselected)
+            item.icon.alpha = resources.getInteger(R.integer.icon_alpha_unselected)
         }
         PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()
