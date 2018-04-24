@@ -136,8 +136,11 @@ class MainActivity :
 
         knitPatternView = findViewById(R.id.knitView)
         stitchCount = findViewById(R.id.stitch_counter)
+        stitchCount.text = getString(R.string.stitches_done, 0)
         rowCount = findViewById(R.id.row_counter)
+        rowCount.text = getString(R.string.rows_done, 0)
         completeCount = findViewById(R.id.complete_counter)
+        completeCount.text = getString(R.string.complete_counter, 0)
 
         findViewById<Button>(R.id.increment_row_button).setOnClickListener { knitPatternDrawer?.incrementRow(); knitPatternView.updateCurrentView(); updateStitchCounter() }
         findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.updateCurrentView(); updateStitchCounter() }
@@ -192,16 +195,9 @@ class MainActivity :
 
     fun updateStitchCounter() {
         val pattern = knitPatternDrawer?.knitPattern
-        if (pattern == null) {
-            stitchCount.text = ""
-            rowCount.text = ""
-            completeCount.text = ""
-            return
-        }
-
-        stitchCount.text = getString(R.string.stitches_done, pattern.stitchesDoneInRow)
-        rowCount.text = getString(R.string.rows_done, pattern.currentRow)
-        completeCount.text = getString(R.string.complete_counter, 100 * pattern.totalStitchesDone / pattern.totalStitches)
+        stitchCount.text = getString(R.string.stitches_done, pattern?.stitchesDoneInRow ?: 0)
+        rowCount.text = getString(R.string.rows_done, pattern?.currentRow ?: 0)
+        completeCount.text = getString(R.string.complete_counter, 100 * (pattern?.totalStitchesDone?:0) / (pattern?.totalStitches?:1))
     }
 
     override fun onPause() {

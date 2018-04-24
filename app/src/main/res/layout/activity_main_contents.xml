@@ -37,7 +37,7 @@
             android:orientation="vertical"
             android:layout_alignParentBottom="true"
             android:id="@id/bottom_section">
-            <LinearLayout
+            <android.support.constraint.ConstraintLayout
                 android:id="@+id/pattern_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -50,25 +50,27 @@
                     android:text="@string/stitches_done"
                     android:textAlignment="textStart"
                     android:layout_height="wrap_content"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"/>
+                    android:layout_width="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent" />
                 <TextView
                     style="@android:style/TextAppearance.DeviceDefault.Medium"
                     android:id="@+id/row_counter"
                     android:text="@string/rows_done"
                     android:textAlignment="textStart"
                     android:layout_height="wrap_content"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"/>
+                    android:layout_width="wrap_content"
+                    app:layout_constraintStart_toEndOf="@id/stitch_counter"
+                    app:layout_constraintEnd_toStartOf="@id/complete_counter"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"/>
                 <TextView
                     style="@android:style/TextAppearance.DeviceDefault.Medium"
                     android:id="@+id/complete_counter"
                     android:text="@string/complete_counter"
                     android:textAlignment="textStart"
                     android:layout_height="wrap_content"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"/>
-            </LinearLayout>
+                    android:layout_width="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+            </android.support.constraint.ConstraintLayout>
             <LinearLayout
                 style="?android:attr/buttonBarStyle"
                 android:id="@+id/bottom_buttons"
