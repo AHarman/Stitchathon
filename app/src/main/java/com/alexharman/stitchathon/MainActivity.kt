@@ -83,6 +83,7 @@ class MainActivity :
         val lockButton = menu.findItem(R.id.lock_button)
         lockButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("lock", false)
         lockButton.icon = getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
+        lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         zoomButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fit_pattern_width", false)
         zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         return true
@@ -163,6 +164,7 @@ class MainActivity :
     private fun lockButtonPressed(lockButton: MenuItem) {
         lockButton.isChecked = !lockButton.isChecked
         lockButton.icon = getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
+        lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()
                 .putBoolean("lock", lockButton.isChecked)
