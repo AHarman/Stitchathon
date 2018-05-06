@@ -305,5 +305,12 @@ class MainActivity :
         override fun onDown(e: MotionEvent): Boolean {
             return true
         }
+
+        override fun onLongPress(e: MotionEvent?) {
+            // TODO: Add vibrate
+            knitPatternDrawer?.incrementBlock()
+            updateStitchCounter()
+            knitPatternView.updateCurrentView()
+        }
     }
 }
