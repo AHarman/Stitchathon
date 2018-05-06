@@ -18,8 +18,8 @@ class GetNamesAndImagesTask(context: Context, callback: GetNamesAndThumbnails) :
     override fun onPostExecute(map: HashMap<String, Bitmap>) {
         callback.get()!!.onNamesAndThumbnailsReturn(map)
     }
-}
 
-interface GetNamesAndThumbnails {
-    fun onNamesAndThumbnailsReturn(map: HashMap<String, Bitmap>)
+    interface GetNamesAndThumbnails {
+        fun onNamesAndThumbnailsReturn(map: HashMap<String, Bitmap>)
+    }
 }

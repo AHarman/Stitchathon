@@ -212,8 +212,9 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
             }
         }
     }
+
+    private fun SharedPreferences.getInt(key: String, default: Long): Int {
+        return getInt(key, default.toInt())
+    }
 }
 
-private fun SharedPreferences.getInt(key: String, default: Long): Int {
-    return getInt(key, default.toInt())
-}

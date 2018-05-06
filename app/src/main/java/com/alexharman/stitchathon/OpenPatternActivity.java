@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.DeletePatternsTask;
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.GetNamesAndImagesTask;
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.GetNamesAndThumbnails;
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.GetNamesAndImagesTask.GetNamesAndThumbnails;
 
 import org.jetbrains.annotations.NotNull;
 
