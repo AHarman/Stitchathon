@@ -60,7 +60,7 @@ class MainActivity :
         db = AppDatabase.getAppDatabase(applicationContext)
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val patternName = sharedPreferences.getString("pattern", null)
+        val patternName = sharedPreferences.getString(getString(R.string.current_pattern_name_key), null)
         if (patternName != null) {
             openPattern(patternName)
         }
@@ -81,10 +81,10 @@ class MainActivity :
         menuInflater.inflate(R.menu.main, menu)
         val zoomButton = menu.findItem(R.id.zoom_button)
         val lockButton = menu.findItem(R.id.lock_button)
-        lockButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("lock", false)
+        lockButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.lock_to_screen_key), false)
         lockButton.icon = getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
         lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
-        zoomButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fit_pattern_width", false)
+        zoomButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.fit_pattern_width_key), false)
         zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         return true
     }
@@ -151,7 +151,7 @@ class MainActivity :
         zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()
-                .putBoolean("fit_pattern_width", zoomButton.isChecked)
+                .putBoolean(getString(R.string.fit_pattern_width_key), zoomButton.isChecked)
                 .apply()
     }
 
@@ -167,7 +167,7 @@ class MainActivity :
         lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()
-                .putBoolean("lock", lockButton.isChecked)
+                .putBoolean(getString(R.string.lock_to_screen_key), lockButton.isChecked)
                 .apply()
     }
 
@@ -212,7 +212,7 @@ class MainActivity :
         findViewById<ImageView>(R.id.nav_drawer_image).setImageBitmap(thumbnail)
         findViewById<Toolbar>(R.id.toolbar)?.title = knitPattern.name
 
-        editor.putString("pattern", knitPattern.name)
+        editor.putString(getString(R.string.current_pattern_name_key), knitPattern.name)
         editor.apply()
     }
 
@@ -224,7 +224,7 @@ class MainActivity :
         findViewById<Toolbar>(R.id.toolbar).title = getString(R.string.title_activity_main)
         updateStitchCounter()
         getPreferences(Context.MODE_PRIVATE).edit()
-                .remove("pattern")
+                .remove(getString(R.string.current_pattern_name_key))
                 .apply()
     }
 
@@ -259,6 +259,7 @@ class MainActivity :
         }
         if (requestCode == OPEN_INTERNAL_PATTERN && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
+                // TODO: use prefs instead of returning?
                 openPattern(resultData.getStringExtra("patternName"))
             }
         }
@@ -279,7 +280,7 @@ class MainActivity :
 
     private inner class MySharedPreferenceListener : OnSharedPreferenceChangeListener {
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-            if (key == "pattern" && !sharedPreferences.contains("pattern")) {
+            if (key == getString(R.string.current_pattern_name_key) && !sharedPreferences.contains(getString(R.string.current_pattern_name_key))) {
                 clearKnitPattern()
             }
         }
@@ -305,6 +306,13 @@ class MainActivity :
 
         override fun onDown(e: MotionEvent): Boolean {
             return true
+        }
+
+        override fun onLongPress(e: MotionEvent?) {
+            // TODO: Add vibrate
+            knitPatternDrawer?.incrementBlock()
+            updateStitchCounter()
+            knitPatternView.updateCurrentView()
         }
     }
 }

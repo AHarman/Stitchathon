@@ -100,8 +100,8 @@ public class OpenPatternActivity extends AppCompatActivity implements GetNamesAn
                         }
                     }
                     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(OpenPatternActivity.this);
-                    if (toBeDeleted.contains(prefs.getString("pattern", ""))) {
-                        prefs.edit().remove("pattern").apply();
+                    if (toBeDeleted.contains(prefs.getString(getString(R.string.current_pattern_name_key), ""))) {
+                        prefs.edit().remove(getString(R.string.current_pattern_name_key)).apply();
                     }
 
                     new DeletePatternsTask(OpenPatternActivity.this).execute(toBeDeleted.toArray(new String[]{}));
