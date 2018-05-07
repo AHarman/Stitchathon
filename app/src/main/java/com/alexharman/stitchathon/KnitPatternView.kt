@@ -35,8 +35,8 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.registerOnSharedPreferenceChangeListener(preferenceListener)
         backgroundColor = prefs.getInt(context.getString(R.string.app_options_bg_colour_key), 0xFFFFFFFF)
-        lockToScreen = prefs.getBoolean("lock_to_screen", false)
-        fitPatternWidth = prefs.getBoolean("fit_pattern_width", false)
+        lockToScreen = prefs.getBoolean(context.getString(R.string.lock_to_screen_key), false)
+        fitPatternWidth = prefs.getBoolean(context.getString(R.string.fit_pattern_width_key), false)
         zoomPattern(fitPatternWidth)
         bitmapToDrawPaint = Paint()
         bitmapToDrawPaint.isAntiAlias = true
@@ -185,7 +185,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     }
 
     internal fun scroll(distanceX: Float, distanceY: Float) {
-        if (lockToScreen) return
+        if (lockToScreen || knitPatternDrawer == null) return
         val ratio = patternSrcRectangle.width().toFloat() / patternDstRectangle!!.width()
 
         moveSrcRectAndCheckBounds((distanceX * ratio).toInt(),(distanceY * ratio).toInt())
@@ -203,11 +203,11 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
                 backgroundColor = sharedPreferences.getInt(key,  backgroundColor)
                 updateCurrentView()
             }
-            if (key == "lock") {
+            if (key == context.getString(R.string.lock_to_screen_key)) {
                 lockToScreen = sharedPreferences.getBoolean(key, lockToScreen)
                 updateCurrentView()
             }
-            if (key == "fit_pattern_width") {
+            if (key == context.getString(R.string.fit_pattern_width_key)) {
                 zoomPattern(sharedPreferences.getBoolean(key, false))
             }
         }

@@ -11,7 +11,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.NavigationView
-import android.support.v4.content.ContextCompat
 import android.support.v4.view.GestureDetectorCompat
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
@@ -61,7 +60,7 @@ class MainActivity :
         db = AppDatabase.getAppDatabase(applicationContext)
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val patternName = sharedPreferences.getString("pattern", null)
+        val patternName = sharedPreferences.getString(getString(R.string.current_pattern_name_key), null)
         if (patternName != null) {
             openPattern(patternName)
         }
@@ -81,13 +80,12 @@ class MainActivity :
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
         val zoomButton = menu.findItem(R.id.zoom_button)
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fit_pattern_width", false)) {
-            zoomButton.isChecked = true
-            zoomButton.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_selected)
-        } else {
-            zoomButton.isChecked = false
-            zoomButton.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_unselected)
-        }
+        val lockButton = menu.findItem(R.id.lock_button)
+        lockButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.lock_to_screen_key), false)
+        lockButton.icon = getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
+        lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
+        zoomButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.fit_pattern_width_key), false)
+        zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         return true
     }
 
@@ -96,7 +94,7 @@ class MainActivity :
             R.id.action_settings -> true
             R.id.zoom_button -> { zoomButtonPressed(item); true }
             R.id.go_to_stitch_button -> { gotToStitch(); true }
-            R.id.lock_button -> { lockButtonPressed(); true }
+            R.id.lock_button -> { lockButtonPressed(item); true }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -148,16 +146,12 @@ class MainActivity :
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event)}
     }
 
-    private fun zoomButtonPressed(item: MenuItem) {
-        item.isChecked = !item.isChecked
-        if (item.isChecked) {
-            item.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_selected)
-        } else {
-            item.icon.alpha = ContextCompat.getColor(this, R.integer.icon_alpha_unselected)
-        }
+    private fun zoomButtonPressed(zoomButton: MenuItem) {
+        zoomButton.isChecked = !zoomButton.isChecked
+        zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()
-                .putBoolean("fit_pattern_width", item.isChecked)
+                .putBoolean(getString(R.string.fit_pattern_width_key), zoomButton.isChecked)
                 .apply()
     }
 
@@ -167,12 +161,13 @@ class MainActivity :
                 .show(supportFragmentManager, "Go to stitch")
     }
 
-    private fun lockButtonPressed() {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val currentVal = preferences.getBoolean("lock", false)
-        preferences
+    private fun lockButtonPressed(lockButton: MenuItem) {
+        lockButton.isChecked = !lockButton.isChecked
+        lockButton.icon = getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
+        lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
+        PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()
-                .putBoolean("lock", !currentVal)
+                .putBoolean(getString(R.string.lock_to_screen_key), lockButton.isChecked)
                 .apply()
     }
 
@@ -217,7 +212,7 @@ class MainActivity :
         findViewById<ImageView>(R.id.nav_drawer_image).setImageBitmap(thumbnail)
         findViewById<Toolbar>(R.id.toolbar)?.title = knitPattern.name
 
-        editor.putString("pattern", knitPattern.name)
+        editor.putString(getString(R.string.current_pattern_name_key), knitPattern.name)
         editor.apply()
     }
 
@@ -229,7 +224,7 @@ class MainActivity :
         findViewById<Toolbar>(R.id.toolbar).title = getString(R.string.title_activity_main)
         updateStitchCounter()
         getPreferences(Context.MODE_PRIVATE).edit()
-                .remove("pattern")
+                .remove(getString(R.string.current_pattern_name_key))
                 .apply()
     }
 
@@ -264,6 +259,7 @@ class MainActivity :
         }
         if (requestCode == OPEN_INTERNAL_PATTERN && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
+                // TODO: use prefs instead of returning?
                 openPattern(resultData.getStringExtra("patternName"))
             }
         }
@@ -284,7 +280,7 @@ class MainActivity :
 
     private inner class MySharedPreferenceListener : OnSharedPreferenceChangeListener {
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-            if (key == "pattern" && !sharedPreferences.contains("pattern")) {
+            if (key == getString(R.string.current_pattern_name_key) && !sharedPreferences.contains(getString(R.string.current_pattern_name_key))) {
                 clearKnitPattern()
             }
         }
@@ -310,6 +306,13 @@ class MainActivity :
 
         override fun onDown(e: MotionEvent): Boolean {
             return true
+        }
+
+        override fun onLongPress(e: MotionEvent?) {
+            // TODO: Add vibrate
+            knitPatternDrawer?.incrementBlock()
+            updateStitchCounter()
+            knitPatternView.updateCurrentView()
         }
     }
 }
