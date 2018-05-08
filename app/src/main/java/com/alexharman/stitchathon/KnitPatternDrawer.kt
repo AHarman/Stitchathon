@@ -201,7 +201,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
         val currentRow = knitPattern.stitches[knitPattern.currentRow]
         var stitchesToDo = 0
         while (stitchesToDo + knitPattern.stitchesDoneInRow < currentRow.size &&
-                currentRow[knitPattern.nextStitchInRow + stitchesToDo].type == stitchType) {
+                currentRow[knitPattern.nextStitchInRow + stitchesToDo * knitPattern.rowDirection].type == stitchType) {
             stitchesToDo++
         }
         increment(stitchesToDo)
