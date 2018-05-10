@@ -140,8 +140,8 @@ class MainActivity :
         completeCount = findViewById(R.id.complete_counter)
         completeCount.text = getString(R.string.complete_counter, 0)
 
-        findViewById<Button>(R.id.increment_row_button).setOnClickListener { knitPatternDrawer?.incrementRow(); knitPatternView.updateCurrentView(); updateStitchCounter() }
-        findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.updateCurrentView(); updateStitchCounter() }
+        findViewById<Button>(R.id.increment_row_button).setOnClickListener { knitPatternDrawer?.incrementRow(); knitPatternView.invalidate(); updateStitchCounter() }
+        findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.invalidate(); updateStitchCounter() }
         knitPatternViewGestureDetector = GestureDetectorCompat(this, KnitPatternViewGestureListener())
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event)}
     }
@@ -204,21 +204,22 @@ class MainActivity :
     private fun setKnitPattern(knitPattern: KnitPattern,
                                knitPatternDrawer: KnitPatternDrawer = KnitPatternDrawer(knitPattern, this),
                                thumbnail: Bitmap = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)) {
+        knitPatternDrawer.createPatternBitmap(knitPatternView.width, knitPatternView.height)
         this.knitPatternDrawer = knitPatternDrawer
-        knitPatternView.setPattern(knitPatternDrawer)
+        knitPatternView.knitPatternDrawer = knitPatternDrawer
         updateStitchCounter()
-        val editor = PreferenceManager.getDefaultSharedPreferences(this).edit()
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putString(getString(R.string.current_pattern_name_key), knitPattern.name)
+                .apply()
         findViewById<TextView>(R.id.nav_drawer_pattern_name).text = knitPattern.name
         findViewById<ImageView>(R.id.nav_drawer_image).setImageBitmap(thumbnail)
         findViewById<Toolbar>(R.id.toolbar)?.title = knitPattern.name
-
-        editor.putString(getString(R.string.current_pattern_name_key), knitPattern.name)
-        editor.apply()
     }
 
     private fun clearKnitPattern() {
         this.knitPatternDrawer = null
-        knitPatternView.clearPattern()
+        knitPatternView.knitPatternDrawer = null
         findViewById<ImageView>(R.id.nav_drawer_image).setImageResource(R.drawable.logo)
         findViewById<TextView>(R.id.nav_drawer_pattern_name).text = ""
         findViewById<Toolbar>(R.id.toolbar).title = getString(R.string.title_activity_main)
@@ -274,7 +275,7 @@ class MainActivity :
         val myRow = if (row < 0) knitPattern.currentRow else min(knitPattern.numRows - 1, row)
         val myCol = if (col < 0) min(knitPattern.stitchesDoneInRow, knitPattern.stitches[myRow].size - 1) else min(knitPattern.stitches[myRow].size - 1, col)
         knitPatternDrawer?.markStitchesTo(myRow, myCol)
-        knitPatternView.updateCurrentView()
+        knitPatternView.invalidate()
         updateStitchCounter()
     }
 
@@ -290,7 +291,7 @@ class MainActivity :
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             knitPatternDrawer?.increment()
             updateStitchCounter()
-            knitPatternView.updateCurrentView()
+            knitPatternView.invalidate()
             return true
         }
 
@@ -300,7 +301,8 @@ class MainActivity :
         }
 
         override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
-            knitPatternView.scroll(distanceX, distanceY)
+            knitPatternDrawer?.scroll(distanceX, distanceY)
+            knitPatternView.invalidate()
             return true
         }
 
@@ -312,7 +314,7 @@ class MainActivity :
             // TODO: Add vibrate
             knitPatternDrawer?.incrementBlock()
             updateStitchCounter()
-            knitPatternView.updateCurrentView()
+            knitPatternView.invalidate()
         }
     }
 }
