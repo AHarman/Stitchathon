@@ -8,7 +8,6 @@ import android.net.Uri
 import android.util.Log
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
-import com.google.gson.Gson
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
@@ -77,7 +76,12 @@ abstract class KnitPatternDao {
     private fun writeStitchesToFile(knitPattern: KnitPattern, path: String, context: Context) {
         try {
             val outputStream = context.openFileOutput(path, Context.MODE_PRIVATE)
-            outputStream.write(Gson().toJson(knitPattern.stitches).toByteArray())
+            val sb = StringBuilder()
+            knitPattern.stitches.map {
+                row -> row.map { col -> sb.append(col.toString());sb.append(",") }
+                sb.replace(sb.lastIndex, sb.length, "\n")
+            }
+            outputStream.write(sb.toString().toByteArray())
             outputStream.close()
         } catch (e: IOException) {
             e.printStackTrace()
@@ -97,13 +101,14 @@ abstract class KnitPatternDao {
     }
 
     private fun readStitchesFromFile(path: String, context: Context): Array<Array<Stitch>> {
-        val stringBuilder = StringBuilder()
+        val stitches = ArrayList<Array<Stitch>>()
         try {
             val inputStream = context.openFileInput(path)
             val reader = BufferedReader(InputStreamReader(inputStream))
-
-            for (line in reader.readLine()) {
-                stringBuilder.append(line)
+            for (line in reader.lineSequence()) {
+                stitches.add(line.trim().split(",").map {
+                        Stitch(it)
+                    }.toTypedArray())
             }
             inputStream.close()
             reader.close()
@@ -112,7 +117,7 @@ abstract class KnitPatternDao {
             throw e
         }
 
-        return Gson().fromJson(stringBuilder.toString(), Array<Array<Stitch>>::class.java)
+        return stitches.toTypedArray()
     }
 
     private fun readBitmapFromFile(path: String, context: Context): Bitmap {
