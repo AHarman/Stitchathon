@@ -22,11 +22,11 @@ abstract class KnitPatternDao {
     }
 
     @Transaction
-    open fun saveNewPattern(knitPattern: KnitPattern, thumbnail: Bitmap, context: Context) {
+    open fun saveNewPattern(knitPattern: KnitPattern, /*thumbnail: Bitmap,*/ context: Context) {
         Log.v("Database", "saveNewPattern: ${knitPattern.name}")
         val kpe = KnitPatternEntity(knitPattern)
         writeStitchesToFile(knitPattern, kpe.stitchesFilePath, context)
-        writeBitmapToFile(thumbnail, kpe.thumbnailFilePath, context)
+//        writeBitmapToFile(thumbnail, kpe.thumbnailFilePath, context)
         insertKnitPatternEntity(kpe)
     }
 
@@ -39,9 +39,9 @@ abstract class KnitPatternDao {
     }
 
     @Transaction
-    open fun getThumbnails(context: Context): HashMap<String, Bitmap> {
+    open fun getThumbnails(context: Context): HashMap<String, Bitmap?> {
         Log.v("Database", "Getting all thumbnails")
-        val hashmap = HashMap<String, Bitmap>()
+        val hashmap = HashMap<String, Bitmap?>()
         selectAllKnitPatterns().forEach { kpe: KnitPatternEntity -> hashmap[kpe.name] = readBitmapFromFile(kpe.thumbnailFilePath, context) }
         return hashmap
     }
@@ -63,7 +63,7 @@ abstract class KnitPatternDao {
     }
 
     @Transaction
-    open fun getThumbnail(context: Context, name: String): Bitmap {
+    open fun getThumbnail(context: Context, name: String): Bitmap? {
         Log.v("Database", "Getting thumbnail for $name")
         return readBitmapFromFile(selectThumbnailFilePath(name), context)
     }
@@ -120,8 +120,8 @@ abstract class KnitPatternDao {
         return stitches.toTypedArray()
     }
 
-    private fun readBitmapFromFile(path: String, context: Context): Bitmap {
-        val bitmap: Bitmap
+    private fun readBitmapFromFile(path: String, context: Context): Bitmap? {
+        var bitmap: Bitmap? = null
         val pathUri = Uri.fromFile(File(context.filesDir.toString() + "/" + path))
         val opts = BitmapFactory.Options()
         opts.inMutable = true
@@ -131,7 +131,6 @@ abstract class KnitPatternDao {
             inputStream.close()
         } catch (e: Exception) {
             e.printStackTrace()
-            throw e
         }
         return bitmap
     }

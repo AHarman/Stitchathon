@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import android.graphics.Bitmap
-import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -115,8 +113,8 @@ class MainActivity :
         return true
     }
 
-    override fun onPatternReturned(knitPattern: KnitPattern, knitPatternDrawer: KnitPatternDrawer, thumbnail: Bitmap) {
-        setKnitPattern(knitPattern, knitPatternDrawer, thumbnail)
+    override fun onPatternReturned(knitPattern: KnitPattern, knitPatternDrawer: KnitPatternDrawer/*, thumbnail: Bitmap*/) {
+        setKnitPattern(knitPattern, knitPatternDrawer/*, thumbnail*/)
     }
 
     private fun setUpUI() {
@@ -202,8 +200,8 @@ class MainActivity :
     }
 
     private fun setKnitPattern(knitPattern: KnitPattern,
-                               knitPatternDrawer: KnitPatternDrawer = KnitPatternDrawer(knitPattern, this),
-                               thumbnail: Bitmap = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)) {
+                               knitPatternDrawer: KnitPatternDrawer = KnitPatternDrawer(knitPattern, this)/*,
+                               thumbnail: Bitmap = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)*/) {
         knitPatternDrawer.createPatternBitmap(knitPatternView.width, knitPatternView.height)
         this.knitPatternDrawer = knitPatternDrawer
         knitPatternView.knitPatternDrawer = knitPatternDrawer
@@ -213,7 +211,7 @@ class MainActivity :
                 .putString(getString(R.string.current_pattern_name_key), knitPattern.name)
                 .apply()
         findViewById<TextView>(R.id.nav_drawer_pattern_name).text = knitPattern.name
-        findViewById<ImageView>(R.id.nav_drawer_image).setImageBitmap(thumbnail)
+//        findViewById<ImageView>(R.id.nav_drawer_image).setImageBitmap(thumbnail)
         findViewById<Toolbar>(R.id.toolbar)?.title = knitPattern.name
     }
 

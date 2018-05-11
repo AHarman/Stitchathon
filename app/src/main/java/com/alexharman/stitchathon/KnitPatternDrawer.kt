@@ -117,13 +117,12 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
 
     fun drawPattern() {
         val canvas = Canvas(patternBitmap)
-        // Something in the next 4 lines is wrong.
         var col = floor(currentView.left / (stitchSize + stitchPad)).toInt()
         var row = floor(currentView.top / (stitchSize + stitchPad)).toInt()
         var totalXTranslate = max(currentView.left, stitchPad)
         var totalYTranslate = max(currentView.top, stitchPad)
         canvas.translate(totalXTranslate, totalYTranslate)
-//        canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR)
+        canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR)
 
         Log.d("Drawing pattern", "currentView top: ${currentView.top}, left: ${currentView.left}")
         Log.d("Drawing pattern", "currentView bottom: ${currentView.bottom}, right: ${currentView.right}")
@@ -131,8 +130,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
         while (totalYTranslate < currentView.bottom) {
             canvas.save()
             while (totalXTranslate < currentView.right) {
-                Log.d("Drawing pattern", "row: $row, col: $col")
-                Log.d("Drawing pattern", "x: $totalXTranslate, y: $totalYTranslate")
+//                Log.d("Drawing pattern", "row: $row, col: $col")
+//                Log.d("Drawing pattern", "x: $totalXTranslate, y: $totalYTranslate")
                 val isDone = row < knitPattern.currentRow ||
                         row == knitPattern.currentRow && knitPattern.rowDirection == 1 && col < knitPattern.nextStitchInRow ||
                         row == knitPattern.currentRow && knitPattern.rowDirection == -1 && col > knitPattern.nextStitchInRow
@@ -233,21 +232,14 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
     }
 
     internal fun scroll(distanceX: Float, distanceY: Float) {
-//        if (lockToScreen) return
-//        val ratio = currentView.width() / patternBitmap.width
-//
-//        moveCurrentViewAndCheckBounds((distanceX * ratio).toInt(), (distanceY * ratio).toInt())
-//        drawPattern()
-    }
+        if (lockToScreen) return
+        val ratio = currentView.width() / patternBitmap.width
 
+        moveCurrentViewAndCheckBounds((distanceX * ratio).toInt(), (distanceY * ratio).toInt())
+        drawPattern()
+    }
 
     private fun zoomPattern() {
-//        this.fitPatternWidth = fitPatternWidth
-//        zoomSrcRect()
-//        drawPattern()
-    }
-
-    private fun zoomSrcRect() {
 //        val centreX = currentView.centerX()
 //        val centreY = currentView.centerY()
 //        val srcRectHeight: Int
@@ -296,8 +288,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
 //        currentView.bottom += myShiftY
     }
 
-    fun resize(width: Int, height: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun setViewSize(width: Int, height: Int) {
+        currentView = RectF(0f, 0f, min(width.toFloat(), knitPattern.patternWidth * (stitchPad + stitchSize) + stitchPad), min(height.toFloat(), knitPattern.stitches.size * (stitchPad + stitchSize) + stitchPad))
     }
 
     inner class MySharedPreferenceListener(val context: Context): SharedPreferences.OnSharedPreferenceChangeListener {
@@ -310,6 +302,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
             if (key == context.getString(R.string.fit_pattern_width_key)) {
                 fitPatternWidth = sharedPreferences.getBoolean(key, false)
                 zoomPattern()
+                drawPattern()
             }
         }
     }

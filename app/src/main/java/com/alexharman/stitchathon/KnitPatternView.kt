@@ -39,7 +39,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         super.onSizeChanged(w, h, oldW, oldH)
 
         val knitPatternDrawer = this.knitPatternDrawer ?: return
-        knitPatternDrawer.resize(width, height)
+        knitPatternDrawer.setViewSize(width, height)
         knitPatternDrawer.drawPattern()
 
     }

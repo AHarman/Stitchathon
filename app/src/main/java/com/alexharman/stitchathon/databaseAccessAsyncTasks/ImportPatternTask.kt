@@ -1,7 +1,5 @@
 package com.alexharman.stitchathon.databaseAccessAsyncTasks
 
-import android.graphics.Bitmap
-import android.media.ThumbnailUtils
 import android.os.AsyncTask
 import android.support.v7.app.AppCompatActivity
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
@@ -16,7 +14,7 @@ internal abstract class ImportPatternTask<V> internal constructor(context: AppCo
     protected var context: WeakReference<AppCompatActivity> = WeakReference(context)
     private var callBack: WeakReference<OpenPattern> = WeakReference(callback)
     private lateinit var knitPatternDrawer: KnitPatternDrawer
-    private lateinit var thumbnail: Bitmap
+//    private lateinit var thumbnail: Bitmap
 
     override fun onPreExecute() {
         progressbarDialog.show(context.get()!!.supportFragmentManager, "Importing image")
@@ -25,9 +23,9 @@ internal abstract class ImportPatternTask<V> internal constructor(context: AppCo
     internal fun saveNewPattern(knitPattern: KnitPattern) {
         publishProgress(context.get()!!.getString(R.string.progress_bar_creating_bitmap))
         knitPatternDrawer = KnitPatternDrawer(knitPattern, context.get()!!)
-        thumbnail = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)
+//        thumbnail = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)
         publishProgress(context.get()!!.getString(R.string.progress_bar_saving_pattern))
-        AppDatabase.getAppDatabase(context.get()!!).knitPatternDao().saveNewPattern(knitPattern, thumbnail, context.get()!!)
+        AppDatabase.getAppDatabase(context.get()!!).knitPatternDao().saveNewPattern(knitPattern, /*thumbnail,*/ context.get()!!)
     }
 
     override fun onProgressUpdate(vararg values: String) {
@@ -37,7 +35,7 @@ internal abstract class ImportPatternTask<V> internal constructor(context: AppCo
     override fun onPostExecute(pattern: KnitPattern?) {
         super.onPostExecute(pattern)
         if (pattern != null) {
-            callBack.get()!!.onPatternReturned(pattern, knitPatternDrawer, thumbnail)
+            callBack.get()!!.onPatternReturned(pattern, knitPatternDrawer/*, thumbnail*/)
         }
         progressbarDialog.dismiss()
     }
