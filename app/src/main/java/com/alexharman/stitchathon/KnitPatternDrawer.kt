@@ -15,6 +15,8 @@ import kotlin.math.min
 class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
     private val stitchSize: Float
     private val stitchPad: Float
+    private val totalPatternHeight: Int
+    private val totalPatternWidth: Int
     private val colours: IntArray
     private var stitchBitmaps: HashMap<Stitch, Bitmap>
     private var stitchPaints: HashMap<Stitch, Paint>
@@ -39,6 +41,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
         colours[2] = prefs.getInt(context.getString(R.string.app_options_stitch_colour_key_3), -1)
         stitchSize = prefs.getString(context.getString(R.string.app_options_stitch_size_key), "").toFloat()
         stitchPad = prefs.getString(context.getString(R.string.app_options_stitch_pad_key), "").toFloat()
+        totalPatternHeight = (knitPattern.stitches.size * (stitchSize + stitchPad) + stitchPad).toInt()
+        totalPatternWidth = (knitPattern.patternWidth * (stitchSize + stitchPad) + stitchPad).toInt()
         lockToScreen = prefs.getBoolean(context.getString(R.string.lock_to_screen_key), false)
         fitPatternWidth = prefs.getBoolean(context.getString(R.string.fit_pattern_width_key), false)
 
@@ -52,7 +56,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
     fun createPatternBitmap(width: Int, height: Int) {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444)
 
-        currentView = RectF(0f, 0f, min(width.toFloat(), knitPattern.patternWidth * (stitchPad + stitchSize) + stitchPad), min(height.toFloat(), knitPattern.stitches.size * (stitchPad + stitchSize) + stitchPad))
+        currentView = RectF(0f, 0f, min(width, totalPatternWidth).toFloat(), min(height, totalPatternHeight).toFloat())
         patternBitmap = bitmap
         scrollToNextStitch()
         drawPattern()
@@ -121,6 +125,11 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
         var row = floor(currentView.top / (stitchSize + stitchPad)).toInt()
         var totalXTranslate = max(currentView.left, stitchPad)
         var totalYTranslate = max(currentView.top, stitchPad)
+
+        if (totalPatternWidth < patternBitmap.width) {
+            canvas.translate((patternBitmap.width - totalPatternWidth).toFloat() / 2, 0f)
+        }
+
         canvas.translate(totalXTranslate, totalYTranslate)
         canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR)
 
