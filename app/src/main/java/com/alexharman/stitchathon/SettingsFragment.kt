@@ -9,12 +9,10 @@ import android.preference.Preference.OnPreferenceClickListener
 import android.preference.PreferenceFragment
 import android.preference.PreferenceManager
 import android.support.v4.content.ContextCompat
-import android.support.v4.content.res.ResourcesCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.DeleteAllPatternsTask
-import com.jaredrummler.android.colorpicker.ColorPreference
 
 class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -25,8 +23,8 @@ class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferen
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == null || sharedPreferences == null) return
-        if (key == getString(R.string.app_options_stitch_size_key) ||
-                key == getString(R.string.app_options_stitch_pad_key)) {
+        if (key == PreferenceKeys.STITCH_SIZE ||
+                key == PreferenceKeys.STITCH_PAD) {
             findPreference(key).summary = sharedPreferences.getString(key, "")
         }
     }
@@ -55,7 +53,7 @@ class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferen
     }
 
     private fun setPrefListeners() {
-        findPreference(getString(R.string.app_options_reset_prefs_key)).onPreferenceClickListener =
+        findPreference(PreferenceKeys.RESET_PREFS).onPreferenceClickListener =
                 OnPreferenceClickListener {
                     val bundle = Bundle()
                     val dialog = ConfirmDialogFragment()
@@ -66,7 +64,7 @@ class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferen
                     dialog.show(fragmentManager, "ResetPrefs")
                     true
                 }
-        findPreference(getString(R.string.app_options_delete_all_key)).onPreferenceClickListener =
+        findPreference(PreferenceKeys.DELETE_ALL).onPreferenceClickListener =
                 OnPreferenceClickListener {
                     val bundle = Bundle()
                     val dialog = ConfirmDialogFragment()
@@ -80,22 +78,15 @@ class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferen
     }
 
     private fun updateSummaryValues() {
-        var key = getString(R.string.app_options_stitch_size_key)
-        findPreference(key).summary = preferenceScreen.sharedPreferences.getString(key, "")
-        key = getString(R.string.app_options_stitch_pad_key)
-        findPreference(key).summary = preferenceScreen.sharedPreferences.getString(key, "")
-        (findPreference(getString(R.string.app_options_stitch_colour_key_1)) as ColorPreference)
-                .saveValue(ResourcesCompat.getColor(resources, R.color.default_stitch_colour_1, null))
-        (findPreference(getString(R.string.app_options_stitch_colour_key_2)) as ColorPreference)
-                .saveValue(ResourcesCompat.getColor(resources, R.color.default_stitch_colour_2, null))
-        (findPreference(getString(R.string.app_options_stitch_colour_key_3)) as ColorPreference)
-                .saveValue(ResourcesCompat.getColor(resources, R.color.default_stitch_colour_3, null))
+        val prefs = preferenceScreen.sharedPreferences
+        findPreference(PreferenceKeys.STITCH_SIZE).summary = prefs.getString(PreferenceKeys.STITCH_SIZE, "")
+        findPreference(PreferenceKeys.STITCH_PAD).summary = prefs.getString(PreferenceKeys.STITCH_PAD, "")
     }
 
-    private fun onDialogConfirm(opcode: Int) {
+    fun onDialogConfirm(opcode: Int) {
         if (opcode == DELETE_ALL_PATTERNS) {
             val editor = PreferenceManager.getDefaultSharedPreferences(activity).edit()
-            editor.remove("pattern")
+            editor.remove(PreferenceKeys.CURRENT_PATTERN_NAME)
             editor.apply()
             DeleteAllPatternsTask(activity).execute()
         } else if (opcode == RESET_ALL_PREFS) {

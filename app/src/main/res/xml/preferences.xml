@@ -5,12 +5,12 @@
         android:title="@string/app_options_stitch_options_title">
         <EditTextPreference
             android:defaultValue="@integer/default_stitch_size"
-            android:key="@string/app_options_stitch_size_key"
+            android:key="stitch_size"
             android:title="@string/app_options_stitch_size_title"
             android:inputType="numberDecimal" />
         <EditTextPreference
             android:defaultValue="@integer/default_stitch_pad"
-            android:key="@string/app_options_stitch_pad_key"
+            android:key="stitch_padding"
             android:title="@string/app_options_stitch_pad_title"
             android:inputType="numberDecimal" />
     </PreferenceCategory>
@@ -18,22 +18,22 @@
         android:title="@string/app_options_colour_options_title">
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_pattern_background_colour"
-            android:key="@string/app_options_bg_colour_key"
+            android:key="bg_colour"
             android:title="@string/options_bg_colour_title"
             app:cpv_colorShape="square" />
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_stitch_colour_1"
-            android:key="@string/app_options_stitch_colour_key_1"
+            android:key="colour_1"
             android:title="@string/options_stitch_colour_title_1"
             app:cpv_colorShape="square" />
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_stitch_colour_2"
-            android:key="@string/app_options_stitch_colour_key_2"
+            android:key="colour_2"
             android:title="@string/options_stitch_colour_title_2"
             app:cpv_colorShape="square" />
         <com.jaredrummler.android.colorpicker.ColorPreference
             android:defaultValue="@color/default_stitch_colour_3"
-            android:key="@string/app_options_stitch_colour_key_3"
+            android:key="colour_3"
             android:title="@string/options_stitch_colour_title_3"
             app:cpv_colorShape="square" />
     </PreferenceCategory>
@@ -42,11 +42,11 @@
         <Preference
             android:title="@string/app_options_delete_all_title"
             android:summary="@string/app_options_delete_all_summary"
-            android:key="@string/app_options_delete_all_key" />
+            android:key="delete_all" />
         <Preference
             android:title="@string/app_options_reset_prefs_title"
             android:summary="@string/app_options_reset_prefs_summary"
-            android:key="@string/app_options_reset_prefs_key">
+            android:key="reset_preferences">
         </Preference>
     </PreferenceCategory>
 </PreferenceScreen>
