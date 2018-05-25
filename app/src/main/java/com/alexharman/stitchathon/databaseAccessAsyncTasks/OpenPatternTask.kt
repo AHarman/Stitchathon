@@ -2,6 +2,7 @@ package com.alexharman.stitchathon.databaseAccessAsyncTasks
 
 import android.graphics.Bitmap
 import android.os.AsyncTask
+import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPatternDrawer
@@ -26,7 +27,7 @@ class OpenPatternTask(context: AppCompatActivity, callback: OpenPattern) : Async
         val knitPattern = dao.getKnitPattern(strings[0], context.get()!!)
         thumbnail = dao.getThumbnail(context.get()!!, knitPattern.name)
         publishProgress(context.get()!!.getString(R.string.progress_bar_creating_bitmap))
-        knitPatternDrawer = KnitPatternDrawer(knitPattern, context.get()!!)
+        knitPatternDrawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(context.get()))
         return knitPattern
     }
 

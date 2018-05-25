@@ -1,17 +1,16 @@
 package com.alexharman.stitchathon
 
-import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.*
-import android.preference.PreferenceManager
 import android.util.Log
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import java.util.*
 
-class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
+class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPreferences) {
     private val stitchSize: Float
     private val stitchPad: Float
-    private val colours: IntArray
+    private val colours: IntArray = IntArray(3)
     private var stitchBitmaps: HashMap<Stitch, Bitmap>
     private var stitchPaints: HashMap<Stitch, Paint>
     private var doneOverlayPaint: Paint
@@ -21,13 +20,11 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, context: Context) {
         private set
 
     init {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        colours = IntArray(3)
-        colours[0] = prefs.getInt(context.getString(R.string.app_options_stitch_colour_key_1), -1)
-        colours[1] = prefs.getInt(context.getString(R.string.app_options_stitch_colour_key_2), -1)
-        colours[2] = prefs.getInt(context.getString(R.string.app_options_stitch_colour_key_3), -1)
-        stitchSize = prefs.getString(context.getString(R.string.app_options_stitch_size_key), "").toFloat()
-        stitchPad = prefs.getString(context.getString(R.string.app_options_stitch_pad_key), "").toFloat()
+        colours[0] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_1, -1)
+        colours[1] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_2, -1)
+        colours[2] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_3, -1)
+        stitchSize = preferences.getString(PreferenceKeys.STITCH_SIZE, "0").toFloat()
+        stitchPad = preferences.getString(PreferenceKeys.STITCH_PAD, "0").toFloat()
 
         stitchPaints = createStitchPaints(knitPattern.stitchTypes)
         doneOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG)

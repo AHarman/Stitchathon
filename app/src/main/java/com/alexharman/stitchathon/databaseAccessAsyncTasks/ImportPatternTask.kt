@@ -3,6 +3,7 @@ package com.alexharman.stitchathon.databaseAccessAsyncTasks
 import android.graphics.Bitmap
 import android.media.ThumbnailUtils
 import android.os.AsyncTask
+import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPatternDrawer
@@ -24,7 +25,7 @@ internal abstract class ImportPatternTask<V> internal constructor(context: AppCo
 
     internal fun saveNewPattern(knitPattern: KnitPattern) {
         publishProgress(context.get()!!.getString(R.string.progress_bar_creating_bitmap))
-        knitPatternDrawer = KnitPatternDrawer(knitPattern, context.get()!!)
+        knitPatternDrawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(context.get()))
         thumbnail = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)
         publishProgress(context.get()!!.getString(R.string.progress_bar_saving_pattern))
         AppDatabase.getAppDatabase(context.get()!!).knitPatternDao().saveNewPattern(knitPattern, thumbnail, context.get()!!)

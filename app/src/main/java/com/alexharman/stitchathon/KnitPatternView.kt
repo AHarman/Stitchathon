@@ -34,9 +34,9 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     init {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.registerOnSharedPreferenceChangeListener(preferenceListener)
-        backgroundColor = prefs.getInt(context.getString(R.string.app_options_bg_colour_key), 0xFFFFFFFF)
-        lockToScreen = prefs.getBoolean(context.getString(R.string.lock_to_screen_key), false)
-        fitPatternWidth = prefs.getBoolean(context.getString(R.string.fit_pattern_width_key), false)
+        backgroundColor = prefs.getInt(PreferenceKeys.BACKGROUND_COLOUR, 0xFFFFFFFF)
+        lockToScreen = prefs.getBoolean(PreferenceKeys.LOCK_TO_SCREEN, false)
+        fitPatternWidth = prefs.getBoolean(PreferenceKeys.FIT_PATTERN_WIDTH, false)
         zoomPattern(fitPatternWidth)
         bitmapToDrawPaint = Paint()
         bitmapToDrawPaint.isAntiAlias = true
@@ -199,15 +199,15 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
     inner class MySharedPreferenceListener: SharedPreferences.OnSharedPreferenceChangeListener {
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-            if (key == context.getString(R.string.app_options_bg_colour_key)) {
+            if (key == PreferenceKeys.BACKGROUND_COLOUR) {
                 backgroundColor = sharedPreferences.getInt(key,  backgroundColor)
                 updateCurrentView()
             }
-            if (key == context.getString(R.string.lock_to_screen_key)) {
+            if (key == PreferenceKeys.LOCK_TO_SCREEN) {
                 lockToScreen = sharedPreferences.getBoolean(key, lockToScreen)
                 updateCurrentView()
             }
-            if (key == context.getString(R.string.fit_pattern_width_key)) {
+            if (key == PreferenceKeys.FIT_PATTERN_WIDTH) {
                 zoomPattern(sharedPreferences.getBoolean(key, false))
             }
         }
