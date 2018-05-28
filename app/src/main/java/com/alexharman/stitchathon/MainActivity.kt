@@ -2,6 +2,7 @@ package com.alexharman.stitchathon
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.NavigationView
@@ -12,10 +13,13 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import com.alexharman.stitchathon.database.AppDatabase
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.ImportImageTask
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.ImportJsonTask
 
 class MainActivity :
         AppCompatActivity(),
-        NavigationView.OnNavigationItemSelectedListener {
+        NavigationView.OnNavigationItemSelectedListener,
+        ImportImageDialog.ImportImageDialogListener {
 
     companion object {
         internal lateinit var db: AppDatabase
@@ -99,31 +103,31 @@ class MainActivity :
         importImageDialog?.show(supportFragmentManager, "Importing image")
     }
 
-//    private fun importJson(uri: Uri?) {
-//        ImportJsonTask(this, this).execute(uri)
-//    }
+    private fun importJson(uri: Uri?) {
+        ImportJsonTask(this, knitPatternFragment).execute(uri)
+    }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
         super.onActivityResult(requestCode, resultCode, resultData)
-//        if (requestCode == READ_EXTERNAL_JSON_PATTERN && resultCode == Activity.RESULT_OK) {
-//            if (resultData != null) {
-//                importJson(resultData.data)
-//            }
-//        }
+        if (requestCode == READ_EXTERNAL_JSON_PATTERN && resultCode == Activity.RESULT_OK) {
+            if (resultData != null) {
+                importJson(resultData.data)
+            }
+        }
         if (requestCode == READ_EXTERNAL_IMAGE && resultCode == Activity.RESULT_OK) {
             if (resultData != null && resultData.data != null) {
                 importImageDialog!!.setUri(resultData.data!!)
             }
         }
-//        if (requestCode == OPEN_INTERNAL_PATTERN && resultCode == Activity.RESULT_OK) {
-//            if (resultData != null) {
-//                // TODO: use prefs instead of returning?
-//                openPattern(resultData.getStringExtra("patternName"))
-//            }
-//        }
+        if (requestCode == OPEN_INTERNAL_PATTERN && resultCode == Activity.RESULT_OK) {
+            if (resultData != null) {
+                // TODO: use prefs instead of returning?
+                knitPatternFragment.openPattern(resultData.getStringExtra("patternName"))
+            }
+        }
     }
 
-//    override fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, numColours: Int) {
-//        ImportImageTask(this, this, imageUri, name, width, height, numColours).execute()
-//    }
+    override fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, numColours: Int) {
+        ImportImageTask(this, knitPatternFragment, imageUri, name, width, height, numColours).execute()
+    }
 }

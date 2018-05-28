@@ -138,7 +138,7 @@ class KnitPatternFragment : Fragment(),
         updateStitchCounter()
     }
 
-    private fun openPattern(patternName: String) {
+    fun openPattern(patternName: String) {
         val context = this.context ?: return
         OpenPatternTask(context, this).execute(patternName)
     }
@@ -147,7 +147,7 @@ class KnitPatternFragment : Fragment(),
         setKnitPattern(knitPattern, knitPatternDrawer, thumbnail)
     }
 
-    private fun setKnitPattern(knitPattern: KnitPattern,
+    fun setKnitPattern(knitPattern: KnitPattern,
                                knitPatternDrawer: KnitPatternDrawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(context)),
                                thumbnail: Bitmap = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)) {
         this.knitPatternDrawer = knitPatternDrawer

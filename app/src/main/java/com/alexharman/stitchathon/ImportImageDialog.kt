@@ -32,7 +32,7 @@ class ImportImageDialog: DialogFragment() {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         try {
-            listener = activity as ImportImageDialogListener
+            listener = (parentFragment ?: activity) as ImportImageDialogListener
         } catch (e: ClassCastException) {
             throw ClassCastException(activity.toString() + " must implement ImportImageDialogListener")
         }
