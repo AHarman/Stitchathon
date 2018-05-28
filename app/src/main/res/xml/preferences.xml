@@ -16,26 +16,26 @@
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/app_options_colour_options_title">
-        <com.jaredrummler.android.colorpicker.ColorPreference
-            android:defaultValue="@color/default_pattern_background_colour"
-            android:key="bg_colour"
-            android:title="@string/options_bg_colour_title"
-            app:cpv_colorShape="square" />
-        <com.jaredrummler.android.colorpicker.ColorPreference
-            android:defaultValue="@color/default_stitch_colour_1"
-            android:key="colour_1"
-            android:title="@string/options_stitch_colour_title_1"
-            app:cpv_colorShape="square" />
-        <com.jaredrummler.android.colorpicker.ColorPreference
-            android:defaultValue="@color/default_stitch_colour_2"
-            android:key="colour_2"
-            android:title="@string/options_stitch_colour_title_2"
-            app:cpv_colorShape="square" />
-        <com.jaredrummler.android.colorpicker.ColorPreference
-            android:defaultValue="@color/default_stitch_colour_3"
-            android:key="colour_3"
-            android:title="@string/options_stitch_colour_title_3"
-            app:cpv_colorShape="square" />
+        <!--<com.jaredrummler.android.colorpicker.ColorPreference-->
+            <!--android:defaultValue="@color/default_pattern_background_colour"-->
+            <!--android:key="bg_colour"-->
+            <!--android:title="@string/options_bg_colour_title"-->
+            <!--app:cpv_colorShape="square" />-->
+        <!--<com.jaredrummler.android.colorpicker.ColorPreference-->
+            <!--android:defaultValue="@color/default_stitch_colour_1"-->
+            <!--android:key="colour_1"-->
+            <!--android:title="@string/options_stitch_colour_title_1"-->
+            <!--app:cpv_colorShape="square" />-->
+        <!--<com.jaredrummler.android.colorpicker.ColorPreference-->
+            <!--android:defaultValue="@color/default_stitch_colour_2"-->
+            <!--android:key="colour_2"-->
+            <!--android:title="@string/options_stitch_colour_title_2"-->
+            <!--app:cpv_colorShape="square" />-->
+        <!--<com.jaredrummler.android.colorpicker.ColorPreference-->
+            <!--android:defaultValue="@color/default_stitch_colour_3"-->
+            <!--android:key="colour_3"-->
+            <!--android:title="@string/options_stitch_colour_title_3"-->
+            <!--app:cpv_colorShape="square" />-->
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/app_options_other_options_title">

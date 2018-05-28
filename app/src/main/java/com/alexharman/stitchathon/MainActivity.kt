@@ -87,8 +87,11 @@ class MainActivity :
     }
 
     private fun openOptions() {
-        val intent = Intent(this, AppOptionsActivity::class.java)
-        startActivity(intent)
+        val frag = SettingsFragment()
+        supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container, frag)
+                .commit()
     }
 
     internal fun selectExternalFile(type: String, requestCode: Int) {

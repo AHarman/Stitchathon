@@ -1,20 +1,21 @@
 package com.alexharman.stitchathon
 
-import android.app.AlertDialog
 import android.app.Dialog
-import android.app.DialogFragment
+import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.Preference.OnPreferenceClickListener
-import android.preference.PreferenceFragment
-import android.preference.PreferenceManager
+import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
+import android.support.v7.preference.Preference.OnPreferenceClickListener
+import android.support.v7.preference.PreferenceFragmentCompat
+import android.support.v7.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.DeleteAllPatternsTask
 
-class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
+class SettingsFragment: PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     companion object {
         const val RESET_ALL_PREFS: Int = 0
@@ -29,8 +30,7 @@ class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferen
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preferences)
         updateSummaryValues()
         setPrefListeners()
@@ -46,9 +46,9 @@ class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferen
         preferenceScreen.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        view.setBackgroundColor(ContextCompat.getColor(activity, android.R.color.white) )
+        view?.setBackgroundColor(ContextCompat.getColor(context!!, android.R.color.white))
         return view
     }
 
@@ -88,7 +88,7 @@ class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferen
             val editor = PreferenceManager.getDefaultSharedPreferences(activity).edit()
             editor.remove(PreferenceKeys.CURRENT_PATTERN_NAME)
             editor.apply()
-            DeleteAllPatternsTask(activity).execute()
+            DeleteAllPatternsTask(context!!).execute()
         } else if (opcode == RESET_ALL_PREFS) {
             PreferenceManager.getDefaultSharedPreferences(activity)
                     .edit()
@@ -101,9 +101,9 @@ class SettingsFragment: PreferenceFragment(), SharedPreferences.OnSharedPreferen
 
     class ConfirmDialogFragment : DialogFragment() {
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            val builder = AlertDialog.Builder(activity)
-                    .setTitle(arguments.getString("title"))
-                    .setMessage(arguments.getString("message"))
+            val builder = AlertDialog.Builder(activity as Context)
+                    .setTitle(arguments?.getString("title"))
+                    .setMessage(arguments?.getString("message"))
                     .setNegativeButton(R.string.cancel, null)
                     .setPositiveButton(R.string.OK, { _, _ -> (targetFragment as SettingsFragment).onDialogConfirm(targetRequestCode) })
             return builder.create()
