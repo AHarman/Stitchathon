@@ -10,7 +10,6 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.view.Menu
 import android.view.MenuItem
 import com.alexharman.stitchathon.database.AppDatabase
 
@@ -46,19 +45,6 @@ class MainActivity :
         } else {
             super.onBackPressed()
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.main, menu)
-        val zoomButton = menu.findItem(R.id.zoom_button)
-        val lockButton = menu.findItem(R.id.lock_button)
-        lockButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKeys.LOCK_TO_SCREEN, false)
-        lockButton.icon = getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
-        lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
-        zoomButton.isChecked = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKeys.FIT_PATTERN_WIDTH, false)
-        zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
-        return true
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

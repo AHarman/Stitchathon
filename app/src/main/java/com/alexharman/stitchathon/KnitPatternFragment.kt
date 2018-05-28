@@ -19,9 +19,9 @@ import com.alexharman.stitchathon.databaseAccessAsyncTasks.OpenPatternTask
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.SavePatternChangesTask
 import kotlin.math.min
 
-
 class KnitPatternFragment : Fragment(),
-        GoToStitchDialog.GoToStitchDialogListener, OpenPattern {
+        GoToStitchDialog.GoToStitchDialogListener,
+        OpenPattern {
 
     private var patternThumbnailView: ImageView? = null
     private var patternNameView: TextView? = null
@@ -69,6 +69,7 @@ class KnitPatternFragment : Fragment(),
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         val activity = this.activity ?: return
+        setHasOptionsMenu(true)
         patternNameView = activity.findViewById(R.id.nav_drawer_pattern_name)
         patternThumbnailView = activity.findViewById(R.id.nav_drawer_image)
         toolbar = activity.findViewById(R.id.toolbar)
@@ -79,6 +80,18 @@ class KnitPatternFragment : Fragment(),
         super.onPause()
         if (knitPatternDrawer != null)
             savePattern()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.main, menu)
+        val zoomButton = menu.findItem(R.id.zoom_button)
+        val lockButton = menu.findItem(R.id.lock_button)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        lockButton.isChecked = prefs.getBoolean(PreferenceKeys.LOCK_TO_SCREEN, false)
+        lockButton.icon = context?.getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
+        lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
+        zoomButton.isChecked = prefs.getBoolean(PreferenceKeys.FIT_PATTERN_WIDTH, false)
+        zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -150,12 +163,11 @@ class KnitPatternFragment : Fragment(),
     }
 
     fun updateStitchCounter() {
-        val pattern = knitPatternDrawer?.knitPattern
-        stitchCount.text = getString(R.string.stitches_done, pattern?.stitchesDoneInRow ?: 0)
-        rowCount.text = getString(R.string.rows_done, pattern?.currentRow ?: 0)
-        completeCount.text = getString(R.string.complete_counter, 100 * (pattern?.totalStitchesDone?:0) / (pattern?.totalStitches?:1))
+        val pattern = knitPatternDrawer?.knitPattern ?: return
+        stitchCount.text = getString(R.string.stitches_done, pattern.stitchesDoneInRow)
+        rowCount.text = getString(R.string.rows_done, pattern.currentRow)
+        completeCount.text = getString(R.string.complete_counter, 100 * pattern.totalStitchesDone / pattern.totalStitches)
     }
-
 
     private fun savePattern() {
         SavePatternChangesTask().execute(knitPatternDrawer?.knitPattern)
@@ -211,5 +223,4 @@ class KnitPatternFragment : Fragment(),
             knitPatternView.updateCurrentView()
         }
     }
-
 }

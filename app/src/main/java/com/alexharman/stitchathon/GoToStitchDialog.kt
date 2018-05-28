@@ -30,7 +30,7 @@ class GoToStitchDialog: DialogFragment() {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         try {
-            listener = activity as GoToStitchDialogListener
+            listener = (parentFragment ?: activity) as GoToStitchDialogListener
         } catch (e: ClassCastException) {
             throw ClassCastException(activity.toString() + " must implement GoToStitchDialogListener")
         }
