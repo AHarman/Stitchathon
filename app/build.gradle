@@ -33,20 +33,24 @@ android {
     }
 }
 
+ext {
+    supportlib_version = '27.1.1' // Lib version
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    implementation 'com.jaredrummler:colorpicker:1.0.2'
+    implementation 'com.github.Kunzisoft:AndroidClearChroma:1.9'
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support:preference-v7:27.1.1'
+    implementation "com.android.support:appcompat-v7:$supportlib_version"
+    implementation "com.android.support:preference-v7:$supportlib_version"
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
-    implementation 'com.android.support:design:27.1.1'
-    implementation 'com.android.support:support-v4:27.1.1'
-    implementation 'com.android.support:support-vector-drawable:27.1.1'
+    implementation "com.android.support:design:$supportlib_version"
+    implementation "com.android.support:support-v4:$supportlib_version"
+    implementation "com.android.support:support-vector-drawable:$supportlib_version"
     testImplementation 'junit:junit:4.12'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
@@ -62,7 +66,19 @@ dependencies {
     testImplementation "org.robolectric:shadows-support-v4:3.3.2"
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == 'com.android.support') {
+            if (!requested.name.startsWith("multidex")) {
+                details.useVersion "$supportlib_version"
+            }
+        }
+    }
+}
+
 repositories {
     mavenCentral()
     google()
+    maven { url "https://jitpack.io" }
 }

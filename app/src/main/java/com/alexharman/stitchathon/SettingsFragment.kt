@@ -5,17 +5,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.preference.Preference.OnPreferenceClickListener
-import android.support.v7.preference.PreferenceFragmentCompat
 import android.support.v7.preference.PreferenceManager
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.DeleteAllPatternsTask
+import com.kunzisoft.androidclearchroma.ChromaPreferenceFragmentCompat
 
-class SettingsFragment: PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
+class SettingsFragment: ChromaPreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     companion object {
         const val RESET_ALL_PREFS: Int = 0
@@ -31,7 +27,7 @@ class SettingsFragment: PreferenceFragmentCompat(), SharedPreferences.OnSharedPr
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        addPreferencesFromResource(R.xml.preferences)
+        setPreferencesFromResource(R.xml.preferences, rootKey)
         updateSummaryValues()
         setPrefListeners()
     }
@@ -44,12 +40,6 @@ class SettingsFragment: PreferenceFragmentCompat(), SharedPreferences.OnSharedPr
     override fun onPause() {
         super.onPause()
         preferenceScreen.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = super.onCreateView(inflater, container, savedInstanceState)
-        view?.setBackgroundColor(ContextCompat.getColor(context!!, android.R.color.white))
-        return view
     }
 
     private fun setPrefListeners() {
