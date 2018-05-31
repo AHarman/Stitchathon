@@ -11,7 +11,7 @@ class KnitPattern {
     // Takes width of stitches into account
     var currentDistanceInRow = 0
         private set
-    var nextStitchInRow = 0
+    var stitchesDoneInRow = 0
         private set
     var totalStitchesDone = 0
         private set
@@ -25,7 +25,7 @@ class KnitPattern {
         this.name = name
         this.stitches = stitches
         this.currentRow = currentRow
-        this.nextStitchInRow = nextStitchInRow
+        this.stitchesDoneInRow = stitchesDoneInRow
         stitchTypes = buildStitchTypes(stitches)
         totalStitches = findTotalStitches(stitches)
         patternWidth = findPatternWidth(stitches)
@@ -64,12 +64,12 @@ class KnitPattern {
 
             currentDistanceInRow += stitches[currentRow][nextStitchInRow].width
             totalStitchesDone++
-            nextStitchInRow += rowDirection
+            stitchesDoneInRow++
 
             if (!isFinished && isEndOfRow) {
                 currentRow++
                 currentDistanceInRow = 0
-                nextStitchInRow = startOfRow
+                stitchesDoneInRow = 0
             }
         }
     }
@@ -86,15 +86,15 @@ class KnitPattern {
     }
 
     fun undoStitch() {
-        if (currentRow == 0 && nextStitchInRow == startOfRow)
+        if (currentRow == 0 && isStartOfRow)
             return
 
         if (isStartOfRow) {
             currentRow--
-            nextStitchInRow = endOfRow
+            stitchesDoneInRow = stitches[currentRow].size - 1
             currentDistanceInRow = stitches[currentRow].sumBy { it.width } - stitches[currentRow][nextStitchInRow].width
         } else {
-            nextStitchInRow -= rowDirection
+            stitchesDoneInRow--
             currentDistanceInRow -= stitches[currentRow][nextStitchInRow].width
         }
         totalStitchesDone--
@@ -106,11 +106,9 @@ class KnitPattern {
             stitches.maxBy { it.sumBy { it.width } }?.sumBy { it.width } ?: 0
 
     private fun findTotalStitchesDone(stitches: Array<Array<Stitch>>, currentRow: Int): Int {
-        var totalStitchesDone = 0
+        var totalStitchesDone = stitchesDoneInRow
         if (currentRow > 0)
-            totalStitchesDone += stitches.sliceArray(IntRange(0, currentRow - 1)).sumBy { it.sumBy { it.width } }
-        if (nextStitchInRow > 0)
-            totalStitchesDone += stitches[currentRow].sliceArray(IntRange(0, nextStitchInRow - 1)).size
+            totalStitchesDone += stitches.sliceArray(IntRange(0, currentRow - 1)).sumBy { it.size }
         return totalStitchesDone
     }
 
@@ -126,27 +124,21 @@ class KnitPattern {
     val rowDirection: Int
         get() = if (oddRowsOpposite && (currentRow % 2 == 1)) -1 else 1
 
-    val isEndOfRow: Boolean
-        get() = if (rowDirection == 1) nextStitchInRow == stitches[currentRow].size else (nextStitchInRow == -1)
+    private val isEndOfRow: Boolean
+        get() = stitchesLeftInRow == 0
 
     val isStartOfRow: Boolean
-        get() = if (rowDirection == 1) nextStitchInRow == 0 else (nextStitchInRow == stitches[currentRow].size - 1)
-
-    private val endOfRow: Int
-        get() = if (rowDirection == 1) (stitches[currentRow].size - 1) else 0
-
-    private val startOfRow: Int
-        get() = if (rowDirection == 1) 0 else (stitches[currentRow].size - 1)
+        get() = stitchesDoneInRow == 0
 
     val stitchesLeftInRow: Int
-        get() = if (rowDirection == 1) (stitches[currentRow].size - nextStitchInRow) else (nextStitchInRow + 1)
+        get() = stitches[currentRow].size - stitchesDoneInRow
 
-    val stitchesDoneInRow: Int
-        get() = if (rowDirection == 1) nextStitchInRow else (stitches[currentRow].size - nextStitchInRow - 1)
+    val nextStitchInRow: Int
+        get() = if (rowDirection == 1) stitchesDoneInRow else (stitches[currentRow].size - 1 - stitchesDoneInRow)
 
     val numRows: Int
         get() = stitches.size
 
     val isFinished: Boolean
-        get() = currentRow == numRows - 1 && isEndOfRow
+        get() = totalStitches == totalStitchesDone
 }
