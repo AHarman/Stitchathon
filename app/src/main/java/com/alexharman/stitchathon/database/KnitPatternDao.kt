@@ -35,7 +35,7 @@ abstract class KnitPatternDao {
         Log.v("Database", "getKnitPattern: $name")
         val result = selectKnitPattern(name)
         val stitches = readStitchesFromFile(result.stitchesFilePath, context)
-        return KnitPattern(result.name, stitches, result.currentRow, result.stitchesDoneInRow)
+        return KnitPattern(result.name, stitches, result.oddRowsOpposite, result.currentRow, result.stitchesDoneInRow)
     }
 
     @Transaction

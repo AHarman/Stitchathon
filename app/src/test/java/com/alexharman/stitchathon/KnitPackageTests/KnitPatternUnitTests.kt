@@ -31,7 +31,7 @@ class KnitPatternUnitTests {
         val initialStitchesDoneInRow = 7
         val initialRow = 4
 
-        val pattern = KnitPattern("", testStitches, initialRow, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, initialRow, initialStitchesDoneInRow)
 
         assertEquals(initialStitchesDoneInRow, pattern.stitchesDoneInRow)
     }
@@ -41,7 +41,7 @@ class KnitPatternUnitTests {
         val initialStitchesDoneInRow = 5
         val initialRow = 1
 
-        val pattern = KnitPattern("", testStitches, initialRow, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, initialRow, initialStitchesDoneInRow)
 
         assertEquals(initialStitchesDoneInRow, pattern.stitchesDoneInRow)
     }
@@ -52,7 +52,7 @@ class KnitPatternUnitTests {
         val initialRow = 4
         val expected = initialStitchesDoneInRow + (initialRow * testPatternWidth)
 
-        val pattern = KnitPattern("", testStitches, initialRow, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, initialRow, initialStitchesDoneInRow)
 
         assertEquals(expected, pattern.totalStitchesDone)
     }
@@ -62,7 +62,7 @@ class KnitPatternUnitTests {
         val initialStitchesDoneInRow = 5
         val initialRow = 1
 
-        val pattern = KnitPattern("", testStitches, initialRow, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, initialRow, initialStitchesDoneInRow)
 
         val expected = initialStitchesDoneInRow + (initialRow * testPatternWidth)
         assertEquals(expected, pattern.totalStitchesDone)
@@ -70,27 +70,29 @@ class KnitPatternUnitTests {
 
     @Test
     fun givenOddRowsOpposite_ifOnReverseRow_thenCorrectRowDirection() {
-        val pattern = KnitPattern("", testStitches, 1, 0)
+        val pattern = KnitPattern("", testStitches, true, 1,0)
 
         assertEquals(-1, pattern.rowDirection)
     }
 
     @Test
     fun givenOddRowsOpposite_ifOnForwardRow_thenCorrectRowDirection() {
-        val pattern = KnitPattern("", testStitches, 4, 0)
+        val pattern = KnitPattern("", testStitches, true, 4,0)
 
         assertEquals(1, pattern.rowDirection)
     }
 
     @Test
     fun givenOddRowsForward_ifOnForwardRow_thenCorrectRowDirection() {
-        assert(false)
+        val pattern = KnitPattern("", testStitches, false, 1,0)
+
+        assertEquals(1, pattern.rowDirection)
     }
 
     @Test
     fun givenOnForwardRow_thenNextStitchInRowCorrect() {
         val initialStitchesDoneInRow = 5
-        val pattern = KnitPattern("", testStitches, 0, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, 0, initialStitchesDoneInRow)
 
         assertEquals(initialStitchesDoneInRow, pattern.nextStitchInRow)
     }
@@ -99,19 +101,19 @@ class KnitPatternUnitTests {
     fun givenOnReverseRow_thenNextStitchInRowCorrect() {
         val initialStitchesDoneInRow = 5
         val expected = testPatternWidth - initialStitchesDoneInRow - 1
-        val pattern = KnitPattern("", testStitches, 1, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, 1,initialStitchesDoneInRow)
 
         assertEquals(expected, pattern.nextStitchInRow)
     }
 
     @Test fun givenOnLastRowAndEndOfRow_thenIsFinished() {
-        val pattern = KnitPattern("", testStitches, testPatternHeight - 1, testPatternWidth)
+        val pattern = KnitPattern("", testStitches,true, testPatternHeight - 1, testPatternWidth)
 
         assert(pattern.isFinished)
     }
 
     @Test fun givenIsFinished_ifIncrement_doNothing() {
-        val pattern = KnitPattern("", testStitches, testPatternHeight - 1, testPatternWidth)
+        val pattern = KnitPattern("", testStitches,true, testPatternHeight - 1, testPatternWidth)
         val expected = pattern.totalStitchesDone
 
         pattern.increment()
@@ -133,7 +135,7 @@ class KnitPatternUnitTests {
     @Test
     fun givenEnoughSpaceInReverseRow_ifIncrementStitches_thenCorrectAmountDone() {
         val initialStitchesDoneInRow = 7
-        val pattern = KnitPattern("", testStitches, 1, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, 1,initialStitchesDoneInRow)
         val stitchesToIncrement = 5
         val expected = pattern.stitchesDoneInRow + stitchesToIncrement
 
@@ -147,7 +149,7 @@ class KnitPatternUnitTests {
         val initialStitchesDoneInRow = testPatternWidth - 5
         val stitchesToIncrement = 8
         val expected = (initialStitchesDoneInRow + stitchesToIncrement) % testPatternWidth
-        val pattern = KnitPattern("", testStitches, 0, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, 0, initialStitchesDoneInRow)
 
         pattern.increment(stitchesToIncrement)
 
@@ -159,7 +161,7 @@ class KnitPatternUnitTests {
         val initialStitchesDoneInRow = testPatternWidth / 2
         val stitchesToIncrement = testPatternWidth
         val expected = stitchesToIncrement - initialStitchesDoneInRow
-        val pattern = KnitPattern("", testStitches, 1, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, 1,initialStitchesDoneInRow)
 
         pattern.increment(stitchesToIncrement)
 
@@ -172,7 +174,7 @@ class KnitPatternUnitTests {
         val stitchesToIncrement = 8
         val initialRow = 0
         val expected = initialRow + 1
-        val pattern = KnitPattern("", testStitches, initialRow, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, initialRow, initialStitchesDoneInRow)
 
         pattern.increment(stitchesToIncrement)
 
@@ -185,7 +187,7 @@ class KnitPatternUnitTests {
         val stitchesToIncrement = 8
         val initialRow = 1
         val expected = initialRow + 1
-        val pattern = KnitPattern("", testStitches, initialRow, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, initialRow, initialStitchesDoneInRow)
 
         pattern.increment(stitchesToIncrement)
 
@@ -197,7 +199,7 @@ class KnitPatternUnitTests {
         val initialNextStitch = testPatternWidth / 2
         val stitchesToIncrement = testPatternWidth - initialNextStitch
         val initialRow = testPatternHeight - 1
-        val pattern = KnitPattern("", testStitches, initialRow, initialNextStitch)
+        val pattern = KnitPattern("", testStitches, true, initialRow, initialNextStitch)
 
         pattern.increment(stitchesToIncrement)
 
@@ -209,7 +211,7 @@ class KnitPatternUnitTests {
         val initialNextStitch = testPatternWidth / 2
         val stitchesToIncrement = testPatternWidth
         val initialRow = testPatternHeight - 1
-        val pattern = KnitPattern("", testStitches, initialRow, initialNextStitch)
+        val pattern = KnitPattern("", testStitches, true, initialRow, initialNextStitch)
 
         pattern.increment(stitchesToIncrement)
 
@@ -221,7 +223,7 @@ class KnitPatternUnitTests {
         val initialStitchesDoneInRow = testPatternWidth / 2
         val initialRow = 3
         val stitchesToIncrement = testPatternWidth
-        val pattern = KnitPattern("", testStitches, initialRow, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, initialRow, initialStitchesDoneInRow)
         val expected = pattern.totalStitchesDone + stitchesToIncrement
 
         pattern.increment(stitchesToIncrement)
@@ -231,7 +233,7 @@ class KnitPatternUnitTests {
 
     @Test
     fun givenOnForwardRow_ifIncrementRow_thenRowIncremented() {
-        val pattern = KnitPattern("", testStitches, 0, 0)
+        val pattern = KnitPattern("", testStitches, true, 0, 0)
 
         pattern.incrementRow()
 
@@ -240,7 +242,7 @@ class KnitPatternUnitTests {
 
     @Test
     fun givenOnForwardRow_ifIncrementRow_then0StitchesDoneInRow() {
-        val pattern = KnitPattern("", testStitches, 0, 0)
+        val pattern = KnitPattern("", testStitches, true, 0, 0)
 
         pattern.incrementRow()
 
@@ -249,7 +251,7 @@ class KnitPatternUnitTests {
 
     @Test
     fun givenOnReverseRow_ifIncrementRow_thenRowIncremented() {
-        val pattern = KnitPattern("", testStitches, 1, 0)
+        val pattern = KnitPattern("", testStitches, true, 1,0)
 
         pattern.incrementRow()
 
@@ -258,7 +260,7 @@ class KnitPatternUnitTests {
 
     @Test
     fun givenOnReverseRow_ifIncrementRow_then0StitchesDoneInRow() {
-        val pattern = KnitPattern("", testStitches, 1, 0)
+        val pattern = KnitPattern("", testStitches, true, 1,0)
 
         pattern.incrementRow()
 
@@ -269,7 +271,7 @@ class KnitPatternUnitTests {
     fun givenOnLastRow_ifIncrementRow_thenFinish() {
         val initialNextStitch = 5
         val initialRow = testPatternHeight - 1
-        val pattern = KnitPattern("", testStitches, initialRow, initialNextStitch)
+        val pattern = KnitPattern("", testStitches, true, initialRow, initialNextStitch)
 
         pattern.incrementRow()
 
@@ -280,7 +282,7 @@ class KnitPatternUnitTests {
     fun givenEnoughSpaceInForwardRow_ifUndoStitch_thenCorrectAmountDone() {
         val initialNextStitch = 5
         val expected = initialNextStitch - 1
-        val pattern = KnitPattern("", testStitches, 0, initialNextStitch)
+        val pattern = KnitPattern("", testStitches, true, 0, initialNextStitch)
 
         pattern.undoStitch()
 
@@ -290,7 +292,7 @@ class KnitPatternUnitTests {
     @Test
     fun givenEnoughSpaceInReverseRow_ifUndoStitches_thenCorrectAmountDone() {
         val initialNextStitch = 5
-        val pattern = KnitPattern("", testStitches, 0, initialNextStitch)
+        val pattern = KnitPattern("", testStitches, true, 0, initialNextStitch)
         val expected = pattern.stitchesDoneInRow - 1
 
         pattern.undoStitch()
@@ -302,7 +304,7 @@ class KnitPatternUnitTests {
     fun givenAtStartOfForwardRow_ifUndoStitch_thenDecrementRow() {
         val initialRow = 2
         val expected = initialRow - 1
-        val pattern = KnitPattern("", testStitches, initialRow, 0)
+        val pattern = KnitPattern("", testStitches, true, initialRow, 0)
 
         pattern.undoStitch()
 
@@ -311,7 +313,7 @@ class KnitPatternUnitTests {
 
     @Test
     fun givenAtStartOfForwardRow_ifUndoStitch_thenCorrectAmountDone() {
-        val pattern = KnitPattern("", testStitches, 2, 0)
+        val pattern = KnitPattern("", testStitches, true, 2, 0)
         val expected = pattern.totalStitchesDone - 1
 
         pattern.undoStitch()
@@ -323,7 +325,7 @@ class KnitPatternUnitTests {
     fun givenAtStartOfReverseRow_ifUndoStitch_thenDecrementRow() {
         val initialRow = 1
         val expected = initialRow - 1
-        val pattern = KnitPattern("", testStitches, initialRow, 0)
+        val pattern = KnitPattern("", testStitches, true, initialRow, 0)
 
         pattern.undoStitch()
 
@@ -334,7 +336,7 @@ class KnitPatternUnitTests {
     fun givenAtStartOfReverseRow_ifUndoStitch_thenCorrectAmountDone() {
         val initialRow = 1
         val expected = testPatternWidth - 1
-        val pattern = KnitPattern("", testStitches, initialRow, 0)
+        val pattern = KnitPattern("", testStitches, true, initialRow, 0)
 
         pattern.undoStitch()
 
@@ -343,7 +345,7 @@ class KnitPatternUnitTests {
 
     @Test
     fun givenStartOfFirstRow_ifUndoStitches_thenDontDecrementRow() {
-        val pattern = KnitPattern("", testStitches, 0, 0)
+        val pattern = KnitPattern("", testStitches, true, 0, 0)
 
         pattern.undoStitch()
 
@@ -352,7 +354,7 @@ class KnitPatternUnitTests {
 
     @Test
     fun givenStartOfFirstRow_ifUndoStitches_then0StitchesDone() {
-        val pattern = KnitPattern("", testStitches, 0, 0)
+        val pattern = KnitPattern("", testStitches, true, 0, 0)
 
         pattern.undoStitch()
 
@@ -363,7 +365,7 @@ class KnitPatternUnitTests {
     fun ifUndoStitches_thenTotalStitchesDoneCorrect() {
         val initialStitchesDoneInRow = 5
         val initialRow = 7
-        val pattern = KnitPattern("", testStitches, initialRow, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, initialRow, initialStitchesDoneInRow)
         val expected = pattern.totalStitchesDone - 1
         pattern.undoStitch()
 
@@ -373,7 +375,7 @@ class KnitPatternUnitTests {
     @Test
     fun givenOnForwardRow_thenStitchesLeftCorrect() {
         val initialStitchesDoneInRow = 6
-        val pattern = KnitPattern("", testStitches, 4, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, 4,initialStitchesDoneInRow)
         val expected = testPatternWidth - initialStitchesDoneInRow
 
         assertEquals(expected, pattern.stitchesLeftInRow)
@@ -382,7 +384,7 @@ class KnitPatternUnitTests {
     @Test
     fun givenOnReverseRow_thenStitchesLeftCorrect() {
         val initialStitchesDoneInRow = 6
-        val pattern = KnitPattern("", testStitches, 5, initialStitchesDoneInRow)
+        val pattern = KnitPattern("", testStitches, true, 5, initialStitchesDoneInRow)
         val expected = testPatternWidth - initialStitchesDoneInRow
 
         assertEquals(expected, pattern.stitchesLeftInRow)
@@ -390,28 +392,28 @@ class KnitPatternUnitTests {
 
     @Test
     fun givenOnForwardRow_ifAtStartOfRow_isStartOfRow() {
-        val pattern = KnitPattern("", testStitches, 4, 0)
+        val pattern = KnitPattern("", testStitches, true, 4,0)
 
         assert(pattern.isStartOfRow)
     }
 
     @Test
     fun givenOnReverseRow_ifAtStartOfRow_isStartOfRow() {
-        val pattern = KnitPattern("", testStitches, 5, 0)
+        val pattern = KnitPattern("", testStitches, true, 5, 0)
 
         assert(pattern.isStartOfRow)
     }
 
     @Test
     fun givenOnForwardRow_ifNotAtStartOfRow_isStartOfRow() {
-        val pattern = KnitPattern("", testStitches, 4, 6)
+        val pattern = KnitPattern("", testStitches, true, 4,6)
 
         assert(!pattern.isStartOfRow)
     }
 
     @Test
     fun givenOnReverseRow_ifNotAtStartOfRow_isStartOfRow() {
-        val pattern = KnitPattern("", testStitches, 5, 6)
+        val pattern = KnitPattern("", testStitches, true, 5, 6)
 
         assert(!pattern.isStartOfRow)
     }

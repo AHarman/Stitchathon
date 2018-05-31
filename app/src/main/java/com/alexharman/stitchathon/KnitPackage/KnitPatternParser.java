@@ -20,7 +20,7 @@ public class KnitPatternParser {
 
     public static KnitPattern createKnitPattern(String stringJsonPattern) throws JSONException {
         JSONObject json = new JSONObject(stringJsonPattern);
-        return new KnitPattern(json.getString("name"), parseJSON(json));
+        return new KnitPattern(json.getString("name"), parseJSON(json), true);
     }
 
     private static ArrayList<ArrayList<String>> parseJSON(JSONObject jsonPattern) throws JSONException {

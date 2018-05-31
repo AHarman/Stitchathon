@@ -3,6 +3,7 @@ package com.alexharman.stitchathon.KnitPackage
 class KnitPattern(
         val name: String,
         val stitches: Array<Array<Stitch>>,
+        val oddRowsOpposite: Boolean = true,
         currentRow: Int = 0,
         stitchesDoneInRow: Int = 0) {
 
@@ -20,9 +21,6 @@ class KnitPattern(
     var currentRow = 0
         private set
 
-    // Assuming doubleknit for now. Will be false for knitting on the round
-    val oddRowsOpposite = true
-
     init {
         this.currentRow = currentRow
         this.stitchesDoneInRow = stitchesDoneInRow
@@ -33,17 +31,11 @@ class KnitPattern(
         currentDistanceInRow = findCurrentDistanceInRow(stitches, currentRow)
     }
 
-    constructor(name: String = "", pattern: Array<Array<String>>) : this (name, pattern.map { row -> row.map { Stitch(it) }.toTypedArray() }.toTypedArray())
+    constructor(name: String = "", pattern: Array<Array<String>>, oddRowsOpposite: Boolean = true) :
+            this (name, pattern.map { row -> row.map { Stitch(it) }.toTypedArray() }.toTypedArray(), oddRowsOpposite)
 
-    constructor(name: String = "", pattern: ArrayList<ArrayList<String>>) : this(name, Array(pattern.size, { i -> pattern[i].toTypedArray() }))
-
-    private fun buildPattern(pattern: Array<Array<String>>): Array<Array<Stitch>> {
-        return Array(pattern.size, { row ->
-            Array(pattern[row].size, { col ->
-                Stitch(pattern[row][col])
-            })
-        })
-    }
+    constructor(name: String = "", pattern: ArrayList<ArrayList<String>>, oddRowsOpposite: Boolean = true) :
+            this(name, Array(pattern.size, { i -> pattern[i].toTypedArray() }), oddRowsOpposite)
 
     private fun buildStitchTypes(stitches: Array<Array<Stitch>>) =  stitches
             .flatten()
