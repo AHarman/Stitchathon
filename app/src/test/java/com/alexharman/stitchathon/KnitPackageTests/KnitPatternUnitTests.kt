@@ -16,7 +16,7 @@ class KnitPatternUnitTests {
 
     @Test
     fun givenSplitStrings_thenStitchTypeContainsSubTypes() {
-        val pattern = KnitPattern(testSplitStrings)
+        val pattern = KnitPattern(pattern = testSplitStrings)
         val expected = setOf(
                 "0", "1", "2",
                 "0/0", "0/1", "0/2",
@@ -121,7 +121,7 @@ class KnitPatternUnitTests {
 
     @Test
     fun givenEnoughSpaceInEvenRow_ifIncrementStitches_thenCorrectAmountDone() {
-        val pattern = KnitPattern(testStrings)
+        val pattern = KnitPattern(pattern = testStrings)
         val stitchesToIncrement = 5
         val expected = pattern.stitchesDoneInRow + stitchesToIncrement
 
