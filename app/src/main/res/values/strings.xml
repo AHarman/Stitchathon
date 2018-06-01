@@ -70,4 +70,6 @@
     <string name="stitches">Stitches</string>
     <string name="lock_button_label">Lock to centre</string>
     <string name="fit_pattern_width">Fit to screen</string>
+    <string name="rows_radio_button_text">Rows</string>
+    <string name="rounds_radio_button_text">Rounds</string>
 </resources>

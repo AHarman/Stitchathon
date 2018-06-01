@@ -13,13 +13,14 @@ internal class ImportImageTask(context: AppCompatActivity,
                                private val patternName: String,
                                private val width: Int,
                                private val height: Int,
+                               private val oddRowsOpposite: Boolean,
                                private val numColours: Int) : ImportPatternTask<Void>(context, callback) {
 
     private lateinit var sourceImg: Bitmap
 
     override fun doInBackground(vararg voids: Void): KnitPattern {
         sourceImg = readImageFile(imageUri)!!
-        val knitPattern = ImageReader().readImage(sourceImg, patternName, width, height, numColours)
+        val knitPattern = ImageReader().readImage(sourceImg, patternName, width, height, oddRowsOpposite, numColours)
         saveNewPattern(knitPattern)
         return knitPattern
     }

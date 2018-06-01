@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.NumberPicker
+import android.widget.RadioGroup
 import com.alexharman.stitchathon.MainActivity.Companion.READ_EXTERNAL_IMAGE
 
 /**
@@ -23,7 +24,7 @@ class ImportImageDialog: DialogFragment() {
     private var imageUri: Uri? = null
 
     interface ImportImageDialogListener {
-        fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, numColours: Int)
+        fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, oddRowsOpposite: Boolean, numColours: Int)
     }
 
     // Use this instance of the interface to deliver action events
@@ -75,13 +76,15 @@ class ImportImageDialog: DialogFragment() {
     }
 
     private fun returnValues(dialog: DialogInterface) {
-        val nameView = dialogView.findViewById(R.id.pattern_name_edittext) as EditText
+        val nameView = dialogView.findViewById<EditText>(R.id.pattern_name_edittext)
         var name = nameView.text.toString()
-        val widthView = dialogView.findViewById(R.id.stitches_wide_edittext) as EditText
+        val widthView = dialogView.findViewById<EditText>(R.id.stitches_wide_edittext)
         val width = widthView.text.toString().toIntOrNull()
-        val heightView = dialogView.findViewById(R.id.stitches_high_edittext) as EditText
+        val heightView = dialogView.findViewById<EditText>(R.id.stitches_high_edittext)
         val height = heightView.text.toString().toIntOrNull()
-        val numPicker = dialogView.findViewById(R.id.import_image_numpicker) as NumberPicker
+        val rowsOrRounds = dialogView.findViewById<RadioGroup>(R.id.rows_rounds_radiogroup)
+        val oddRowsOpposite = rowsOrRounds.checkedRadioButtonId == R.id.rows_radio_button
+        val numPicker = dialogView.findViewById<NumberPicker>(R.id.import_image_numpicker)
         val numColours = numPicker.value
         var formNotFull = false
 
@@ -98,7 +101,7 @@ class ImportImageDialog: DialogFragment() {
         if (formNotFull) return
         if (imageUri == null) return
         dialog.dismiss()
-        listener.onImportImageDialogOK(imageUri!!, name, width!!, height!!, numColours)
+        listener.onImportImageDialogOK(imageUri!!, name, width!!, height!!, oddRowsOpposite, numColours)
     }
 
     private fun getFileDisplayName(uri: Uri): String {

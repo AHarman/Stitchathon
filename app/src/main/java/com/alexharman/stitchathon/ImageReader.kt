@@ -16,13 +16,13 @@ import kotlin.math.sqrt
  */
 
 class ImageReader {
-    fun readImage(bitmap: Bitmap, name: String, stitchesWide: Int, stitchesHigh: Int, numColours: Int): KnitPattern {
+    fun readImage(bitmap: Bitmap, name: String, stitchesWide: Int, stitchesHigh: Int, oddRowsOpposite: Boolean, numColours: Int): KnitPattern {
         val sampledBitmap: Bitmap = Bitmap.createScaledBitmap(bitmap, stitchesWide, stitchesHigh, false)
         val colourMap = quantizeColours(sampledBitmap, numColours)
-        return patternFromBitmap(name, sampledBitmap, colourMap)
+        return KnitPattern(name, stichesFromBitmap(sampledBitmap, colourMap), oddRowsOpposite)
     }
 
-    private fun patternFromBitmap(name: String, bitmap: Bitmap, colourMap: HashMap<Int, Int>): KnitPattern {
+    private fun stichesFromBitmap(bitmap: Bitmap, colourMap: HashMap<Int, Int>): ArrayList<ArrayList<String>> {
         val stitches = ArrayList<ArrayList<String>>()
         val colours = colourMap.values.distinct().sortedBy { colour -> colourMap.keys.count { colour == it } }
         colourMap.mapKeys { (_, value) -> colours.indexOf(value) }
@@ -34,7 +34,7 @@ class ImageReader {
             }
             stitches.add(newRow)
         }
-        return KnitPattern(name, stitches)
+        return stitches
     }
 
     // TODO: selectively use colourReduce in countColours() method if too many colours
@@ -43,15 +43,6 @@ class ImageReader {
         val colours = bitmapToPixels(bitmap)
         if (colours.distinct().size <= numColours) return colours.distinct().associate { Pair(it.toArgb(), it.toArgb()) } as HashMap<Int, Int>
         return groupColours(colours, numColours)
-    }
-
-    private fun replaceColours(bitmap: Bitmap, colourMap: HashMap<Int, Int>): Bitmap {
-        for (row in 0 until bitmap.height) {
-            for (col in 0 until bitmap.width) {
-                bitmap.setPixel(col, row, colourMap[bitmap.getPixel(col, row)]!!)
-            }
-        }
-        return bitmap
     }
 
     private fun bitmapToPixels(bitmap: Bitmap): ArrayList<Colour> {

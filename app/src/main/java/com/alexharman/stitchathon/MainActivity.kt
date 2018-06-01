@@ -126,7 +126,7 @@ class MainActivity :
         }
     }
 
-    override fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, numColours: Int) {
-        ImportImageTask(this, knitPatternFragment, imageUri, name, width, height, numColours).execute()
+    override fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, oddRowsOpposite: Boolean, numColours: Int) {
+        ImportImageTask(this, knitPatternFragment, imageUri, name, width, height, oddRowsOpposite, numColours).execute()
     }
 }
