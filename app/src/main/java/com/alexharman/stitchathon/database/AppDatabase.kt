@@ -13,7 +13,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.lang.ref.WeakReference
 
-@Database(entities = [KnitPatternEntity::class], version = 2)
+@Database(entities = [KnitPatternEntity::class], version = 3)
 internal abstract class AppDatabase : RoomDatabase() {
 
     abstract fun knitPatternDao(): KnitPatternDao

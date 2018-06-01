@@ -44,7 +44,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         return bitmap
     }
 
-    private fun createStitchBitmaps(stitches: Array<Stitch>): HashMap<Stitch, Bitmap> {
+    private fun createStitchBitmaps(stitches: Collection<Stitch>): HashMap<Stitch, Bitmap> {
         val stitchBitmaps = HashMap<Stitch, Bitmap>()
         var bitmap: Bitmap
         var bitmapWidth: Int
@@ -86,7 +86,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         return bitmap
     }
 
-    private fun createStitchPaints(stitches: Array<Stitch>): HashMap<Stitch, Paint> {
+    private fun createStitchPaints(stitches: Collection<Stitch>): HashMap<Stitch, Paint> {
         var p: Paint
         val paints = HashMap<Stitch, Paint>()
         var colourCount = 0

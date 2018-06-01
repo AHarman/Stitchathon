@@ -34,7 +34,7 @@ class ImageReader {
             }
             stitches.add(newRow)
         }
-        return KnitPattern(stitches, name)
+        return KnitPattern(name, stitches)
     }
 
     // TODO: selectively use colourReduce in countColours() method if too many colours
