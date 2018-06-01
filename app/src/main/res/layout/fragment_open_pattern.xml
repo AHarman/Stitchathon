@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:contextRef="com.alexharman.stitchathon.OpenPatternActivity"
+    tools:contextRef="com.alexharman.stitchathon.OpenPatternFragment"
     android:orientation="vertical">
     <GridView
         android:id="@+id/pattern_select_grid"

@@ -25,7 +25,6 @@ class MainActivity :
         internal lateinit var db: AppDatabase
         const val READ_EXTERNAL_IMAGE = 42
         const val READ_EXTERNAL_JSON_PATTERN = 55
-        const val OPEN_INTERNAL_PATTERN = 1234
     }
 
     private var importImageDialog: ImportImageDialog? = null
@@ -82,15 +81,17 @@ class MainActivity :
     }
 
     private fun selectInternalPattern() {
-        val intent = Intent(this, OpenPatternActivity::class.java)
-        startActivityForResult(intent, OPEN_INTERNAL_PATTERN)
+        supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container, OpenPatternFragment(), null)
+                .addToBackStack(null)
+                .commit()
     }
 
     private fun openOptions() {
-        val frag = SettingsFragment()
         supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.fragment_container, frag)
+                .replace(R.id.fragment_container, SettingsFragment())
                 .addToBackStack(null)
                 .commit()
     }
@@ -121,12 +122,6 @@ class MainActivity :
         if (requestCode == READ_EXTERNAL_IMAGE && resultCode == Activity.RESULT_OK) {
             if (resultData != null && resultData.data != null) {
                 importImageDialog!!.setUri(resultData.data!!)
-            }
-        }
-        if (requestCode == OPEN_INTERNAL_PATTERN && resultCode == Activity.RESULT_OK) {
-            if (resultData != null) {
-                // TODO: use prefs instead of returning?
-                knitPatternFragment.openPattern(resultData.getStringExtra("patternName"))
             }
         }
     }
