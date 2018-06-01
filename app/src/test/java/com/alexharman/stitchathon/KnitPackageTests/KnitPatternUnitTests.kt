@@ -23,7 +23,7 @@ class KnitPatternUnitTests {
                 "1/0", "1/1", "1/2",
                 "2/0", "2/1", "2/2").map { Stitch(it) }.toSet()
 
-        assert(expected == pattern.stitchTypes.toSet())
+        assertEquals(expected, pattern.stitchTypes)
     }
 
     @Test

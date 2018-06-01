@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "0538e6133d7040cda91fa84dc2446f0b",
+    "identityHash": "0b6672a2afcba11c405d4106fad07bef",
     "entities": [
       {
         "tableName": "pattern_info",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`name` TEXT NOT NULL, `currentRow` INTEGER NOT NULL, `nextStitchInRow` INTEGER NOT NULL, `stitchesFilePath` TEXT NOT NULL, `thumbnailFilePath` TEXT NOT NULL, PRIMARY KEY(`name`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`name` TEXT NOT NULL, `currentRow` INTEGER NOT NULL, `stitchesDoneInRow` INTEGER NOT NULL, `oddRowsOpposite` INTEGER NOT NULL, `stitchesFilePath` TEXT NOT NULL, `thumbnailFilePath` TEXT NOT NULL, PRIMARY KEY(`name`))",
         "fields": [
           {
             "fieldPath": "name",
@@ -21,8 +21,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "nextStitchInRow",
-            "columnName": "nextStitchInRow",
+            "fieldPath": "stitchesDoneInRow",
+            "columnName": "stitchesDoneInRow",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "oddRowsOpposite",
+            "columnName": "oddRowsOpposite",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -51,7 +57,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"0538e6133d7040cda91fa84dc2446f0b\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"0b6672a2afcba11c405d4106fad07bef\")"
     ]
   }
 }

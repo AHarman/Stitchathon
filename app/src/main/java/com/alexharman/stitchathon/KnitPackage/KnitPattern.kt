@@ -7,7 +7,7 @@ class KnitPattern(
         currentRow: Int = 0,
         stitchesDoneInRow: Int = 0) {
 
-    val stitchTypes: Array<Stitch>
+    val stitchTypes: Set<Stitch>
     val totalStitches: Int
     val patternWidth: Int
 
@@ -24,24 +24,20 @@ class KnitPattern(
     init {
         this.currentRow = currentRow
         this.stitchesDoneInRow = stitchesDoneInRow
-        stitchTypes = buildStitchTypes(stitches)
         totalStitches = findTotalStitches(stitches)
         patternWidth = findPatternWidth(stitches)
         totalStitchesDone = findTotalStitchesDone(stitches, currentRow)
         currentDistanceInRow = findCurrentDistanceInRow(stitches, currentRow)
+
+        val initStitchTypes = stitches.flatten().toSet()
+        stitchTypes = initStitchTypes.union(initStitchTypes.flatMap { it.madeOf.toList() }.toSet())
     }
 
     constructor(name: String = "", pattern: Array<Array<String>>, oddRowsOpposite: Boolean = true) :
             this (name, pattern.map { row -> row.map { Stitch(it) }.toTypedArray() }.toTypedArray(), oddRowsOpposite)
 
-    constructor(name: String = "", pattern: ArrayList<ArrayList<String>>, oddRowsOpposite: Boolean = true) :
+    constructor(name: String = "", pattern: List<List<String>>, oddRowsOpposite: Boolean = true) :
             this(name, Array(pattern.size, { i -> pattern[i].toTypedArray() }), oddRowsOpposite)
-
-    private fun buildStitchTypes(stitches: Array<Array<Stitch>>) =  stitches
-            .flatten()
-            .flatMap { if (it.isSplit) it.madeOf.toList() + listOf(it) else listOf(it) }
-            .distinct()
-            .toTypedArray()
 
     fun increment (numStitches: Int = 1) {
         for (i in 0 until numStitches) {
