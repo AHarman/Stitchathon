@@ -41,8 +41,7 @@ class KnitPattern(
 
     fun increment (numStitches: Int = 1) {
         for (i in 0 until numStitches) {
-            if (isFinished)
-                return
+            if (isFinished) return
 
             currentDistanceInRow += stitches[currentRow][nextStitchInRow].width
             totalStitchesDone++
@@ -56,16 +55,7 @@ class KnitPattern(
         }
     }
 
-    fun incrementRow(): Int {
-        if (isFinished)
-            return 0
-        var stitchesDone = 0
-        do {
-            increment()
-            stitchesDone++
-        } while (!isStartOfRow && !isFinished)
-        return stitchesDone
-    }
+    fun incrementRow() = increment(stitchesLeftInRow)
 
     fun undoStitch() {
         if (currentRow == 0 && isStartOfRow)
@@ -87,20 +77,16 @@ class KnitPattern(
     private fun findPatternWidth(stitches: Array<Array<Stitch>>) =
             stitches.maxBy { it.sumBy { it.width } }?.sumBy { it.width } ?: 0
 
-    private fun findTotalStitchesDone(stitches: Array<Array<Stitch>>, currentRow: Int): Int {
-        var totalStitchesDone = stitchesDoneInRow
-        if (currentRow > 0)
-            totalStitchesDone += stitches.sliceArray(IntRange(0, currentRow - 1)).sumBy { it.size }
-        return totalStitchesDone
-    }
+    private fun findTotalStitchesDone(stitches: Array<Array<Stitch>>, currentRow: Int) =
+            stitchesDoneInRow + stitches.sliceArray(IntRange(0, currentRow - 1)).sumBy { it.size }
 
     private fun findCurrentDistanceInRow(stitches: Array<Array<Stitch>>, currentRow: Int): Int {
-        val stitchesDone: Array<Stitch>
-        if (rowDirection == 1)
-            stitchesDone = stitches[currentRow].sliceArray(IntRange(0, nextStitchInRow - 1))
-        else
-            stitchesDone = stitches[currentRow].sliceArray(IntRange(nextStitchInRow + 1, stitches[currentRow].size-1))
-        return stitchesDone.sumBy { it.width }
+        val rowDoneRange =
+                if(rowDirection == 1)
+                    IntRange(0, nextStitchInRow - 1)
+                else
+                    IntRange(nextStitchInRow + 1, stitches[currentRow].size-1)
+        return stitches[currentRow].sliceArray(rowDoneRange).sumBy { it.width }
     }
 
     val rowDirection: Int
