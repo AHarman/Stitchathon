@@ -37,7 +37,6 @@ class KnitPatternFragment : Fragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        PreferenceManager.setDefaultValues(context, R.xml.preferences, false)
 
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         val patternName = sharedPreferences.getString(PreferenceKeys.CURRENT_PATTERN_NAME, null)
@@ -64,6 +63,10 @@ class KnitPatternFragment : Fragment(),
         view.findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.updateCurrentView(); updateStitchCounter() }
         knitPatternViewGestureDetector = GestureDetectorCompat(context, KnitPatternViewGestureListener())
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event) }
+
+        val knitPatternDrawer = this.knitPatternDrawer
+        if (knitPatternDrawer != null)
+            knitPatternView.knitPatternDrawer = knitPatternDrawer
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -147,11 +150,11 @@ class KnitPatternFragment : Fragment(),
         setKnitPattern(knitPattern, knitPatternDrawer, thumbnail)
     }
 
-    fun setKnitPattern(knitPattern: KnitPattern,
+    private fun setKnitPattern(knitPattern: KnitPattern,
                                knitPatternDrawer: KnitPatternDrawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(context)),
                                thumbnail: Bitmap = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)) {
         this.knitPatternDrawer = knitPatternDrawer
-        knitPatternView.setPattern(knitPatternDrawer)
+        knitPatternView.knitPatternDrawer = knitPatternDrawer
         updateStitchCounter()
         val editor = PreferenceManager.getDefaultSharedPreferences(context).edit()
         patternNameView?.text = knitPattern.name

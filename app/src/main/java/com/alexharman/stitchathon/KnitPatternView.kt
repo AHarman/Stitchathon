@@ -16,7 +16,18 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         @JvmName("_getBackgroundColour") get() {return field}
         @JvmName("_setBackgroundColour") set(color) { field = color }
 
-    private var knitPatternDrawer: KnitPatternDrawer? = null
+    var knitPatternDrawer: KnitPatternDrawer? = null
+        set(value) {
+            field = value
+            if (viewWidth > 0) {
+                //TODO: something about this?
+                zoomSrcRect()
+                scrollToNextStitch()
+                updatePatternDstRectangle()
+                currentView = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444)
+                updateCurrentView()
+            }
+        }
 
     private var fitPatternWidth = true
     private var viewHeight: Int = 0
@@ -50,6 +61,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         currentView = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444)
         if (knitPatternDrawer != null) {
             updatePatternDstRectangle()
+            zoomSrcRect()
             updateCurrentView()
         }
     }
@@ -147,20 +159,6 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         zoomSrcRect()
         updatePatternDstRectangle()
         updateCurrentView()
-    }
-
-    // TODO: maybe save paints and stitch bitmaps and pattern bitmaps to file or something.
-    // TODO: Move to kotlin's fancy setters
-    fun setPattern(knitPatternDrawer: KnitPatternDrawer) {
-        this.knitPatternDrawer = knitPatternDrawer
-        if (viewWidth > 0) {
-            //TODO: something about this?
-            zoomSrcRect()
-            scrollToNextStitch()
-            updatePatternDstRectangle()
-            currentView = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444)
-            updateCurrentView()
-        }
     }
 
     fun clearPattern() {
