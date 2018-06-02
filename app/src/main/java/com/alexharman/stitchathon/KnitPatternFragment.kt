@@ -191,8 +191,11 @@ class KnitPatternFragment : Fragment(),
 
     private inner class MySharedPreferenceListener : SharedPreferences.OnSharedPreferenceChangeListener {
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-            if (key == PreferenceKeys.CURRENT_PATTERN_NAME && !sharedPreferences.contains(PreferenceKeys.CURRENT_PATTERN_NAME)) {
-                clearKnitPattern()
+            if (key == PreferenceKeys.CURRENT_PATTERN_NAME ) {
+                if (sharedPreferences.contains(PreferenceKeys.CURRENT_PATTERN_NAME))
+                    openPattern(sharedPreferences.getString(PreferenceKeys.CURRENT_PATTERN_NAME, null))
+                else
+                    clearKnitPattern()
             }
         }
     }
