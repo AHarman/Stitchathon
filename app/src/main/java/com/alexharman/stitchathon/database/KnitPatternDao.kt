@@ -12,6 +12,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
+import java.util.*
 
 @Dao
 abstract class KnitPatternDao {
@@ -39,11 +40,11 @@ abstract class KnitPatternDao {
     }
 
     @Transaction
-    open fun getThumbnails(context: Context): HashMap<String, Bitmap> {
+    open fun getThumbnails(context: Context): Array<Pair<String, Bitmap>> {
         Log.v("Database", "Getting all thumbnails")
-        val hashmap = HashMap<String, Bitmap>()
-        selectAllKnitPatterns().forEach { kpe: KnitPatternEntity -> hashmap[kpe.name] = readBitmapFromFile(kpe.thumbnailFilePath, context) }
-        return hashmap
+        val patterns = selectAllKnitPatterns()
+        return Array(patterns.size,
+                { i -> Pair(patterns[i].name, readBitmapFromFile(patterns[i].thumbnailFilePath, context)) })
     }
 
     @Transaction
