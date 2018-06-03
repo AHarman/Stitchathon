@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v4.app.Fragment
+import android.support.v7.widget.Toolbar
 import android.view.*
 import android.widget.*
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.DeletePatternsTask
@@ -30,6 +31,12 @@ class OpenPatternFragment : Fragment(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setUpGridView(view)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        val toolbar = activity?.findViewById<Toolbar>(R.id.toolbar)
+        toolbar?.title = getString(R.string.open_pattern_title)
     }
 
     private fun setUpGridView(view: View) {

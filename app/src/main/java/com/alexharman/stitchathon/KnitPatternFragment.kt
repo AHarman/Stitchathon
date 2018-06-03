@@ -76,6 +76,7 @@ class KnitPatternFragment : Fragment(),
         patternNameView = activity.findViewById(R.id.nav_drawer_pattern_name)
         patternThumbnailView = activity.findViewById(R.id.nav_drawer_image)
         toolbar = activity.findViewById(R.id.toolbar)
+        toolbar?.title = knitPatternDrawer?.knitPattern?.name ?: getString(R.string.title_activity_main)
         db = AppDatabase.getAppDatabase(activity)
     }
 
