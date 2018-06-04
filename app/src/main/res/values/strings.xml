@@ -60,7 +60,7 @@
     <string name="open_pattern_title">Select pattern</string>
     <string name="thumbnail">thumbnail</string>
     <string name="delete">Delete</string>
-    <string name="select_patterns">Select patterns</string>
+    <string name="delete_patterns">Delete patterns</string>
     <string name="no_patterns_found">Nothing to see here! Import a pattern first.</string>
     <string name="go_to_stitch_label">Go to stitch</string>
     <string name="negative_number_error">Must be positive</string>

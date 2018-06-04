@@ -53,7 +53,7 @@ class OpenPatternFragment : Fragment(),
     override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
         this.actionMode = mode
         mode?.menuInflater?.inflate(R.menu.delete_button, menu)
-        mode?.setTitle(R.string.select_patterns)
+        mode?.setTitle(R.string.delete_patterns)
         return true
     }
 
