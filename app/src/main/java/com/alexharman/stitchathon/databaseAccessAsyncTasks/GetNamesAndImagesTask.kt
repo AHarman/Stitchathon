@@ -19,6 +19,6 @@ class GetNamesAndImagesTask(context: Context, callback: GetNamesAndThumbnails) :
     }
 
     interface GetNamesAndThumbnails {
-        fun onNamesAndThumbnailsReturn(map: Array<Pair<String, Bitmap>>)
+        fun onNamesAndThumbnailsReturn(result: Array<Pair<String, Bitmap>>)
     }
 }

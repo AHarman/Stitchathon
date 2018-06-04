@@ -5,16 +5,18 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.*
 import android.widget.*
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.GetNamesAndImagesTask
 
 class OpenPatternFragment : Fragment(),
-        GetNamesAndImagesTask.GetNamesAndThumbnails {
+        GetNamesAndImagesTask.GetNamesAndThumbnails,
+        MultiSelectAdapter.MultiSelectListener<Pair<String, Bitmap>> {
 
     private lateinit var recyclerView: RecyclerView
-    private var patterns = emptyArray<Pair<String, Bitmap>>()
-    private var viewAdaptor = MyAdapter(patterns)
+    private var patterns = mutableListOf<Pair<String, Bitmap>>()
+    private var viewAdaptor = MyAdapter(patterns, this)
     private var viewManager = GridLayoutManager(context, 3)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -30,28 +32,39 @@ class OpenPatternFragment : Fragment(),
         GetNamesAndImagesTask(context ?: return, this).execute()
     }
 
-    override fun onNamesAndThumbnailsReturn(map: Array<Pair<String, Bitmap>>) {
-        viewAdaptor.dataset = map.toList().toTypedArray()
+    override fun onNamesAndThumbnailsReturn(result: Array<Pair<String, Bitmap>>) {
+        viewAdaptor.setDataset(result.toMutableList())
         viewAdaptor.notifyDataSetChanged()
     }
 
-    class MyAdapter(var dataset: Array<Pair<String, Bitmap>>) : RecyclerView.Adapter<MyAdapter.ViewHolder>() {
+    override fun onSelectionStart() {
+        Log.d("Open", "onSelectionStart")
+    }
 
-        class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
-            val nameTextView: TextView = view.findViewById(R.id.grid_item_text)
-            val thumbnailView: ImageView = view.findViewById(R.id.grid_item_image)
-        }
+    override fun onSelectionEnd() {
+        Log.d("Open", "onSelectionEnd")
+    }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyAdapter.ViewHolder {
+    override fun onSingleItemSelected(item: Pair<String, Bitmap>) {
+        Log.d("Open", "onSingleItemSelected")
+    }
+
+    inner class MyAdapter(dataset: MutableList<Pair<String, Bitmap>>, listener: MultiSelectListener<Pair<String, Bitmap>>) :
+            MultiSelectAdapter<Pair<String, Bitmap>>(dataset, listener) {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectableViewHolder<Pair<String, Bitmap>> {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.grid_item, parent, false)
-            return ViewHolder(view)
+            return MyViewHolder(view)
         }
+    }
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.nameTextView.text = dataset[position].first
-            holder.thumbnailView.setImageBitmap(dataset[position].second)
+    inner class MyViewHolder(itemView: View): SelectableViewHolder<Pair<String, Bitmap>>(itemView) {
+        private val nameTextView: TextView = itemView.findViewById(R.id.grid_item_text)
+        private val thumbnailView: ImageView = itemView.findViewById(R.id.grid_item_image)
+
+        override fun bindData(data: Pair<String, Bitmap>) {
+            nameTextView.text = data.first
+            thumbnailView.setImageBitmap(data.second)
         }
-
-        override fun getItemCount() = dataset.size
     }
 }
