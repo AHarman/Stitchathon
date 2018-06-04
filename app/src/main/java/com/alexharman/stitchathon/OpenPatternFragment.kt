@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.support.v7.widget.Toolbar
 import android.view.*
 import android.widget.*
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.GetNamesAndImagesTask
@@ -35,6 +36,12 @@ class OpenPatternFragment : Fragment(),
     override fun onNamesAndThumbnailsReturn(result: Array<Pair<String, Bitmap>>) {
         viewAdaptor.setDataset(result.toMutableList())
         viewAdaptor.notifyDataSetChanged()
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        val toolbar = activity?.findViewById<Toolbar>(R.id.toolbar)
+        toolbar?.title = getString(R.string.open_pattern_title)
     }
 
     override fun onSelectionStart() {
