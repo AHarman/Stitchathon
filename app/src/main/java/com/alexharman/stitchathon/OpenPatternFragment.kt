@@ -61,7 +61,9 @@ class OpenPatternFragment : Fragment(),
         return false
     }
 
-    override fun onDestroyActionMode(mode: ActionMode?) { }
+    override fun onDestroyActionMode(mode: ActionMode?) {
+        viewAdapter.deselectAll()
+    }
 
     override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
         if (item?.itemId == R.id.delete_button) {

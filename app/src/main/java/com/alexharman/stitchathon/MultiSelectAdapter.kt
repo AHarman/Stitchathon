@@ -12,14 +12,31 @@ abstract class MultiSelectAdapter<D>(private var dataset: MutableList<D>, privat
     }
 
     private val selected = mutableListOf<D>()
+    private var recyclerView: RecyclerView? = null
 
     override fun onBindViewHolder(holder: SelectableViewHolder<D>, position: Int) {
         holder.bindData(dataset[position])
         holder.view.setOnClickListener { onItemClicked(holder) }
         holder.view.setOnLongClickListener { onItemLongPressed(holder); true }
+        if (selected.contains(dataset[position])) holder.view.isActivated = true
+    }
+
+    override fun onViewRecycled(holder: SelectableViewHolder<D>) {
+        super.onViewRecycled(holder)
+        holder.view.isActivated = false
     }
 
     override fun getItemCount() = dataset.size
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        this.recyclerView = null
+    }
 
     private fun onItemClicked(item: SelectableViewHolder<D>) {
         val data = dataset[item.adapterPosition]
@@ -79,5 +96,14 @@ abstract class MultiSelectAdapter<D>(private var dataset: MutableList<D>, privat
 
     fun getSelectedItems(): List<D> {
         return selected.toList()
+    }
+
+    fun deselectAll() {
+        val recyclerView = this.recyclerView ?: return
+        for (item in selected) {
+            (recyclerView.findViewHolderForAdapterPosition(dataset.indexOf(item)) as SelectableViewHolder<D>)
+                    .deselect()
+        }
+        selected.clear()
     }
 }
