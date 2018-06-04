@@ -57,6 +57,21 @@ abstract class MultiSelectAdapter<D>(private var dataset: MutableList<D>, privat
         notifyItemRemoved(position)
     }
 
+    fun removeItem(item: D) {
+        val position = dataset.indexOf(item)
+        if (position != -1) {
+            dataset.removeAt(position)
+            selected.remove(item)
+            notifyItemRemoved(position)
+        }
+    }
+
+    fun removeSelectedItems() {
+        selected.forEach { dataset.remove(it) }
+        selected.clear()
+        notifyDataSetChanged()
+    }
+
     fun setDataset(dataset: MutableList<D>) {
         this.dataset = dataset
         notifyDataSetChanged()
