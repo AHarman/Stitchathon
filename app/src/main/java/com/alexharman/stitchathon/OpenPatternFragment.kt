@@ -23,7 +23,7 @@ class OpenPatternFragment : Fragment(),
     private lateinit var recyclerView: RecyclerView
     private var patterns = mutableListOf<Pair<String, Bitmap>>()
     private var viewAdapter = MyAdapter(patterns, this)
-    private var viewManager = GridLayoutManager(context, 3)
+    private lateinit var viewManager: RecyclerView.LayoutManager
     private var actionMode: android.support.v7.view.ActionMode? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -34,6 +34,7 @@ class OpenPatternFragment : Fragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         recyclerView = view.findViewById(R.id.pattern_select_grid)
         recyclerView.setHasFixedSize(true)
+        viewManager = GridLayoutManager(context, 3)
         recyclerView.layoutManager = viewManager
         recyclerView.adapter = viewAdapter
         GetNamesAndImagesTask(context ?: return, this).execute()
