@@ -107,6 +107,19 @@ class OpenPatternFragment : Fragment(),
     inner class MyAdapter(dataset: MutableList<Pair<String, Bitmap>>, listener: MultiSelectListener<Pair<String, Bitmap>>) :
             MultiSelectAdapter<Pair<String, Bitmap>>(dataset, listener) {
 
+        init {
+            registerAdapterDataObserver(
+                    object : RecyclerView.AdapterDataObserver() {
+                        override fun onChanged() {
+                            updateVisibility()
+                        }
+                    })
+        }
+
+        private fun updateVisibility() {
+            recyclerView.visibility = if (itemCount == 0) View.GONE else View.VISIBLE
+        }
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectableViewHolder<Pair<String, Bitmap>> {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.grid_item, parent, false)
             return MyViewHolder(view)
