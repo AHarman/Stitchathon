@@ -5,6 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
@@ -25,6 +27,9 @@ class MainActivity :
         internal lateinit var db: AppDatabase
         const val READ_EXTERNAL_IMAGE = 42
         const val READ_EXTERNAL_JSON_PATTERN = 55
+        const val KNIT_PATTERN_FRAGMENT = "KnitPatternFragment"
+        const val OPEN_PATTERN_FRAGMENT = "OpenPatternFragment"
+        const val SETTINGS_FRAGMENT = "SettingsFragment"
     }
 
     private var importImageDialog: ImportImageDialog? = null
@@ -37,7 +42,7 @@ class MainActivity :
         db = AppDatabase.getAppDatabase(applicationContext)
         supportFragmentManager
                 .beginTransaction()
-                .add(R.id.fragment_container, knitPatternFragment)
+                .add(R.id.fragment_container, knitPatternFragment, KNIT_PATTERN_FRAGMENT)
                 .commit()
     }
 
@@ -45,6 +50,8 @@ class MainActivity :
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START)
+        } else if (supportFragmentManager.backStackEntryCount > 0) {
+            supportFragmentManager.popBackStack(supportFragmentManager.getBackStackEntryAt(0).id, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         } else {
             super.onBackPressed()
         }
@@ -54,11 +61,11 @@ class MainActivity :
         // Handle navigation view item clicks here.
         val id = item.itemId
         when (id) {
-            R.id.nav_open -> selectInternalPattern()
+            R.id.nav_open -> startFragment(supportFragmentManager.findFragmentByTag(OPEN_PATTERN_FRAGMENT) ?: OpenPatternFragment(), OPEN_PATTERN_FRAGMENT)
             R.id.nav_import_pattern -> selectExternalFile("application/json", READ_EXTERNAL_JSON_PATTERN)
             R.id.nav_import_image -> importImage()
             R.id.nav_about_app -> AppInfoDialog().show(supportFragmentManager, "App info")
-            R.id.nav_settings -> openOptions()
+            R.id.nav_settings -> startFragment(supportFragmentManager.findFragmentByTag(SETTINGS_FRAGMENT) ?: SettingsFragment(), SETTINGS_FRAGMENT)
         }
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
@@ -80,20 +87,16 @@ class MainActivity :
         findViewById<NavigationView>(R.id.nav_view).setNavigationItemSelectedListener(this)
     }
 
-    private fun selectInternalPattern() {
-        supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container, OpenPatternFragment(), null)
-                .addToBackStack(null)
-                .commit()
-    }
-
-    private fun openOptions() {
-        supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.fragment_container, SettingsFragment())
-                .addToBackStack(null)
-                .commit()
+    private fun startFragment(fragment: Fragment, tag: String) {
+        if (supportFragmentManager.findFragmentByTag(tag) != null) {
+            supportFragmentManager.popBackStack(tag, 0)
+        } else {
+            supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment, tag)
+                    .addToBackStack(tag)
+                    .commit()
+        }
     }
 
     internal fun selectExternalFile(type: String, requestCode: Int) {
