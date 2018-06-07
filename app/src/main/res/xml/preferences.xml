@@ -24,7 +24,7 @@
             app:chromaShapePreview="ROUNDED_SQUARE"
             app:chromaColorMode="RGB"
             app:chromaIndicatorMode="HEX"
-            app:chromaInitialColor="@color/default_pattern_background_colour" />
+            android:defaultValue="@color/default_pattern_background_colour" />
         <com.kunzisoft.androidclearchroma.ChromaPreferenceCompat
             android:key="colour_1"
             android:title="@string/options_stitch_colour_title_1"
@@ -32,7 +32,7 @@
             app:chromaShapePreview="ROUNDED_SQUARE"
             app:chromaColorMode="RGB"
             app:chromaIndicatorMode="HEX"
-            app:chromaInitialColor="@color/default_stitch_colour_1" />
+            android:defaultValue="@color/default_stitch_colour_1" />
         <com.kunzisoft.androidclearchroma.ChromaPreferenceCompat
             android:key="colour_2"
             android:title="@string/options_stitch_colour_title_2"
@@ -40,7 +40,7 @@
             app:chromaShapePreview="ROUNDED_SQUARE"
             app:chromaColorMode="RGB"
             app:chromaIndicatorMode="HEX"
-            app:chromaInitialColor="@color/default_stitch_colour_2" />
+            android:defaultValue="@color/default_stitch_colour_2" />
         <com.kunzisoft.androidclearchroma.ChromaPreferenceCompat
             android:key="colour_3"
             android:title="@string/options_stitch_colour_title_3"
@@ -48,7 +48,7 @@
             app:chromaShapePreview="ROUNDED_SQUARE"
             app:chromaColorMode="RGB"
             app:chromaIndicatorMode="HEX"
-            app:chromaInitialColor="@color/default_stitch_colour_3" />
+            android:defaultValue="@color/default_stitch_colour_3" />
     </android.support.v7.preference.PreferenceCategory>
 
     <android.support.v7.preference.PreferenceCategory
