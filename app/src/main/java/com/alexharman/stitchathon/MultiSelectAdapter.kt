@@ -101,7 +101,7 @@ abstract class MultiSelectAdapter<D>(private var dataset: MutableList<D>, privat
     fun deselectAll() {
         val recyclerView = this.recyclerView ?: return
         for (item in selected) {
-            (recyclerView.findViewHolderForAdapterPosition(dataset.indexOf(item)) as SelectableViewHolder<D>)
+            (recyclerView.findViewHolderForAdapterPosition(dataset.indexOf(item)) as SelectableViewHolder<*>)
                     .deselect()
         }
         selected.clear()
