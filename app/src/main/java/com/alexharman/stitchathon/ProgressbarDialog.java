@@ -18,12 +18,11 @@ public class ProgressbarDialog extends DialogFragment {
     ProgressBar progressBar;
     View dialogView;
 
-    public static ProgressbarDialog newInstance(String title, boolean indeterminate, String label) {
+    public static ProgressbarDialog newInstance(String title, String label) {
         ProgressbarDialog fragment = new ProgressbarDialog();
         Bundle args = new Bundle();
         args.putString("title", title);
         args.putString("label", label);
-        args.putBoolean("indeterminate", indeterminate);
         fragment.setArguments(args);
         fragment.setCancelable(false);
         return fragment;
@@ -41,7 +40,7 @@ public class ProgressbarDialog extends DialogFragment {
         Dialog dialog = builder.create();
 
         progressBar = dialogView.findViewById(R.id.progress_dialog_bar);
-        progressBar.setIndeterminate(getArguments().getBoolean("indeterminate"));
+        progressBar.setIndeterminate(true);
         ((TextView) dialogView.findViewById(R.id.progress_dialog_text)).setText(getArguments().getString("label"));
 
         return dialog;

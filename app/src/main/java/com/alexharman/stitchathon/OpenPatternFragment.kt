@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.preference.PreferenceManager
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -12,7 +11,6 @@ import android.support.v7.widget.Toolbar
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.DeletePatternsTask
 import com.alexharman.stitchathon.databaseAccessAsyncTasks.GetNamesAndImagesTask
 
 class OpenPatternFragment : Fragment(),
@@ -83,25 +81,13 @@ class OpenPatternFragment : Fragment(),
     }
 
     override fun onSingleItemSelected(item: Pair<String, Bitmap>) {
-        PreferenceManager.getDefaultSharedPreferences(context)
-                .edit()
-                .putString(PreferenceKeys.CURRENT_PATTERN_NAME, item.first)
-                .apply()
+        (activity as MainActivity?)?.openPattern(item.first)
         activity?.supportFragmentManager?.popBackStack()
     }
 
     private fun deleteSelectedPatterns() {
-        val context = this.context ?: return
         val patterns = viewAdapter.getSelectedItems().map { it.first }.toTypedArray()
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-
-        DeletePatternsTask(context).execute(*patterns)
-        if (prefs.getString(PreferenceKeys.CURRENT_PATTERN_NAME, "") in patterns) {
-            prefs
-                    .edit()
-                    .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
-                    .apply()
-        }
+        (activity as MainActivity?)?.deletePatterns(*patterns)
         viewAdapter.removeSelectedItems()
     }
 

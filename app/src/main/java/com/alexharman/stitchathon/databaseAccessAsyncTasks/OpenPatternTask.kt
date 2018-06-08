@@ -11,16 +11,10 @@ import com.alexharman.stitchathon.database.AppDatabase
 import java.lang.ref.WeakReference
 
 class OpenPatternTask(context: Context, callback: OpenPattern) : AsyncTask<String, String, KnitPattern>() {
-//    private var progressbarDialog = ProgressbarDialog.newInstance(context.getString(R.string.progress_dialog_load_title), true, context.getString(R.string.progress_bar_loading_pattern))
     private lateinit var knitPatternDrawer: KnitPatternDrawer
     private lateinit var thumbnail: Bitmap
     private val context: WeakReference<Context> = WeakReference(context)
     private val callback: WeakReference<OpenPattern> = WeakReference(callback)
-
-    //TODO: Pass in the progressbar?
-//    override fun onPreExecute() {
-//        progressbarDialog.show(context.get()!!.supportFragmentManager, "Opening")
-//    }
 
     override fun doInBackground(vararg strings: String): KnitPattern {
         val dao = AppDatabase.getAppDatabase(context.get()!!).knitPatternDao()
@@ -31,13 +25,8 @@ class OpenPatternTask(context: Context, callback: OpenPattern) : AsyncTask<Strin
         return knitPattern
     }
 
-//    override fun onProgressUpdate(vararg values: String) {
-//        progressbarDialog.updateText(values[0])
-//    }
-
     override fun onPostExecute(knitPattern: KnitPattern) {
         super.onPostExecute(knitPattern)
         callback.get()!!.onPatternReturned(knitPattern, knitPatternDrawer, thumbnail)
-//        progressbarDialog.dismiss()
     }
 }

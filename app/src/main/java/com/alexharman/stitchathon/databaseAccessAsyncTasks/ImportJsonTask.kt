@@ -1,5 +1,6 @@
 package com.alexharman.stitchathon.databaseAccessAsyncTasks
 
+import android.content.Context
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
@@ -8,7 +9,7 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 
-internal class ImportJsonTask(context: AppCompatActivity, callback: OpenPattern) : ImportPatternTask<Uri>(context, callback) {
+internal class ImportJsonTask(context: Context, callback: OpenPattern) : ImportPatternTask<Uri>(context, callback) {
 
     override fun doInBackground(vararg uris: Uri): KnitPattern? {
         var knitPattern: KnitPattern? = null

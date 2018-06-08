@@ -78,7 +78,7 @@ class SettingsFragment: ChromaPreferenceFragmentCompat(), SharedPreferences.OnSh
             val editor = PreferenceManager.getDefaultSharedPreferences(activity).edit()
             editor.remove(PreferenceKeys.CURRENT_PATTERN_NAME)
             editor.apply()
-            DeleteAllPatternsTask(context!!).execute()
+            (activity as MainActivity?)?.deleteAllPatterns()
         } else if (opcode == RESET_ALL_PREFS) {
             PreferenceManager.getDefaultSharedPreferences(activity)
                     .edit()

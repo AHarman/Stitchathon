@@ -1,13 +1,13 @@
 package com.alexharman.stitchathon.databaseAccessAsyncTasks
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.support.v7.app.AppCompatActivity
 import com.alexharman.stitchathon.ImageReader
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 
-internal class ImportImageTask(context: AppCompatActivity,
+internal class ImportImageTask(context: Context,
                                callback: OpenPattern,
                                private val imageUri: Uri,
                                private val patternName: String,

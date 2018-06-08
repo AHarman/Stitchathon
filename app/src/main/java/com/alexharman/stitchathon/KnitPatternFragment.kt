@@ -32,7 +32,6 @@ class KnitPatternFragment : Fragment(),
     private lateinit var knitPatternView: KnitPatternView
     private lateinit var knitPatternViewGestureDetector: GestureDetectorCompat
     private var knitPatternDrawer: KnitPatternDrawer? = null
-    private val preferenceListener = MySharedPreferenceListener()
     private lateinit var db: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,9 +40,8 @@ class KnitPatternFragment : Fragment(),
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         val patternName = sharedPreferences.getString(PreferenceKeys.CURRENT_PATTERN_NAME, null)
         if (patternName != null) {
-            openPattern(patternName)
+            (activity as MainActivity).openPattern(patternName)
         }
-        sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceListener)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -142,11 +140,6 @@ class KnitPatternFragment : Fragment(),
         updateStitchCounter()
     }
 
-    fun openPattern(patternName: String) {
-        val context = this.context ?: return
-        OpenPatternTask(context, this).execute(patternName)
-    }
-
     override fun onPatternReturned(knitPattern: KnitPattern, knitPatternDrawer: KnitPatternDrawer, thumbnail: Bitmap) {
         setKnitPattern(knitPattern, knitPatternDrawer, thumbnail)
     }
@@ -157,13 +150,9 @@ class KnitPatternFragment : Fragment(),
         this.knitPatternDrawer = knitPatternDrawer
         knitPatternView.knitPatternDrawer = knitPatternDrawer
         updateStitchCounter()
-        val editor = PreferenceManager.getDefaultSharedPreferences(context).edit()
         patternNameView?.text = knitPattern.name
         patternThumbnailView?.setImageBitmap(thumbnail)
         toolbar?.title = knitPattern.name
-
-        editor.putString(PreferenceKeys.CURRENT_PATTERN_NAME, knitPattern.name)
-        editor.apply()
     }
 
     fun updateStitchCounter() {
@@ -177,28 +166,13 @@ class KnitPatternFragment : Fragment(),
         SavePatternChangesTask().execute(knitPatternDrawer?.knitPattern)
     }
 
-    private fun clearKnitPattern() {
+    fun clearKnitPattern() {
         this.knitPatternDrawer = null
         knitPatternView.clearPattern()
         patternThumbnailView?.setImageResource(R.drawable.logo)
         patternNameView?.text = ""
         toolbar?.title = getString(R.string.title_activity_main)
         updateStitchCounter()
-        PreferenceManager.getDefaultSharedPreferences(context)
-                .edit()
-                .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
-                .apply()
-    }
-
-    private inner class MySharedPreferenceListener : SharedPreferences.OnSharedPreferenceChangeListener {
-        override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-            if (key == PreferenceKeys.CURRENT_PATTERN_NAME ) {
-                if (sharedPreferences.contains(PreferenceKeys.CURRENT_PATTERN_NAME))
-                    openPattern(sharedPreferences.getString(PreferenceKeys.CURRENT_PATTERN_NAME, null))
-                else
-                    clearKnitPattern()
-            }
-        }
     }
 
     private inner class KnitPatternViewGestureListener : GestureDetector.SimpleOnGestureListener() {

@@ -2,6 +2,7 @@ package com.alexharman.stitchathon
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.NavigationView
@@ -14,14 +15,14 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
+import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.database.AppDatabase
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.ImportImageTask
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.ImportJsonTask
+import com.alexharman.stitchathon.databaseAccessAsyncTasks.*
 
 class MainActivity :
         AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
-        ImportImageDialog.ImportImageDialogListener {
+        ImportImageDialog.ImportImageDialogListener, OpenPattern {
 
     companion object {
         internal lateinit var db: AppDatabase
@@ -34,6 +35,7 @@ class MainActivity :
 
     private var importImageDialog: ImportImageDialog? = null
     private var knitPatternFragment = KnitPatternFragment()
+    private var progressbarDialog: ProgressbarDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +46,10 @@ class MainActivity :
                 .beginTransaction()
                 .add(R.id.fragment_container, knitPatternFragment, KNIT_PATTERN_FRAGMENT)
                 .commit()
+
+        val patternName = PreferenceManager.getDefaultSharedPreferences(this)
+                .getString(PreferenceKeys.CURRENT_PATTERN_NAME, null)
+        if (patternName != null) openPattern(patternName)
     }
 
     override fun onBackPressed() {
@@ -51,9 +57,16 @@ class MainActivity :
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START)
         } else if (supportFragmentManager.backStackEntryCount > 0) {
-            supportFragmentManager.popBackStack(supportFragmentManager.getBackStackEntryAt(0).id, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            returnToKnitPatternFragment()
         } else {
             super.onBackPressed()
+        }
+    }
+
+    fun returnToKnitPatternFragment() {
+        val fragManager = supportFragmentManager ?: return
+        if (fragManager.backStackEntryCount > 0) {
+            fragManager.popBackStack(fragManager.getBackStackEntryAt(0).id, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
 
@@ -106,13 +119,26 @@ class MainActivity :
         startActivityForResult(intent, requestCode)
     }
 
+    private fun showProgressBar(title: String, message: String) {
+        if (progressbarDialog == null) {
+            progressbarDialog = ProgressbarDialog.newInstance(title, message)
+            progressbarDialog?.show(supportFragmentManager, "Progress dialog")
+        }
+    }
+
+    fun openPattern(patternName: String) {
+        showProgressBar(getString(R.string.progress_dialog_load_title), getString(R.string.progress_bar_loading_pattern))
+        OpenPatternTask(this, this).execute(patternName)
+    }
+
     private fun importImage() {
         importImageDialog = ImportImageDialog()
         importImageDialog?.show(supportFragmentManager, "Importing image")
     }
 
-    private fun importJson(uri: Uri?) {
-        ImportJsonTask(this, knitPatternFragment).execute(uri)
+    private fun importJson(uri: Uri) {
+        showProgressBar(getString(R.string.progress_dialog_import_title), getString(R.string.progress_bar_importing_pattern))
+        ImportJsonTask(this, this).execute(uri)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
@@ -129,7 +155,41 @@ class MainActivity :
         }
     }
 
+    fun deletePatterns(vararg patternNames: String) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+
+        DeletePatternsTask(this).execute(*patternNames)
+        if (prefs.getString(PreferenceKeys.CURRENT_PATTERN_NAME, "") in patternNames) {
+            knitPatternFragment.clearKnitPattern()
+            prefs
+                    .edit()
+                    .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
+                    .apply()
+        }
+    }
+
+    fun deleteAllPatterns() {
+        DeleteAllPatternsTask(this).execute()
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
+                .apply()
+        knitPatternFragment.clearKnitPattern()
+    }
+
     override fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, oddRowsOpposite: Boolean, numColours: Int) {
-        ImportImageTask(this, knitPatternFragment, imageUri, name, width, height, oddRowsOpposite, numColours).execute()
+        showProgressBar(getString(R.string.progress_dialog_import_title), getString(R.string.progress_bar_importing_pattern))
+        ImportImageTask(this, this, imageUri, name, width, height, oddRowsOpposite, numColours).execute()
+    }
+
+    override fun onPatternReturned(knitPattern: KnitPattern, knitPatternDrawer: KnitPatternDrawer, thumbnail: Bitmap) {
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
+                .putString(PreferenceKeys.CURRENT_PATTERN_NAME, knitPattern.name)
+                .apply()
+        progressbarDialog?.dismiss()
+        progressbarDialog = null
+
+        returnToKnitPatternFragment()
+        knitPatternFragment.onPatternReturned(knitPattern, knitPatternDrawer, thumbnail)
     }
 }
