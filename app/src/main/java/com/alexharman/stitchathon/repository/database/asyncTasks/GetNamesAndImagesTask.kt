@@ -1,9 +1,9 @@
-package com.alexharman.stitchathon.databaseAccessAsyncTasks
+package com.alexharman.stitchathon.repository.database.asyncTasks
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.AsyncTask
-import com.alexharman.stitchathon.database.AppDatabase
+import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference
 
 class GetNamesAndImagesTask(context: Context, callback: GetNamesAndThumbnails) : AsyncTask<Void, Void, Array<Pair<String, Bitmap>>>() {

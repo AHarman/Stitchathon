@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon.databaseAccessAsyncTasks
+package com.alexharman.stitchathon.repository.database.asyncTasks
 
 import android.content.Context
 import android.graphics.Bitmap

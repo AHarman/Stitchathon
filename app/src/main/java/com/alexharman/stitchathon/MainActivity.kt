@@ -16,8 +16,8 @@ import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
-import com.alexharman.stitchathon.database.AppDatabase
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.*
+import com.alexharman.stitchathon.repository.database.AppDatabase
+import com.alexharman.stitchathon.repository.database.asyncTasks.*
 
 class MainActivity :
         AppCompatActivity(),

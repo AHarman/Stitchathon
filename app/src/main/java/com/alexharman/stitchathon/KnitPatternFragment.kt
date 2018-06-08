@@ -1,6 +1,5 @@
 package com.alexharman.stitchathon
 
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.media.ThumbnailUtils
 import android.os.Bundle
@@ -13,10 +12,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
-import com.alexharman.stitchathon.database.AppDatabase
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.OpenPattern
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.OpenPatternTask
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.SavePatternChangesTask
+import com.alexharman.stitchathon.repository.database.AppDatabase
+import com.alexharman.stitchathon.repository.database.asyncTasks.OpenPattern
+import com.alexharman.stitchathon.repository.database.asyncTasks.SavePatternChangesTask
 import kotlin.math.min
 
 class KnitPatternFragment : Fragment(),

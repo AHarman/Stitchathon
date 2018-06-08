@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon.databaseAccessAsyncTasks
+package com.alexharman.stitchathon.repository.database.asyncTasks
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -7,8 +7,7 @@ import android.os.AsyncTask
 import android.preference.PreferenceManager
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPatternDrawer
-import com.alexharman.stitchathon.R
-import com.alexharman.stitchathon.database.AppDatabase
+import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference
 
 internal abstract class ImportPatternTask<V> internal constructor(context: Context, callback: OpenPattern) : AsyncTask<V, String, KnitPattern>() {

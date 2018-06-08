@@ -8,7 +8,6 @@ import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.preference.Preference.OnPreferenceClickListener
 import android.support.v7.preference.PreferenceManager
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.DeleteAllPatternsTask
 import com.kunzisoft.androidclearchroma.ChromaPreferenceFragmentCompat
 
 class SettingsFragment: ChromaPreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {

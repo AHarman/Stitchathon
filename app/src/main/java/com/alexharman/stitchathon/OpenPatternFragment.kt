@@ -11,7 +11,7 @@ import android.support.v7.widget.Toolbar
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
-import com.alexharman.stitchathon.databaseAccessAsyncTasks.GetNamesAndImagesTask
+import com.alexharman.stitchathon.repository.database.asyncTasks.GetNamesAndImagesTask
 
 class OpenPatternFragment : Fragment(),
         GetNamesAndImagesTask.GetNamesAndThumbnails,

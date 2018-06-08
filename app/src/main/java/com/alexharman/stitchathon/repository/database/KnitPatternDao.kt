@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon.database
+package com.alexharman.stitchathon.repository.database
 
 import android.arch.persistence.room.*
 import android.content.Context

@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon.databaseAccessAsyncTasks
+package com.alexharman.stitchathon.repository.database.asyncTasks
 
 import android.graphics.Bitmap
 import com.alexharman.stitchathon.KnitPackage.KnitPattern

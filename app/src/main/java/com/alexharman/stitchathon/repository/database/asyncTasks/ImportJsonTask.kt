@@ -1,8 +1,7 @@
-package com.alexharman.stitchathon.databaseAccessAsyncTasks
+package com.alexharman.stitchathon.repository.database.asyncTasks
 
 import android.content.Context
 import android.net.Uri
-import android.support.v7.app.AppCompatActivity
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.KnitPatternParser
 import java.io.BufferedReader
