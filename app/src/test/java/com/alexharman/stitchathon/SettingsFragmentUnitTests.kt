@@ -1,7 +1,7 @@
 package com.alexharman.stitchathon
 
 import android.content.Context
-import android.preference.PreferenceManager
+import android.support.v7.preference.PreferenceManager
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
