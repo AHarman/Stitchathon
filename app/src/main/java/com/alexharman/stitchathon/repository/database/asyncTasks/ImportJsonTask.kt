@@ -4,11 +4,12 @@ import android.content.Context
 import android.net.Uri
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.KnitPatternParser
+import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 
-internal class ImportJsonTask(context: Context, callback: OpenPattern) : ImportPatternTask<Uri>(context, callback) {
+internal class ImportJsonTask(context: Context, callback: KnitPatternDataSource.OpenKnitPatternCallback) : ImportPatternTask<Uri>(context, callback) {
 
     override fun doInBackground(vararg uris: Uri): KnitPattern? {
         var knitPattern: KnitPattern? = null

@@ -40,7 +40,7 @@ abstract class KnitPatternDao {
     }
 
     @Transaction
-    open fun getThumbnails(context: Context): Array<Pair<String, Bitmap>> {
+    open fun getThumbnails(context: Context): Array<Pair<String, Bitmap?>> {
         Log.v("Database", "Getting all thumbnails")
         val patterns = selectAllKnitPatterns()
         return Array(patterns.size,
@@ -52,6 +52,13 @@ abstract class KnitPatternDao {
         Log.v("Database", "Deleting all patterns")
         for (kpe in selectAllKnitPatterns()) {
             deletePattern(kpe.name, context)
+        }
+    }
+
+    @Transaction
+    open fun deletePatterns(vararg names: String, context: Context) {
+        for (name in names) {
+            deletePattern(name, context)
         }
     }
 

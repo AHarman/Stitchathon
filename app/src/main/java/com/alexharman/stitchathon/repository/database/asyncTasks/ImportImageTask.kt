@@ -6,9 +6,10 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import com.alexharman.stitchathon.ImageReader
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.repository.KnitPatternDataSource
 
 internal class ImportImageTask(context: Context,
-                               callback: OpenPattern,
+                               callback: KnitPatternDataSource.OpenKnitPatternCallback,
                                private val imageUri: Uri,
                                private val patternName: String,
                                private val width: Int,
@@ -26,11 +27,12 @@ internal class ImportImageTask(context: Context,
     }
 
     private fun readImageFile(uri: Uri): Bitmap? {
+        val context = context.get() ?: return null
         var bitmap: Bitmap? = null
         val opts = BitmapFactory.Options()
         opts.inMutable = true
         try {
-            val inputStream = context.get()!!.contentResolver.openInputStream(uri)
+            val inputStream = context.contentResolver.openInputStream(uri)
             bitmap = BitmapFactory.decodeStream(inputStream, null, opts)
             inputStream.close()
         } catch (e: Exception) {

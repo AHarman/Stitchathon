@@ -6,9 +6,10 @@ import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference
 
 class DeleteAllPatternsTask(context: Context) : AsyncTask<Void, Void, Void>() {
-    var context: WeakReference<Context> = WeakReference(context)
+    val context: WeakReference<Context> = WeakReference(context)
     override fun doInBackground(vararg params: Void): Void? {
-        AppDatabase.getAppDatabase(context.get()!!).knitPatternDao().deleteAllPatterns(context.get()!!)
+        val context = context.get() ?: return null
+        AppDatabase.getAppDatabase(context).knitPatternDao().deleteAllPatterns(context)
         return null
     }
 }

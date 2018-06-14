@@ -13,13 +13,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.repository.database.AppDatabase
-import com.alexharman.stitchathon.repository.database.asyncTasks.OpenPattern
 import com.alexharman.stitchathon.repository.database.asyncTasks.SavePatternChangesTask
 import kotlin.math.min
 
 class KnitPatternFragment : Fragment(),
-        GoToStitchDialog.GoToStitchDialogListener,
-        OpenPattern {
+        GoToStitchDialog.GoToStitchDialogListener {
 
     private var patternThumbnailView: ImageView? = null
     private var patternNameView: TextView? = null
@@ -138,13 +136,9 @@ class KnitPatternFragment : Fragment(),
         updateStitchCounter()
     }
 
-    override fun onPatternReturned(knitPattern: KnitPattern, knitPatternDrawer: KnitPatternDrawer, thumbnail: Bitmap) {
-        setKnitPattern(knitPattern, knitPatternDrawer, thumbnail)
-    }
-
-    private fun setKnitPattern(knitPattern: KnitPattern,
-                               knitPatternDrawer: KnitPatternDrawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(context)),
-                               thumbnail: Bitmap = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)) {
+    fun setKnitPattern(knitPattern: KnitPattern,
+                       knitPatternDrawer: KnitPatternDrawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(context)),
+                       thumbnail: Bitmap = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)) {
         this.knitPatternDrawer = knitPatternDrawer
         knitPatternView.knitPatternDrawer = knitPatternDrawer
         updateStitchCounter()

@@ -16,13 +16,15 @@ import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import com.alexharman.stitchathon.repository.database.asyncTasks.*
 
 class MainActivity :
         AppCompatActivity(),
+        KnitPatternDataSource.OpenKnitPatternCallback,
         NavigationView.OnNavigationItemSelectedListener,
-        ImportImageDialog.ImportImageDialogListener, OpenPattern {
+        ImportImageDialog.ImportImageDialogListener {
 
     companion object {
         internal lateinit var db: AppDatabase
@@ -182,18 +184,18 @@ class MainActivity :
         ImportImageTask(this, this, imageUri, name, width, height, oddRowsOpposite, numColours).execute()
     }
 
-    override fun onPatternReturned(knitPattern: KnitPattern, knitPatternDrawer: KnitPatternDrawer, thumbnail: Bitmap) {
+    override fun onKnitPatternOpened(pattern: KnitPattern) {
         returnToKnitPatternFragment()
-        knitPatternFragment.setKnitPattern(knitPattern)
+        knitPatternFragment.setKnitPattern(pattern)
 
         PreferenceManager.getDefaultSharedPreferences(this).edit()
-                .putString(PreferenceKeys.CURRENT_PATTERN_NAME, knitPattern.name)
+                .putString(PreferenceKeys.CURRENT_PATTERN_NAME, pattern.name)
                 .apply()
         progressbarDialog?.dismiss()
         progressbarDialog = null
     }
 
-        returnToKnitPatternFragment()
-        knitPatternFragment.onPatternReturned(knitPattern, knitPatternDrawer, thumbnail)
+    override fun onOpenKnitPatternFail() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

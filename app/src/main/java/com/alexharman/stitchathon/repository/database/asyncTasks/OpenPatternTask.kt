@@ -1,32 +1,28 @@
 package com.alexharman.stitchathon.repository.database.asyncTasks
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.os.AsyncTask
-import android.preference.PreferenceManager
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
-import com.alexharman.stitchathon.KnitPatternDrawer
-import com.alexharman.stitchathon.R
+import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference
 
-class OpenPatternTask(context: Context, callback: OpenPattern) : AsyncTask<String, String, KnitPattern>() {
-    private lateinit var knitPatternDrawer: KnitPatternDrawer
-    private lateinit var thumbnail: Bitmap
+class OpenPatternTask(context: Context, callback: KnitPatternDataSource.OpenKnitPatternCallback) : AsyncTask<String, String, KnitPattern>() {
     private val context: WeakReference<Context> = WeakReference(context)
-    private val callback: WeakReference<OpenPattern> = WeakReference(callback)
+    private val callback: WeakReference<KnitPatternDataSource.OpenKnitPatternCallback> = WeakReference(callback)
 
-    override fun doInBackground(vararg strings: String): KnitPattern {
-        val dao = AppDatabase.getAppDatabase(context.get()!!).knitPatternDao()
-        val knitPattern = dao.getKnitPattern(strings[0], context.get()!!)
-        thumbnail = dao.getThumbnail(context.get()!!, knitPattern.name)
-        publishProgress(context.get()!!.getString(R.string.progress_bar_creating_bitmap))
-        knitPatternDrawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(context.get()))
-        return knitPattern
+    override fun doInBackground(vararg strings: String): KnitPattern? {
+        val context = context.get() ?: return null
+        return AppDatabase.getAppDatabase(context).knitPatternDao().getKnitPattern(strings[0], context)
     }
 
-    override fun onPostExecute(knitPattern: KnitPattern) {
+    override fun onPostExecute(knitPattern: KnitPattern?) {
         super.onPostExecute(knitPattern)
-        callback.get()!!.onPatternReturned(knitPattern, knitPatternDrawer, thumbnail)
+        val callback = callback.get() ?: return
+        if (knitPattern == null) {
+            callback.onOpenKnitPatternFail()
+        } else {
+            callback.onKnitPatternOpened(knitPattern)
+        }
     }
 }

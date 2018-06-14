@@ -7,12 +7,14 @@ import android.os.AsyncTask
 import android.preference.PreferenceManager
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPatternDrawer
+import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference
 
-internal abstract class ImportPatternTask<V> internal constructor(context: Context, callback: OpenPattern) : AsyncTask<V, String, KnitPattern>() {
+internal abstract class ImportPatternTask<V> internal constructor(context: Context, callback: KnitPatternDataSource.OpenKnitPatternCallback)
+    : AsyncTask<V, String, KnitPattern>() {
     protected var context: WeakReference<Context> = WeakReference(context)
-    private var callBack: WeakReference<OpenPattern> = WeakReference(callback)
+    private var callback: WeakReference<KnitPatternDataSource.OpenKnitPatternCallback> = WeakReference(callback)
     private lateinit var knitPatternDrawer: KnitPatternDrawer
     private lateinit var thumbnail: Bitmap
 
@@ -23,10 +25,13 @@ internal abstract class ImportPatternTask<V> internal constructor(context: Conte
         AppDatabase.getAppDatabase(context).knitPatternDao().saveNewPattern(knitPattern, thumbnail, context)
     }
 
-    override fun onPostExecute(pattern: KnitPattern?) {
-        super.onPostExecute(pattern)
-        if (pattern != null) {
-            callBack.get()?.onPatternReturned(pattern, knitPatternDrawer, thumbnail)
+    override fun onPostExecute(knitPattern: KnitPattern?) {
+        super.onPostExecute(knitPattern)
+        val callback = callback.get() ?: return
+        if (knitPattern == null) {
+            callback.onOpenKnitPatternFail()
+        } else {
+            callback.onKnitPatternOpened(knitPattern)
         }
     }
 }
