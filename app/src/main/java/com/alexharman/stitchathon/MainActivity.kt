@@ -183,11 +183,15 @@ class MainActivity :
     }
 
     override fun onPatternReturned(knitPattern: KnitPattern, knitPatternDrawer: KnitPatternDrawer, thumbnail: Bitmap) {
+        returnToKnitPatternFragment()
+        knitPatternFragment.setKnitPattern(knitPattern)
+
         PreferenceManager.getDefaultSharedPreferences(this).edit()
                 .putString(PreferenceKeys.CURRENT_PATTERN_NAME, knitPattern.name)
                 .apply()
         progressbarDialog?.dismiss()
         progressbarDialog = null
+    }
 
         returnToKnitPatternFragment()
         knitPatternFragment.onPatternReturned(knitPattern, knitPatternDrawer, thumbnail)
