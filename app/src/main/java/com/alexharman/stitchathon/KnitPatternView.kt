@@ -19,19 +19,17 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     var knitPatternDrawer: KnitPatternDrawer? = null
         set(value) {
             field = value
-            if (viewWidth > 0) {
+            if (width > 0) {
                 //TODO: something about this?
                 zoomSrcRect()
                 scrollToNextStitch()
                 updatePatternDstRectangle()
-                currentView = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444)
+                currentView = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444)
                 updateCurrentView()
             }
         }
 
     private var fitPatternWidth = true
-    private var viewHeight: Int = 0
-    private var viewWidth: Int = 0
 
     // TODO: Change some of these to val
     private var bitmapToDrawPaint: Paint
@@ -56,9 +54,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
-        viewHeight = h
-        viewWidth = w
-        currentView = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_4444)
+        currentView = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444)
         if (knitPatternDrawer != null) {
             updatePatternDstRectangle()
             zoomSrcRect()
@@ -105,17 +101,17 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         if (fitPatternWidth) {
             left = 0f
             top = 0f
-            right = viewWidth.toFloat()
-            val ratio = viewWidth.toFloat() / patternBitmap.width.toFloat()
-            bottom = Math.min(viewHeight.toFloat(), patternBitmap.height * ratio)
+            right = width.toFloat()
+            val ratio = width.toFloat() / patternBitmap.width.toFloat()
+            bottom = Math.min(height.toFloat(), patternBitmap.height * ratio)
         } else {
             left = 0f
             top = 0f
-            right = Math.min(viewWidth, patternBitmap.width).toFloat()
-            bottom = Math.min(viewHeight, patternBitmap.height).toFloat()
-            if (patternBitmap.width < viewWidth) {
-                left += ((viewWidth - patternBitmap.width) / 2).toFloat()
-                right += ((viewWidth - patternBitmap.width) / 2).toFloat()
+            right = Math.min(width, patternBitmap.width).toFloat()
+            bottom = Math.min(height, patternBitmap.height).toFloat()
+            if (patternBitmap.width < width) {
+                left += ((width - patternBitmap.width) / 2).toFloat()
+                right += ((width - patternBitmap.width) / 2).toFloat()
             }
         }
         patternDstRectangle = RectF(left, top, right, bottom)
