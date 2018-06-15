@@ -2,7 +2,6 @@ package com.alexharman.stitchathon
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.NavigationView
@@ -17,8 +16,7 @@ import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
-import com.alexharman.stitchathon.repository.database.AppDatabase
-import com.alexharman.stitchathon.repository.database.asyncTasks.*
+import com.alexharman.stitchathon.repository.KnitPatternRepository
 
 class MainActivity :
         AppCompatActivity(),
@@ -27,7 +25,7 @@ class MainActivity :
         ImportImageDialog.ImportImageDialogListener {
 
     companion object {
-        internal lateinit var db: AppDatabase
+        lateinit var repository: KnitPatternRepository
         const val READ_EXTERNAL_IMAGE = 42
         const val READ_EXTERNAL_JSON_PATTERN = 55
         const val KNIT_PATTERN_FRAGMENT = "KnitPatternFragment"
@@ -43,7 +41,7 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
         setUpUI()
-        db = AppDatabase.getAppDatabase(applicationContext)
+        repository = KnitPatternRepository.getInstance(this)
         supportFragmentManager
                 .beginTransaction()
                 .add(R.id.fragment_container, knitPatternFragment, KNIT_PATTERN_FRAGMENT)
@@ -130,7 +128,7 @@ class MainActivity :
 
     fun openPattern(patternName: String) {
         showProgressBar(getString(R.string.progress_dialog_load_title), getString(R.string.progress_bar_loading_pattern))
-        OpenPatternTask(this, this).execute(patternName)
+        repository.openKnitPattern(patternName, this)
     }
 
     private fun importImage() {
@@ -140,7 +138,7 @@ class MainActivity :
 
     private fun importJson(uri: Uri) {
         showProgressBar(getString(R.string.progress_dialog_import_title), getString(R.string.progress_bar_importing_pattern))
-        ImportJsonTask(this, this).execute(uri)
+        repository.importNewJsonPattern(uri, this)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
@@ -159,8 +157,8 @@ class MainActivity :
 
     fun deletePatterns(vararg patternNames: String) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        repository.deleteKnitPatterns(*patternNames)
 
-        DeletePatternsTask(this).execute(*patternNames)
         if (prefs.getString(PreferenceKeys.CURRENT_PATTERN_NAME, "") in patternNames) {
             knitPatternFragment.clearKnitPattern()
             prefs
@@ -171,7 +169,7 @@ class MainActivity :
     }
 
     fun deleteAllPatterns() {
-        DeleteAllPatternsTask(this).execute()
+        repository.deleteAllKnitPatterns()
         PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()
                 .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
@@ -181,7 +179,7 @@ class MainActivity :
 
     override fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, oddRowsOpposite: Boolean, numColours: Int) {
         showProgressBar(getString(R.string.progress_dialog_import_title), getString(R.string.progress_bar_importing_pattern))
-        ImportImageTask(this, this, imageUri, name, width, height, oddRowsOpposite, numColours).execute()
+        repository.importNewBitmapPattern(imageUri, name, width, height, oddRowsOpposite, numColours, this)
     }
 
     override fun onKnitPatternOpened(pattern: KnitPattern) {
@@ -196,6 +194,6 @@ class MainActivity :
     }
 
     override fun onOpenKnitPatternFail() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        // TODO: Error message or retry
     }
 }

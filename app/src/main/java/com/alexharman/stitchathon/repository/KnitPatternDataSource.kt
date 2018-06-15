@@ -27,7 +27,15 @@ interface KnitPatternDataSource {
 
     fun saveKnitPatternChanges(pattern: KnitPattern)
 
-    fun importNewPattern(uri: Uri)
+    fun importNewJsonPattern(uri: Uri, callback: KnitPatternDataSource.OpenKnitPatternCallback?)
+
+    fun importNewBitmapPattern(uri: Uri,
+                               name: String,
+                               width: Int,
+                               height: Int,
+                               oddRowsOpposite: Boolean,
+                               numColours: Int,
+                               callback: KnitPatternDataSource.OpenKnitPatternCallback?)
 
     fun deleteAllKnitPatterns()
 

@@ -11,10 +11,10 @@ import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference
 
-internal abstract class ImportPatternTask<V> internal constructor(context: Context, callback: KnitPatternDataSource.OpenKnitPatternCallback)
+internal abstract class ImportPatternTask<V> internal constructor(context: Context, callback: KnitPatternDataSource.OpenKnitPatternCallback?)
     : AsyncTask<V, String, KnitPattern>() {
     protected var context: WeakReference<Context> = WeakReference(context)
-    private var callback: WeakReference<KnitPatternDataSource.OpenKnitPatternCallback> = WeakReference(callback)
+    private var callback: WeakReference<KnitPatternDataSource.OpenKnitPatternCallback?> = WeakReference(callback)
     private lateinit var knitPatternDrawer: KnitPatternDrawer
     private lateinit var thumbnail: Bitmap
 

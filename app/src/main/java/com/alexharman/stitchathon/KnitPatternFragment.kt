@@ -13,7 +13,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.repository.database.AppDatabase
-import com.alexharman.stitchathon.repository.database.asyncTasks.SavePatternChangesTask
 import kotlin.math.min
 
 class KnitPatternFragment : Fragment(),
@@ -155,7 +154,8 @@ class KnitPatternFragment : Fragment(),
     }
 
     private fun savePattern() {
-        SavePatternChangesTask().execute(knitPatternDrawer?.knitPattern)
+        val pattern = knitPatternDrawer?.knitPattern ?: return
+        MainActivity.repository.saveKnitPatternChanges(pattern)
     }
 
     fun clearKnitPattern() {

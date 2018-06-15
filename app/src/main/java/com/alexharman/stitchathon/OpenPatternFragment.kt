@@ -12,7 +12,7 @@ import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
-import com.alexharman.stitchathon.repository.database.asyncTasks.GetNamesAndImagesTask
+import com.alexharman.stitchathon.repository.KnitPatternRepository
 
 class OpenPatternFragment : Fragment(),
         KnitPatternDataSource.GetPatternInfoCallback,
@@ -36,7 +36,6 @@ class OpenPatternFragment : Fragment(),
         viewManager = GridLayoutManager(context, 3)
         recyclerView.layoutManager = viewManager
         recyclerView.adapter = viewAdapter
-        GetNamesAndImagesTask(context ?: return, this).execute()
     }
 
     override fun onPatternInfoReturn(result: Array<Pair<String, Bitmap?>>) {
@@ -52,6 +51,7 @@ class OpenPatternFragment : Fragment(),
         super.onActivityCreated(savedInstanceState)
         val toolbar = activity?.findViewById<Toolbar>(R.id.toolbar)
         toolbar?.title = getString(R.string.open_pattern_title)
+        KnitPatternRepository.getInstance(context ?: return).getKnitPatternNames(this)
     }
 
     override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
