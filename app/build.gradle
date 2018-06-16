@@ -31,6 +31,10 @@ android {
             includeAndroidResources = true
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 ext {
@@ -38,11 +42,10 @@ ext {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-
     implementation 'com.github.AHarman:AndroidClearChroma:master-SNAPSHOT'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation "com.android.support:appcompat-v7:$supportlib_version"
@@ -54,20 +57,16 @@ dependencies {
     implementation "com.android.support:support-vector-drawable:$supportlib_version"
     testImplementation 'junit:junit:4.12'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    implementation "android.arch.persistence.room:runtime:1.1.0"
+    implementation 'android.arch.persistence.room:runtime:1.1.0'
     kapt "android.arch.persistence.room:compiler:1.1.0"
-    testImplementation "android.arch.persistence.room:testing:1.1.0"
-
+    testImplementation 'android.arch.persistence.room:testing:1.1.0'
     // AndroidJUnitRunner and JUnit Rules
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'org.mockito:mockito-android:2.7.22'
-
-    testImplementation "org.robolectric:robolectric:3.8"
-    testImplementation "org.robolectric:shadows-support-v4:3.3.2"
+    testImplementation 'org.robolectric:robolectric:3.8'
+    testImplementation 'org.robolectric:shadows-support-v4:3.3.2'
     testImplementation 'org.mockito:mockito-core:2.18.3'
-
 }
 
 configurations.all {

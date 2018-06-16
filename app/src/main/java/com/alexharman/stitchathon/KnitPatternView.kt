@@ -21,8 +21,6 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
             field = value
             if (width > 0) {
                 //TODO: something about this?
-                zoomSrcRect()
-                scrollToNextStitch()
                 updatePatternDstRectangle()
                 currentView = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444)
                 updateCurrentView()
@@ -62,34 +60,6 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         }
     }
 
-    private fun moveSrcRectAndCheckBounds(shiftX: Int, shiftY: Int) {
-        Log.d("Move", "$shiftX, $shiftY")
-        val patternBitmap = knitPatternDrawer?.patternBitmap ?: return
-        var myShiftX = shiftX
-        var myShiftY = shiftY
-
-        if (fitPatternWidth) {
-            myShiftX = 0
-        } else {
-            if (patternSrcRectangle.left + shiftX < 0) {
-                myShiftX = -patternSrcRectangle.left
-            } else if (patternSrcRectangle.right + shiftX > patternBitmap.width) {
-                myShiftX = patternBitmap.width - patternSrcRectangle.right
-            }
-        }
-
-        if (patternSrcRectangle.top + shiftY < 0) {
-            myShiftY = -patternSrcRectangle.top
-        } else if (patternSrcRectangle.bottom + shiftY > patternBitmap.height) {
-            myShiftY = patternBitmap.height - patternSrcRectangle.bottom
-        }
-
-        patternSrcRectangle.left += myShiftX
-        patternSrcRectangle.right += myShiftX
-        patternSrcRectangle.top += myShiftY
-        patternSrcRectangle.bottom += myShiftY
-    }
-
     private fun updatePatternDstRectangle() {
         val patternBitmap = knitPatternDrawer?.patternBitmap ?: return
 
@@ -118,10 +88,11 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     }
 
     private fun scrollToNextStitch() {
+        TODO("Not migrated")
         val (newCentreX, newCentreY) = knitPatternDrawer?.positionOfNextStitch() ?: return
         val centreX = patternSrcRectangle.centerX()
         val centreY = patternSrcRectangle.centerY()
-        moveSrcRectAndCheckBounds(newCentreX.toInt() - centreX, newCentreY.toInt() - centreY)
+//        moveSrcRectAndCheckBounds(newCentreX.toInt() - centreX, newCentreY.toInt() - centreY)
     }
 
     private fun zoomSrcRect() {
@@ -145,7 +116,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
         patternSrcRectangle.top = centreY - srcRectHeight / 2
         patternSrcRectangle.bottom = centreY + srcRectHeight / 2
-        moveSrcRectAndCheckBounds(0, 0)
+//        moveSrcRectAndCheckBounds(0, 0)
     }
 
     private fun zoomPattern(fitPatternWidth: Boolean) {
@@ -176,15 +147,6 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         canvas.drawColor(backgroundColor)
         canvas.drawBitmap(patternBitmap, 0f, 0f, bitmapToDrawPaint)
         invalidate()
-    }
-
-    internal fun scroll(distanceX: Float, distanceY: Float) {
-        TODO("Not Migrated")
-        if (lockToScreen || knitPatternDrawer == null) return
-        val ratio = patternSrcRectangle.width().toFloat() / patternDstRectangle!!.width()
-
-        moveSrcRectAndCheckBounds((distanceX * ratio).toInt(),(distanceY * ratio).toInt())
-        updateCurrentView()
     }
 
     override fun performClick(): Boolean {

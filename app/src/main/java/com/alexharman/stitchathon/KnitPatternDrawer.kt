@@ -17,11 +17,9 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     private var doneOverlayPaint: Paint
     private val undoStack = Stack<Int>()
 
-    private val totalPatternHeight: Int
-    private val totalPatternWidth: Int
-    private var currentViewHeight = displayHeight
-    private var currentViewWidth = displayWidth
-    private val currentView = Rect(0, 0, currentViewWidth, currentViewHeight)
+    val totalPatternHeight: Int
+    val totalPatternWidth: Int
+    val currentView = Rect(0, 0, displayWidth, displayHeight)
     var patternBitmap: Bitmap
         private set
 
@@ -44,7 +42,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     }
 
     private fun createPatternBitmap(): Bitmap {
-        val bitmap = Bitmap.createBitmap(currentViewWidth, currentViewHeight, Bitmap.Config.ARGB_4444)
+        val bitmap = Bitmap.createBitmap(currentView.width(), currentView.height(), Bitmap.Config.ARGB_4444)
         val canvas = Canvas(bitmap)
         canvas.drawARGB(0x00, 1, 2, 3)
         return bitmap
@@ -114,8 +112,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         val firstCol = currentView.left / (stitchSize + stitchPad)
         canvas.translate(stitchPad, stitchPad)
 
-        if (currentViewWidth > totalPatternWidth) {
-            canvas.translate((currentViewWidth - totalPatternWidth).toFloat() / 2, 0f)
+        if (currentView.width() > totalPatternWidth) {
+            canvas.translate((currentView.height() - totalPatternWidth).toFloat() / 2, 0f)
         }
 
         for (row in firstRow..lastRow) {
@@ -219,8 +217,31 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         }
         increment(stitchesToDo)
     }
+
+    fun scroll(distanceX: Float, distanceY: Float) {
+        moveCurrentViewWithinBounds(distanceX, distanceY)
+        drawPattern()
+    }
+
+    private fun moveCurrentViewWithinBounds(shiftX: Float, shiftY: Float) {
+        val myShiftX: Int = when {
+            currentView.width() >= totalPatternWidth -> 0
+            currentView.left + shiftX <= 0 -> -currentView.left
+            currentView.right + shiftX > totalPatternWidth -> totalPatternWidth - currentView.right
+            else -> shiftX.toInt()
+        }
+
+        val myShiftY: Int = when {
+            currentView.height() >= totalPatternHeight -> 0
+            currentView.top + shiftY <= 0 -> -currentView.top
+            currentView.bottom + shiftY > totalPatternHeight -> totalPatternHeight - currentView.bottom
+            else -> shiftY.toInt()
+        }
+        currentView.offset(myShiftX, myShiftY)
+    }
+
+    private fun Canvas.translate(x: Int, y: Int) {
+        translate(x.toFloat(), y.toFloat())
+    }
 }
 
-private fun Canvas.translate(x: Int, y: Int) {
-    translate(x.toFloat(), y.toFloat())
-}

@@ -177,7 +177,8 @@ class KnitPatternFragment : Fragment(),
         }
 
         override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
-            knitPatternView.scroll(distanceX, distanceY)
+            knitPatternDrawer?.scroll(distanceX, distanceY)
+            knitPatternView.updateCurrentView()
             return true
         }
 
