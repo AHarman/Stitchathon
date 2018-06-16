@@ -114,6 +114,10 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         val firstCol = currentView.left / (stitchSize + stitchPad)
         canvas.translate(stitchPad, stitchPad)
 
+        if (currentViewWidth > totalPatternWidth) {
+            canvas.translate((currentViewWidth - totalPatternWidth).toFloat() / 2, 0f)
+        }
+
         for (row in firstRow..lastRow) {
             val lastCol = min(currentView.right / (stitchSize + stitchPad), knitPattern.stitches[row].size - 1)
             canvas.save()
