@@ -174,11 +174,12 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
         if(lockToScreen) scrollToNextStitch()
         canvas.drawColor(backgroundColor)
-        canvas.drawBitmap(patternBitmap, patternSrcRectangle, patternDstRectangle!!, bitmapToDrawPaint)
+        canvas.drawBitmap(patternBitmap, 0f, 0f, bitmapToDrawPaint)
         invalidate()
     }
 
     internal fun scroll(distanceX: Float, distanceY: Float) {
+        TODO("Not Migrated")
         if (lockToScreen || knitPatternDrawer == null) return
         val ratio = patternSrcRectangle.width().toFloat() / patternDstRectangle!!.width()
 

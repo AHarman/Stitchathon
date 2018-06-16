@@ -6,16 +6,22 @@ import android.util.Log
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import java.util.*
+import kotlin.math.min
 
-class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPreferences) {
-    private val stitchSize: Float
-    private val stitchPad: Float
+class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, displayHeight: Int, preferences: SharedPreferences) {
+    private val stitchSize: Int
+    private val stitchPad: Int
     private val colours: IntArray = IntArray(3)
     private var stitchBitmaps: HashMap<Stitch, Bitmap>
     private var stitchPaints: HashMap<Stitch, Paint>
     private var doneOverlayPaint: Paint
     private val undoStack = Stack<Int>()
 
+    private val totalPatternHeight: Int
+    private val totalPatternWidth: Int
+    private var currentViewHeight = displayHeight
+    private var currentViewWidth = displayWidth
+    private val currentView = Rect(0, 0, currentViewWidth, currentViewHeight)
     var patternBitmap: Bitmap
         private set
 
@@ -23,24 +29,24 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         colours[0] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_1, -1)
         colours[1] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_2, -1)
         colours[2] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_3, -1)
-        stitchSize = preferences.getString(PreferenceKeys.STITCH_SIZE, "0").toFloat()
-        stitchPad = preferences.getString(PreferenceKeys.STITCH_PAD, "0").toFloat()
+        stitchSize = preferences.getString(PreferenceKeys.STITCH_SIZE, "0").toInt()
+        stitchPad = preferences.getString(PreferenceKeys.STITCH_PAD, "0").toInt()
+        totalPatternHeight = (knitPattern.stitches.size * (stitchSize + stitchPad) + stitchPad)
+        totalPatternWidth = (knitPattern.patternWidth * (stitchSize + stitchPad) + stitchPad)
 
         stitchPaints = createStitchPaints(knitPattern.stitchTypes)
         doneOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         doneOverlayPaint.style = Paint.Style.FILL
         doneOverlayPaint.colorFilter = LightingColorFilter(0x00FFFFFF, 0x00888888)
         stitchBitmaps = createStitchBitmaps(knitPattern.stitchTypes)
-        patternBitmap = createPatternBitmap(knitPattern)
+        patternBitmap = createPatternBitmap()
+        drawPattern()
     }
 
-    private fun createPatternBitmap(knitPattern: KnitPattern): Bitmap {
-        val bitmapWidth = (knitPattern.patternWidth * stitchSize + (knitPattern.patternWidth + 1) * stitchPad).toInt()
-        val bitmapHeight = (knitPattern.numRows * stitchSize + (knitPattern.numRows + 1) * stitchPad).toInt()
-        val bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_4444)
+    private fun createPatternBitmap(): Bitmap {
+        val bitmap = Bitmap.createBitmap(currentViewWidth, currentViewHeight, Bitmap.Config.ARGB_4444)
         val canvas = Canvas(bitmap)
         canvas.drawARGB(0x00, 1, 2, 3)
-        drawPattern(canvas, knitPattern)
         return bitmap
     }
 
@@ -50,8 +56,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         var bitmapWidth: Int
 
         for (stitch in stitches) {
-            bitmapWidth = (stitchSize * stitch.width + (stitch.width - 1) * stitchPad).toInt()
-            bitmap = Bitmap.createBitmap(bitmapWidth, stitchSize.toInt(), Bitmap.Config.ARGB_8888)
+            bitmapWidth = (stitchSize * stitch.width + (stitch.width - 1) * stitchPad)
+            bitmap = Bitmap.createBitmap(bitmapWidth, stitchSize, Bitmap.Config.ARGB_8888)
             if (stitch.isSplit) {
                 bitmap = createSplitStitchBitmap(stitch, bitmap)
             } else {
@@ -73,8 +79,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
 
         leftSide.fillType = Path.FillType.EVEN_ODD
         leftSide.lineTo(startX - 1.0f, 0f)
-        leftSide.lineTo(stopX - 1.0f, stitchSize)
-        leftSide.lineTo(0f, stitchSize)
+        leftSide.lineTo(stopX - 1.0f, stitchSize.toFloat())
+        leftSide.lineTo(0f, stitchSize.toFloat())
         leftSide.close()
 
         rightSide = Path(leftSide)
@@ -101,20 +107,26 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         return paints
     }
 
-    private fun drawPattern(canvas: Canvas, knitPattern: KnitPattern = this.knitPattern) {
-        canvas.translate(0f, stitchPad)
-        for (row in 0 until knitPattern.numRows) {
+    private fun drawPattern() {
+        val canvas = Canvas(patternBitmap)
+        val firstRow = currentView.top / (stitchSize + stitchPad)
+        val lastRow = min(currentView.bottom / (stitchSize + stitchPad), knitPattern.numRows - 1)
+        val firstCol = currentView.left / (stitchSize + stitchPad)
+        canvas.translate(stitchPad, stitchPad)
+
+        for (row in firstRow..lastRow) {
+            val lastCol = min(currentView.right / (stitchSize + stitchPad), knitPattern.stitches[row].size - 1)
             canvas.save()
-            canvas.translate(stitchPad, 0f)
-            for (col in 0 until knitPattern.patternWidth) {
+
+            for (col in firstCol..lastCol) {
                 val isDone = row < knitPattern.currentRow ||
-                        row == knitPattern.currentRow && knitPattern.rowDirection == 1 && col < knitPattern.nextStitchInRow ||
-                        row == knitPattern.currentRow && knitPattern.rowDirection == -1 && col > knitPattern.nextStitchInRow
+                        row == knitPattern.currentRow && knitPattern.rowDirection == 1 && col < knitPattern.stitchesDoneInRow ||
+                        row == knitPattern.currentRow && knitPattern.rowDirection == -1 && col >= knitPattern.stitchesDoneInRow
                 drawStitch(canvas, knitPattern.stitches[row][col], isDone)
-                canvas.translate((stitchSize + stitchPad) * knitPattern.stitches[row][col].width, 0f)
+                canvas.translate(stitchSize + stitchPad, 0)
             }
             canvas.restore()
-            canvas.translate(0f, stitchSize + stitchPad)
+            canvas.translate(0, stitchSize + stitchPad)
         }
     }
 
@@ -186,7 +198,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         undoStack.clear()
     }
 
-    fun positionOfNextStitch(): Pair<Float, Float> {
+    fun positionOfNextStitch(): Pair<Int, Int> {
         val x = knitPattern.currentDistanceInRow * (stitchSize + stitchPad) * knitPattern.rowDirection +
                 if (knitPattern.rowDirection == -1) patternBitmap.width else 0
         val y = knitPattern.currentRow * (stitchSize + stitchPad)
@@ -203,4 +215,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         }
         increment(stitchesToDo)
     }
+}
+
+private fun Canvas.translate(x: Int, y: Int) {
+    translate(x.toFloat(), y.toFloat())
 }

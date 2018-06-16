@@ -1,11 +1,9 @@
 package com.alexharman.stitchathon
 
-import android.graphics.Bitmap
-import android.media.ThumbnailUtils
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.support.v4.app.Fragment
 import android.support.v4.view.GestureDetectorCompat
+import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.Toolbar
 import android.view.*
 import android.widget.Button
@@ -135,14 +133,12 @@ class KnitPatternFragment : Fragment(),
         updateStitchCounter()
     }
 
-    fun setKnitPattern(knitPattern: KnitPattern,
-                       knitPatternDrawer: KnitPatternDrawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(context)),
-                       thumbnail: Bitmap = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)) {
-        this.knitPatternDrawer = knitPatternDrawer
+    fun setKnitPattern(knitPattern: KnitPattern) {
+        this.knitPatternDrawer = KnitPatternDrawer(knitPattern, knitPatternView.width, knitPatternView.height, PreferenceManager.getDefaultSharedPreferences(requireContext()))
         knitPatternView.knitPatternDrawer = knitPatternDrawer
         updateStitchCounter()
         patternNameView?.text = knitPattern.name
-        patternThumbnailView?.setImageBitmap(thumbnail)
+//        patternThumbnailView?.setImageBitmap(thumbnail)
         toolbar?.title = knitPattern.name
     }
 
