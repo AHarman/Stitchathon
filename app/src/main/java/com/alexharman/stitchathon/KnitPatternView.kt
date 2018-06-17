@@ -88,10 +88,9 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     }
 
     private fun scrollToNextStitch() {
-        TODO("Not migrated")
-        val (newCentreX, newCentreY) = knitPatternDrawer?.positionOfNextStitch() ?: return
-        val centreX = patternSrcRectangle.centerX()
-        val centreY = patternSrcRectangle.centerY()
+//        val (newCentreX, newCentreY) = knitPatternDrawer?.positionOfNextStitch() ?: return
+//        val centreX = patternSrcRectangle.centerX()
+//        val centreY = patternSrcRectangle.centerY()
 //        moveSrcRectAndCheckBounds(newCentreX.toInt() - centreX, newCentreY.toInt() - centreY)
     }
 

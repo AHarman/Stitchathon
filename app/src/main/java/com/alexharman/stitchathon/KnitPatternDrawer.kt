@@ -107,9 +107,12 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
 
     private fun drawPattern() {
         val canvas = Canvas(patternBitmap)
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
         val firstRow = currentView.top / (stitchSize + stitchPad)
         val lastRow = min(currentView.bottom / (stitchSize + stitchPad), knitPattern.numRows - 1)
         val firstCol = currentView.left / (stitchSize + stitchPad)
+
+        canvas.translate(-currentView.left % (stitchPad + stitchSize), -currentView.top % (stitchPad + stitchSize))
         canvas.translate(stitchPad, stitchPad)
 
         if (currentView.width() > totalPatternWidth) {
