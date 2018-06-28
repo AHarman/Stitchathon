@@ -22,6 +22,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     val currentView = Rect(0, 0, displayWidth, displayHeight)
     var patternBitmap: Bitmap
         private set
+    private var patternBitmapBuffer: Bitmap
+    private val patternBitmapPaint: Paint
 
     init {
         colours[0] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_1, -1)
@@ -38,6 +40,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         doneOverlayPaint.colorFilter = LightingColorFilter(0x00FFFFFF, 0x00888888)
         stitchBitmaps = createStitchBitmaps(knitPattern.stitchTypes)
         patternBitmap = createPatternBitmap()
+        patternBitmapBuffer = Bitmap.createBitmap(patternBitmap.width, patternBitmap.height, patternBitmap.config)
+        patternBitmapPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC) }
         drawPattern()
     }
 
@@ -222,25 +226,34 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     }
 
     fun scroll(distanceX: Float, distanceY: Float) {
-        moveCurrentViewWithinBounds(distanceX, distanceY)
-        drawPattern()
+        val shift = keepScrollWithinBounds(distanceX, distanceY)
+        val canvas = Canvas(patternBitmapBuffer)
+        currentView.offset(shift.first.toInt(), shift.second.toInt())
+
+        canvas.drawBitmap(patternBitmap, -shift.first, -shift.second, patternBitmapPaint)
+
+        // Swap patternBitmap and patternBitmapBuffer
+        // Saves drawing the latter back onto the first
+        val tempBitmap = patternBitmap
+        patternBitmap = patternBitmapBuffer
+        patternBitmapBuffer = tempBitmap
     }
 
-    private fun moveCurrentViewWithinBounds(shiftX: Float, shiftY: Float) {
-        val myShiftX: Int = when {
-            currentView.width() >= totalPatternWidth -> 0
-            currentView.left + shiftX <= 0 -> -currentView.left
-            currentView.right + shiftX > totalPatternWidth -> totalPatternWidth - currentView.right
-            else -> shiftX.toInt()
+    private fun keepScrollWithinBounds(shiftX: Float, shiftY: Float): Pair<Float, Float> {
+        val myShiftX: Float = when {
+            currentView.width() >= totalPatternWidth -> 0f
+            currentView.left + shiftX <= 0 -> -currentView.left.toFloat()
+            currentView.right + shiftX > totalPatternWidth -> totalPatternWidth - currentView.right.toFloat()
+            else -> shiftX
         }
 
-        val myShiftY: Int = when {
-            currentView.height() >= totalPatternHeight -> 0
-            currentView.top + shiftY <= 0 -> -currentView.top
-            currentView.bottom + shiftY > totalPatternHeight -> totalPatternHeight - currentView.bottom
-            else -> shiftY.toInt()
+        val myShiftY: Float = when {
+            currentView.height() >= totalPatternHeight -> 0f
+            currentView.top + shiftY <= 0 -> -currentView.top.toFloat()
+            currentView.bottom + shiftY > totalPatternHeight -> totalPatternHeight - currentView.bottom.toFloat()
+            else -> shiftY
         }
-        currentView.offset(myShiftX, myShiftY)
+        return Pair(myShiftX, myShiftY)
     }
 
     private fun Canvas.translate(x: Int, y: Int) {
