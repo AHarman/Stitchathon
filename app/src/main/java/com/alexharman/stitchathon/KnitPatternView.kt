@@ -21,9 +21,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
             field = value
             if (width > 0) {
                 //TODO: something about this?
-                updatePatternDstRectangle()
-                currentView = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444)
-                updateCurrentView()
+                invalidate()
             }
         }
 
@@ -31,10 +29,8 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
     // TODO: Change some of these to val
     private var bitmapToDrawPaint: Paint
-    private var patternDstRectangle: RectF? = null
     private val patternSrcRectangle: Rect = Rect(0, 0, 0, 0)
     private var lockToScreen: Boolean
-    private lateinit var currentView: Bitmap
 
     private val preferenceListener = MySharedPreferenceListener()
 
@@ -52,39 +48,10 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
-        currentView = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444)
         if (knitPatternDrawer != null) {
-            updatePatternDstRectangle()
             zoomSrcRect()
-            updateCurrentView()
+            invalidate()
         }
-    }
-
-    private fun updatePatternDstRectangle() {
-        val patternBitmap = knitPatternDrawer?.patternBitmap ?: return
-
-        var left: Float
-        var right: Float
-        val top: Float
-        val bottom: Float
-
-        if (fitPatternWidth) {
-            left = 0f
-            top = 0f
-            right = width.toFloat()
-            val ratio = width.toFloat() / patternBitmap.width.toFloat()
-            bottom = Math.min(height.toFloat(), patternBitmap.height * ratio)
-        } else {
-            left = 0f
-            top = 0f
-            right = Math.min(width, patternBitmap.width).toFloat()
-            bottom = Math.min(height, patternBitmap.height).toFloat()
-            if (patternBitmap.width < width) {
-                left += ((width - patternBitmap.width) / 2).toFloat()
-                right += ((width - patternBitmap.width) / 2).toFloat()
-            }
-        }
-        patternDstRectangle = RectF(left, top, right, bottom)
     }
 
     private fun scrollToNextStitch() {
@@ -123,29 +90,22 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         if (knitPatternDrawer == null)
             return
         zoomSrcRect()
-        updatePatternDstRectangle()
-        updateCurrentView()
+        invalidate()
     }
 
     fun clearPattern() {
         this.knitPatternDrawer = null
-        Canvas(currentView).drawColor(backgroundColor)
         invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawBitmap(currentView, 0f, 0f, null)
-    }
+        canvas.drawColor(backgroundColor)
 
-    fun updateCurrentView() {
         val patternBitmap = knitPatternDrawer?.patternBitmap ?: return
-        val canvas = Canvas(currentView)
 
         if(lockToScreen) scrollToNextStitch()
-        canvas.drawColor(backgroundColor)
         canvas.drawBitmap(patternBitmap, 0f, 0f, bitmapToDrawPaint)
-        invalidate()
     }
 
     override fun performClick(): Boolean {
@@ -157,11 +117,11 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
             if (key == PreferenceKeys.BACKGROUND_COLOUR) {
                 backgroundColor = sharedPreferences.getInt(key,  backgroundColor)
-                updateCurrentView()
+                invalidate()
             }
             if (key == PreferenceKeys.LOCK_TO_SCREEN) {
                 lockToScreen = sharedPreferences.getBoolean(key, lockToScreen)
-                updateCurrentView()
+                invalidate()
             }
             if (key == PreferenceKeys.FIT_PATTERN_WIDTH) {
                 zoomPattern(sharedPreferences.getBoolean(key, false))

@@ -50,8 +50,8 @@ class KnitPatternFragment : Fragment(),
         completeCount = view.findViewById(R.id.complete_counter)
         completeCount.text = getString(R.string.complete_counter, 0)
 
-        view.findViewById<Button>(R.id.increment_row_button).setOnClickListener { knitPatternDrawer?.incrementRow(); knitPatternView.updateCurrentView(); updateStitchCounter() }
-        view.findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.updateCurrentView(); updateStitchCounter() }
+        view.findViewById<Button>(R.id.increment_row_button).setOnClickListener { knitPatternDrawer?.incrementRow(); knitPatternView.invalidate(); updateStitchCounter() }
+        view.findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.invalidate(); updateStitchCounter() }
         knitPatternViewGestureDetector = GestureDetectorCompat(context, KnitPatternViewGestureListener())
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event) }
 
@@ -129,7 +129,7 @@ class KnitPatternFragment : Fragment(),
         val myRow = if (row < 0) knitPattern.currentRow else min(knitPattern.numRows - 1, row)
         val myCol = if (col < 0) min(knitPattern.stitchesDoneInRow, knitPattern.stitches[myRow].size - 1) else min(knitPattern.stitches[myRow].size - 1, col)
         knitPatternDrawer?.markStitchesTo(myRow, myCol)
-        knitPatternView.updateCurrentView()
+        knitPatternView.invalidate()
         updateStitchCounter()
     }
 
@@ -167,7 +167,7 @@ class KnitPatternFragment : Fragment(),
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             knitPatternDrawer?.increment()
             updateStitchCounter()
-            knitPatternView.updateCurrentView()
+            knitPatternView.invalidate()
             return true
         }
 
@@ -178,7 +178,7 @@ class KnitPatternFragment : Fragment(),
 
         override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
             knitPatternDrawer?.scroll(distanceX, distanceY)
-            knitPatternView.updateCurrentView()
+            knitPatternView.invalidate()
             return true
         }
 
@@ -190,7 +190,7 @@ class KnitPatternFragment : Fragment(),
             // TODO: Add vibrate
             knitPatternDrawer?.incrementBlock()
             updateStitchCounter()
-            knitPatternView.updateCurrentView()
+            knitPatternView.invalidate()
         }
     }
 }
