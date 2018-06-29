@@ -228,9 +228,9 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     fun scroll(distanceX: Float, distanceY: Float) {
         val shift = keepScrollWithinBounds(distanceX, distanceY)
         val canvas = Canvas(patternBitmapBuffer)
-        currentView.offset(shift.first.toInt(), shift.second.toInt())
+        currentView.offset(shift.first, shift.second)
 
-        canvas.drawBitmap(patternBitmap, -shift.first, -shift.second, patternBitmapPaint)
+        canvas.drawBitmap(patternBitmap, -shift.first.toFloat(), -shift.second.toFloat(), patternBitmapPaint)
 
         // Swap patternBitmap and patternBitmapBuffer
         // Saves drawing the latter back onto the first
@@ -239,19 +239,19 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         patternBitmapBuffer = tempBitmap
     }
 
-    private fun keepScrollWithinBounds(shiftX: Float, shiftY: Float): Pair<Float, Float> {
-        val myShiftX: Float = when {
-            currentView.width() >= totalPatternWidth -> 0f
-            currentView.left + shiftX <= 0 -> -currentView.left.toFloat()
-            currentView.right + shiftX > totalPatternWidth -> totalPatternWidth - currentView.right.toFloat()
-            else -> shiftX
+    private fun keepScrollWithinBounds(shiftX: Float, shiftY: Float): Pair<Int, Int> {
+        val myShiftX: Int = when {
+            currentView.width() >= totalPatternWidth -> 0
+            currentView.left + shiftX <= 0 -> -currentView.left
+            currentView.right + shiftX > totalPatternWidth -> totalPatternWidth - currentView.right
+            else -> shiftX.toInt()
         }
 
-        val myShiftY: Float = when {
-            currentView.height() >= totalPatternHeight -> 0f
-            currentView.top + shiftY <= 0 -> -currentView.top.toFloat()
-            currentView.bottom + shiftY > totalPatternHeight -> totalPatternHeight - currentView.bottom.toFloat()
-            else -> shiftY
+        val myShiftY: Int = when {
+            currentView.height() >= totalPatternHeight -> 0
+            currentView.top + shiftY <= 0 -> -currentView.top
+            currentView.bottom + shiftY > totalPatternHeight -> totalPatternHeight - currentView.bottom
+            else -> shiftY.toInt()
         }
         return Pair(myShiftX, myShiftY)
     }
