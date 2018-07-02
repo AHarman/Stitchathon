@@ -6,7 +6,6 @@ import android.util.Log
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import java.util.*
-import kotlin.math.max
 import kotlin.math.min
 
 class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, displayHeight: Int, preferences: SharedPreferences) {
@@ -15,6 +14,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     private val colours: IntArray = IntArray(3)
     private var stitchBitmaps: HashMap<Stitch, Bitmap>
     private var stitchPaints: HashMap<Stitch, Paint>
+    private val clearPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
     private var doneOverlayPaint: Paint
     private val undoStack = Stack<Int>()
 
@@ -117,18 +117,9 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         val lastRow = min(patternAreaToDraw.bottom / (stitchSize + stitchPad) + 1, knitPattern.numRows - 1)
         val firstCol = patternAreaToDraw.left / (stitchSize + stitchPad)
 
-        val pad = Rect(
-                -patternAreaToDraw.left % (stitchPad + stitchSize),
-                -patternAreaToDraw.top % (stitchPad + stitchSize),
-                (stitchPad + stitchSize) - (patternAreaToDraw.left % (stitchPad + stitchSize)),
-                (stitchPad + stitchSize) - (patternAreaToDraw.top % (stitchPad + stitchSize)))
-        val bitmapAreaToDraw = pad + Rect(patternAreaToDraw.left - currentView.left, patternAreaToDraw.top - currentView.top, patternAreaToDraw.right - currentView.left, patternAreaToDraw.bottom - currentView.top)
-        if (patternAreaToDraw.width() > totalPatternWidth) {
-            bitmapAreaToDraw.inset((patternAreaToDraw.width() - totalPatternWidth) / 2, 0)
-        }
+        val bitmapAreaToDraw = findBitmapArea(patternAreaToDraw)
 
-        val p = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
-        canvas.drawRect(bitmapAreaToDraw, p)
+        canvas.drawRect(bitmapAreaToDraw, clearPaint)
 
         canvas.translate(bitmapAreaToDraw.left, bitmapAreaToDraw.top)
         canvas.translate(stitchPad, stitchPad)
@@ -147,6 +138,25 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
             canvas.restore()
             canvas.translate(0, stitchSize + stitchPad)
         }
+    }
+
+    private fun findBitmapArea(knitPatternArea: Rect): Rect {
+        val pad = Rect(
+                -knitPatternArea.left % (stitchPad + stitchSize),
+                -knitPatternArea.top % (stitchPad + stitchSize),
+                (stitchPad + stitchSize) - (knitPatternArea.left % (stitchPad + stitchSize)),
+                (stitchPad + stitchSize) - (knitPatternArea.top % (stitchPad + stitchSize)))
+        val bitmapAreaToDraw = pad +
+                Rect(knitPatternArea.left - currentView.left,
+                        knitPatternArea.top - currentView.top,
+                        knitPatternArea.right - currentView.left,
+                        knitPatternArea.bottom - currentView.top)
+
+        if (knitPatternArea.width() > totalPatternWidth) {
+            bitmapAreaToDraw.inset((knitPatternArea.width() - totalPatternWidth) / 2, 0)
+        }
+
+        return bitmapAreaToDraw
     }
 
     private fun drawStitch(canvas: Canvas, stitch: Stitch, isDone: Boolean) {
