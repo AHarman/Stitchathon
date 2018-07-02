@@ -6,6 +6,7 @@ import android.util.Log
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import java.util.*
+import kotlin.math.max
 import kotlin.math.min
 
 class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, displayHeight: Int, preferences: SharedPreferences) {
@@ -113,7 +114,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         val canvas = Canvas(patternBitmap)
 
         val firstRow = patternAreaToDraw.top / (stitchSize + stitchPad)
-        val lastRow = min(patternAreaToDraw.bottom / (stitchSize + stitchPad), knitPattern.numRows - 1)
+        val lastRow = min(patternAreaToDraw.bottom / (stitchSize + stitchPad) + 1, knitPattern.numRows - 1)
         val firstCol = patternAreaToDraw.left / (stitchSize + stitchPad)
 
         val pad = Rect(
@@ -134,7 +135,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         }
 
         for (row in firstRow..lastRow) {
-            val lastCol = min(patternAreaToDraw.right / (stitchSize + stitchPad), knitPattern.stitches[row].size - 1)
+            val lastCol = min(patternAreaToDraw.right / (stitchSize + stitchPad) + 1, knitPattern.stitches[row].size - 1)
             canvas.save()
 
             for (col in firstCol..lastCol) {
@@ -147,9 +148,6 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
             canvas.restore()
             canvas.translate(0, stitchSize + stitchPad)
         }
-
-        // Remove later, shows area that was drawn on when scrolling
-        if (patternAreaToDraw != currentView) Canvas(patternBitmap).drawRect(bitmapAreaToDraw, Paint().apply { color = 0x8000FF00.toInt() })
     }
 
     private fun drawStitch(canvas: Canvas, stitch: Stitch, isDone: Boolean) {
