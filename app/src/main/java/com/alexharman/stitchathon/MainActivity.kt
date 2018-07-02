@@ -46,10 +46,6 @@ class MainActivity :
                 .beginTransaction()
                 .add(R.id.fragment_container, knitPatternFragment, KNIT_PATTERN_FRAGMENT)
                 .commit()
-
-        val patternName = PreferenceManager.getDefaultSharedPreferences(this)
-                .getString(PreferenceKeys.CURRENT_PATTERN_NAME, null)
-        if (patternName != null) openPattern(patternName)
     }
 
     override fun onBackPressed() {
