@@ -109,22 +109,32 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         return paints
     }
 
-    private fun drawPattern() {
+    fun drawPattern(patternAreaToDraw: Rect = currentView) {
         val canvas = Canvas(patternBitmap)
-        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
-        val firstRow = currentView.top / (stitchSize + stitchPad)
-        val lastRow = min(currentView.bottom / (stitchSize + stitchPad), knitPattern.numRows - 1)
-        val firstCol = currentView.left / (stitchSize + stitchPad)
 
-        canvas.translate(-currentView.left % (stitchPad + stitchSize), -currentView.top % (stitchPad + stitchSize))
+        val firstRow = patternAreaToDraw.top / (stitchSize + stitchPad)
+        val lastRow = min(patternAreaToDraw.bottom / (stitchSize + stitchPad), knitPattern.numRows - 1)
+        val firstCol = patternAreaToDraw.left / (stitchSize + stitchPad)
+
+        val pad = Rect(
+                -patternAreaToDraw.left % (stitchPad + stitchSize),
+                -patternAreaToDraw.top % (stitchPad + stitchSize),
+                (stitchPad + stitchSize) - (patternAreaToDraw.left % (stitchPad + stitchSize)),
+                (stitchPad + stitchSize) - (patternAreaToDraw.top % (stitchPad + stitchSize)))
+        val bitmapAreaToDraw = pad + Rect(patternAreaToDraw.left - currentView.left, patternAreaToDraw.top - currentView.top, patternAreaToDraw.right - currentView.left, patternAreaToDraw.bottom - currentView.top)
+
+        val p = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
+        canvas.drawRect(bitmapAreaToDraw, p)
+
+        canvas.translate(bitmapAreaToDraw.left, bitmapAreaToDraw.top)
         canvas.translate(stitchPad, stitchPad)
 
-        if (currentView.width() > totalPatternWidth) {
-            canvas.translate((currentView.height() - totalPatternWidth).toFloat() / 2, 0f)
+        if (patternAreaToDraw.width() > totalPatternWidth) {
+            canvas.translate((patternAreaToDraw.height() - totalPatternWidth).toFloat() / 2, 0f)
         }
 
         for (row in firstRow..lastRow) {
-            val lastCol = min(currentView.right / (stitchSize + stitchPad), knitPattern.stitches[row].size - 1)
+            val lastCol = min(patternAreaToDraw.right / (stitchSize + stitchPad), knitPattern.stitches[row].size - 1)
             canvas.save()
 
             for (col in firstCol..lastCol) {
@@ -137,6 +147,9 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
             canvas.restore()
             canvas.translate(0, stitchSize + stitchPad)
         }
+
+        // Remove later, shows area that was drawn on when scrolling
+        if (patternAreaToDraw != currentView) Canvas(patternBitmap).drawRect(bitmapAreaToDraw, Paint().apply { color = 0x8000FF00.toInt() })
     }
 
     private fun drawStitch(canvas: Canvas, stitch: Stitch, isDone: Boolean) {
@@ -237,6 +250,25 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         val tempBitmap = patternBitmap
         patternBitmap = patternBitmapBuffer
         patternBitmapBuffer = tempBitmap
+        drawNewScrollArea(shift.first, shift.second)
+    }
+
+    // TODO: Overlapping in the corners
+    private fun drawNewScrollArea(shiftX: Int, shiftY: Int) {
+        if (shiftY < 0) {
+            val topRect = Rect(currentView.left, currentView.top, currentView.right, currentView.top - shiftY)
+            drawPattern(topRect)
+        } else if (shiftY > 0) {
+            val botRect = Rect(currentView.left, currentView.bottom - shiftY, currentView.right, currentView.bottom)
+            drawPattern(botRect)
+        }
+        if (shiftX < 0) {
+            val leftRect = Rect(currentView.left, currentView.top, currentView.left - shiftX, currentView.bottom)
+            drawPattern(leftRect)
+        } else if (shiftX > 0) {
+            val rightRect = Rect(currentView.right - shiftX, currentView.top, currentView.right, currentView.bottom)
+            drawPattern(rightRect)
+        }
     }
 
     private fun keepScrollWithinBounds(shiftX: Float, shiftY: Float): Pair<Int, Int> {
@@ -259,5 +291,16 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     private fun Canvas.translate(x: Int, y: Int) {
         translate(x.toFloat(), y.toFloat())
     }
+
+    private operator fun Rect.minus(other: Rect) =
+            Rect(this.left - other.left,
+                    this.top - other.top,
+                    this.right - other.right,
+                    this.bottom - other.bottom)
+    private operator fun Rect.plus(other: Rect) =
+            Rect(this.left + other.left,
+                    this.top + other.top,
+                    this.right + other.right,
+                    this.bottom + other.bottom)
 }
 
