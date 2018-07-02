@@ -123,16 +123,15 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
                 (stitchPad + stitchSize) - (patternAreaToDraw.left % (stitchPad + stitchSize)),
                 (stitchPad + stitchSize) - (patternAreaToDraw.top % (stitchPad + stitchSize)))
         val bitmapAreaToDraw = pad + Rect(patternAreaToDraw.left - currentView.left, patternAreaToDraw.top - currentView.top, patternAreaToDraw.right - currentView.left, patternAreaToDraw.bottom - currentView.top)
+        if (patternAreaToDraw.width() > totalPatternWidth) {
+            bitmapAreaToDraw.inset((patternAreaToDraw.width() - totalPatternWidth) / 2, 0)
+        }
 
         val p = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
         canvas.drawRect(bitmapAreaToDraw, p)
 
         canvas.translate(bitmapAreaToDraw.left, bitmapAreaToDraw.top)
         canvas.translate(stitchPad, stitchPad)
-
-        if (patternAreaToDraw.width() > totalPatternWidth) {
-            canvas.translate((patternAreaToDraw.height() - totalPatternWidth).toFloat() / 2, 0f)
-        }
 
         for (row in firstRow..lastRow) {
             val lastCol = min(patternAreaToDraw.right / (stitchSize + stitchPad) + 1, knitPattern.stitches[row].size - 1)
