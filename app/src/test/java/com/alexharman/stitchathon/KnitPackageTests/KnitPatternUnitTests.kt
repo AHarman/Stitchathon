@@ -72,21 +72,21 @@ class KnitPatternUnitTests {
     fun givenOddRowsOpposite_ifOnReverseRow_thenCorrectRowDirection() {
         val pattern = KnitPattern("", testStitches, true, 1,0)
 
-        assertEquals(-1, pattern.rowDirection)
+        assertEquals(-1, pattern.currentRowDirection)
     }
 
     @Test
     fun givenOddRowsOpposite_ifOnForwardRow_thenCorrectRowDirection() {
         val pattern = KnitPattern("", testStitches, true, 4,0)
 
-        assertEquals(1, pattern.rowDirection)
+        assertEquals(1, pattern.currentRowDirection)
     }
 
     @Test
     fun givenOddRowsForward_ifOnForwardRow_thenCorrectRowDirection() {
         val pattern = KnitPattern("", testStitches, false, 1,0)
 
-        assertEquals(1, pattern.rowDirection)
+        assertEquals(1, pattern.currentRowDirection)
     }
 
     @Test

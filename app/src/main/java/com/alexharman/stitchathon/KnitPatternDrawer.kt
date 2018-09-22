@@ -130,8 +130,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
 
             for (col in firstCol..lastCol) {
                 val isDone = row < knitPattern.currentRow ||
-                        row == knitPattern.currentRow && knitPattern.rowDirection == 1 && col < knitPattern.stitchesDoneInRow ||
-                        row == knitPattern.currentRow && knitPattern.rowDirection == -1 && col >= knitPattern.stitchesDoneInRow
+                        (row == knitPattern.currentRow && knitPattern.currentRowDirection == 1 && col < knitPattern.stitchesDoneInRow) ||
+                        (row == knitPattern.currentRow && knitPattern.currentRowDirection == -1 && col > knitPattern.nextStitchInRow)
                 drawStitch(canvas, knitPattern.stitches[row][col], isDone)
                 canvas.translate(stitchSize + stitchPad, 0)
             }
@@ -168,7 +168,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         val canvas = Canvas(patternBitmap)
         val stitch = knitPattern.stitches[knitPattern.currentRow][knitPattern.nextStitchInRow]
         val xTranslate =
-                if (knitPattern.rowDirection == 1) {
+                if (knitPattern.currentRowDirection == 1) {
                     knitPattern.currentDistanceInRow * (stitchPad + stitchSize) + stitchPad
                 } else {
                     totalPatternWidth - (knitPattern.currentDistanceInRow + stitch.width) * (stitchPad + stitchSize)
@@ -228,8 +228,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     }
 
     fun positionOfNextStitch(): Pair<Int, Int> {
-        val x = knitPattern.currentDistanceInRow * (stitchSize + stitchPad) * knitPattern.rowDirection +
-                if (knitPattern.rowDirection == -1) patternBitmap.width else 0
+        val x = knitPattern.currentDistanceInRow * (stitchSize + stitchPad) * knitPattern.currentRowDirection +
+                if (knitPattern.currentRowDirection == -1) patternBitmap.width else 0
         val y = knitPattern.currentRow * (stitchSize + stitchPad)
         return Pair(x, y)
     }
@@ -239,7 +239,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         val currentRow = knitPattern.stitches[knitPattern.currentRow]
         var stitchesToDo = 0
         while (stitchesToDo + knitPattern.stitchesDoneInRow < currentRow.size &&
-                currentRow[knitPattern.nextStitchInRow + stitchesToDo * knitPattern.rowDirection].type == stitchType) {
+                currentRow[knitPattern.nextStitchInRow + stitchesToDo * knitPattern.currentRowDirection].type == stitchType) {
             stitchesToDo++
         }
         increment(stitchesToDo)

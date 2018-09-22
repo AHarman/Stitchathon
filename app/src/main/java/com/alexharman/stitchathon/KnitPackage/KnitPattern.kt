@@ -82,15 +82,18 @@ class KnitPattern(
 
     private fun findCurrentDistanceInRow(stitches: Array<Array<Stitch>>, currentRow: Int): Int {
         val rowDoneRange =
-                if(rowDirection == 1)
+                if(currentRowDirection == 1)
                     IntRange(0, nextStitchInRow - 1)
                 else
                     IntRange(nextStitchInRow + 1, stitches[currentRow].size-1)
         return stitches[currentRow].sliceArray(rowDoneRange).sumBy { it.width }
     }
 
-    val rowDirection: Int
-        get() = if (oddRowsOpposite && (currentRow % 2 == 1)) -1 else 1
+    fun rowDirection(row: Int = currentRow) =
+            if (oddRowsOpposite && (row % 2 == 1)) -1 else 1
+
+    val currentRowDirection: Int
+        get() = rowDirection(currentRow)
 
     private val isEndOfRow: Boolean
         get() = stitchesLeftInRow == 0
@@ -102,7 +105,7 @@ class KnitPattern(
         get() = stitches[currentRow].size - stitchesDoneInRow
 
     val nextStitchInRow: Int
-        get() = if (rowDirection == 1) stitchesDoneInRow else (stitches[currentRow].size - 1 - stitchesDoneInRow)
+        get() = if (currentRowDirection == 1) stitchesDoneInRow else (stitches[currentRow].size - 1 - stitchesDoneInRow)
 
     val numRows: Int
         get() = stitches.size
