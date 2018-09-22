@@ -171,9 +171,9 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
                 if (knitPattern.rowDirection == 1) {
                     knitPattern.currentDistanceInRow * (stitchPad + stitchSize) + stitchPad
                 } else {
-                    patternBitmap.width - (knitPattern.currentDistanceInRow + stitch.width) * (stitchPad + stitchSize)
-                }
-        val yTranslate = knitPattern.currentRow * (stitchPad + stitchSize) + stitchPad
+                    totalPatternWidth - (knitPattern.currentDistanceInRow + stitch.width) * (stitchPad + stitchSize)
+                } - currentView.left
+        val yTranslate = knitPattern.currentRow * (stitchPad + stitchSize) + stitchPad - currentView.top
         canvas.translate(xTranslate, yTranslate)
         drawStitch(canvas, stitch, isDone)
     }
