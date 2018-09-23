@@ -82,7 +82,7 @@ class KnitPatternFragment : Fragment(),
         val zoomButton = menu.findItem(R.id.zoom_button)
         val lockButton = menu.findItem(R.id.lock_button)
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        lockButton.isChecked = prefs.getBoolean(PreferenceKeys.LOCK_TO_SCREEN, false)
+        lockButton.isChecked = prefs.getBoolean(PreferenceKeys.LOCK_TO_CENTRE, false)
         lockButton.icon = context?.getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
         lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         zoomButton.isChecked = prefs.getBoolean(PreferenceKeys.FIT_PATTERN_WIDTH, false)
@@ -105,8 +105,10 @@ class KnitPatternFragment : Fragment(),
         lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
-                .putBoolean(PreferenceKeys.LOCK_TO_SCREEN, lockButton.isChecked)
+                .putBoolean(PreferenceKeys.LOCK_TO_CENTRE, lockButton.isChecked)
                 .apply()
+        knitPatternDrawer?.setLockToCentre(lockButton.isChecked)
+        if (lockButton.isChecked) knitPatternView.invalidate()
     }
 
     private fun zoomButtonPressed(zoomButton: MenuItem) {

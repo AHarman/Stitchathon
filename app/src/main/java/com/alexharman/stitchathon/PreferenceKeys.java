@@ -10,6 +10,6 @@ public final class PreferenceKeys {
     public static final String DELETE_ALL = "delete_all";
     public static final String RESET_PREFS = "reset_preferences";
     public static final String FIT_PATTERN_WIDTH = "fit_pattern_width";
-    public static final String LOCK_TO_SCREEN = "lock_to_current";
+    public static final String LOCK_TO_CENTRE = "lock_to_current";
     public static final String CURRENT_PATTERN_NAME = "pattern_name";
 }

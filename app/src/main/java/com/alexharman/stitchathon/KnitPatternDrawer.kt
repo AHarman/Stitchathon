@@ -12,11 +12,14 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     private val stitchSize: Int
     private val stitchPad: Int
     private val colours: IntArray = IntArray(3)
+    private var lockToCentre: Boolean
+
     private var stitchBitmaps: HashMap<Stitch, Bitmap>
     private var stitchPaints: HashMap<Stitch, Paint>
     private val clearPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
     private var doneOverlayPaint: Paint
     private val undoStack = Stack<Int>()
+
 
     val totalPatternHeight: Int
     val totalPatternWidth: Int
@@ -34,6 +37,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         stitchPad = preferences.getString(PreferenceKeys.STITCH_PAD, "0").toInt()
         totalPatternHeight = (knitPattern.stitches.size * (stitchSize + stitchPad) + stitchPad)
         totalPatternWidth = (knitPattern.patternWidth * (stitchSize + stitchPad) + stitchPad)
+        lockToCentre = preferences.getBoolean(PreferenceKeys.LOCK_TO_CENTRE, false)
 
         stitchPaints = createStitchPaints(knitPattern.stitchTypes)
         doneOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -43,6 +47,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         patternBitmap = createPatternBitmap()
         patternBitmapBuffer = Bitmap.createBitmap(patternBitmap.width, patternBitmap.height, patternBitmap.config)
         patternBitmapPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC) }
+
+        if (lockToCentre) centreOnNextStitch()
         drawPattern()
     }
 
@@ -167,13 +173,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     private fun drawNextStitch(isDone: Boolean) {
         val canvas = Canvas(patternBitmap)
         val stitch = knitPattern.stitches[knitPattern.currentRow][knitPattern.nextStitchInRow]
-        val xTranslate =
-                if (knitPattern.currentRowDirection == 1) {
-                    knitPattern.currentDistanceInRow * (stitchPad + stitchSize) + stitchPad
-                } else {
-                    totalPatternWidth - (knitPattern.currentDistanceInRow + stitch.width) * (stitchPad + stitchSize)
-                } - currentView.left
-        val yTranslate = knitPattern.currentRow * (stitchPad + stitchSize) + stitchPad - currentView.top
+        val (xTranslate, yTranslate) = positionOfNextStitchInCurrentView()
         canvas.translate(xTranslate, yTranslate)
         drawStitch(canvas, stitch, isDone)
     }
@@ -181,12 +181,13 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     fun undo() {
         if (undoStack.size == 0) {
             undoRow()
-            return
+        } else {
+            for (i in 0 until undoStack.pop()) {
+                knitPattern.undoStitch()
+                drawNextStitch(false)
+            }
         }
-        for (i in 0 until undoStack.pop()) {
-            knitPattern.undoStitch()
-            drawNextStitch(false)
-        }
+        if (lockToCentre) centreOnNextStitch()
     }
 
     private fun undoRow() {
@@ -194,6 +195,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
             knitPattern.undoStitch()
             drawNextStitch(false)
         } while (!knitPattern.isStartOfRow)
+        if (lockToCentre) centreOnNextStitch()
     }
 
     fun increment(numStitches: Int = 1) {
@@ -202,6 +204,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
             drawNextStitch(true)
             knitPattern.increment()
         }
+        if(lockToCentre) centreOnNextStitch()
     }
 
     fun incrementRow() {
@@ -227,11 +230,21 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         undoStack.clear()
     }
 
-    fun positionOfNextStitch(): Pair<Int, Int> {
-        val x = knitPattern.currentDistanceInRow * (stitchSize + stitchPad) * knitPattern.currentRowDirection +
-                if (knitPattern.currentRowDirection == -1) patternBitmap.width else 0
-        val y = knitPattern.currentRow * (stitchSize + stitchPad)
+    private fun positionOfNextStitchInPattern(): Pair<Int, Int> {
+        val stitch = knitPattern.stitches[knitPattern.currentRow][knitPattern.nextStitchInRow]
+        val x =
+                if (knitPattern.currentRowDirection == 1) {
+                    knitPattern.currentDistanceInRow * (stitchPad + stitchSize) + stitchPad
+                } else {
+                    totalPatternWidth - (knitPattern.currentDistanceInRow + stitch.width) * (stitchPad + stitchSize)
+                }
+        val y = knitPattern.currentRow * (stitchPad + stitchSize) + stitchPad
         return Pair(x, y)
+    }
+
+    private fun positionOfNextStitchInCurrentView(): Pair<Int, Int> {
+        val (patternX, patternY) = positionOfNextStitchInPattern()
+        return Pair(patternX - currentView.left, patternY - currentView.top)
     }
 
     fun incrementBlock() {
@@ -246,6 +259,10 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
     }
 
     fun scroll(distanceX: Float, distanceY: Float) {
+        if (!lockToCentre) shiftCurrentView(distanceX, distanceY)
+    }
+
+    private fun shiftCurrentView(distanceX: Float, distanceY: Float) {
         val shift = keepScrollWithinBounds(distanceX, distanceY)
         val canvas = Canvas(patternBitmapBuffer)
         currentView.offset(shift.first, shift.second)
@@ -295,6 +312,20 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         return Pair(myShiftX, myShiftY)
     }
 
+    fun setLockToCentre(lockToCentre: Boolean) {
+        this.lockToCentre = lockToCentre
+        if (lockToCentre) centreOnNextStitch()
+    }
+
+    fun centreOnNextStitch() {
+        val (stitchX, stitchY) = positionOfNextStitchInPattern()
+        val shiftX = (stitchX - currentView.centerX()).toFloat()
+        val shiftY = (stitchY - currentView.centerY()).toFloat()
+        shiftCurrentView(shiftX, shiftY)
+    }
+
+    /* Extension functions */
+
     private fun Canvas.translate(x: Int, y: Int) {
         translate(x.toFloat(), y.toFloat())
     }
@@ -310,4 +341,3 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
                     this.right + other.right,
                     this.bottom + other.bottom)
 }
-
