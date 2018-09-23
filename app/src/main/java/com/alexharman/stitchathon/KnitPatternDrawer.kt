@@ -8,7 +8,7 @@ import com.alexharman.stitchathon.KnitPackage.Stitch
 import java.util.*
 import kotlin.math.min
 
-class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, displayHeight: Int, preferences: SharedPreferences) {
+class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPreferences) {
     private val stitchSize: Int
     private val stitchPad: Int
     private val colours: IntArray = IntArray(3)
@@ -23,11 +23,15 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
 
     val totalPatternHeight: Int
     val totalPatternWidth: Int
-    val currentView = Rect(0, 0, displayWidth, displayHeight)
-    var patternBitmap: Bitmap
+    lateinit var currentView: Rect
+    lateinit var patternBitmap: Bitmap
         private set
-    private var patternBitmapBuffer: Bitmap
+    private lateinit var patternBitmapBuffer: Bitmap
     private val patternBitmapPaint: Paint
+
+    constructor(knitPattern: KnitPattern, displayWidth: Int, displayHeight: Int, preferences: SharedPreferences): this(knitPattern, preferences) {
+        setDisplayDimensions(displayWidth, displayHeight)
+    }
 
     init {
         colours[0] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_1, -1)
@@ -44,12 +48,15 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, displayWidth: Int, display
         doneOverlayPaint.style = Paint.Style.FILL
         doneOverlayPaint.colorFilter = LightingColorFilter(0x00FFFFFF, 0x00888888)
         stitchBitmaps = createStitchBitmaps(knitPattern.stitchTypes)
+        patternBitmapPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC) }
+    }
+
+    fun setDisplayDimensions (displayWidth: Int, displayHeight: Int) {
+        currentView = Rect(0, 0, displayWidth, displayHeight)
         patternBitmap = createPatternBitmap()
         patternBitmapBuffer = Bitmap.createBitmap(patternBitmap.width, patternBitmap.height, patternBitmap.config)
-        patternBitmapPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC) }
-
-        if (lockToCentre) centreOnNextStitch()
         drawPattern()
+        if (lockToCentre) centreOnNextStitch()
     }
 
     private fun createPatternBitmap(): Bitmap {

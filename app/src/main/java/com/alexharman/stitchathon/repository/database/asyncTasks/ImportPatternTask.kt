@@ -20,7 +20,7 @@ internal abstract class ImportPatternTask<V> internal constructor(context: Conte
 
     internal fun saveNewPattern(knitPattern: KnitPattern) {
         val context = context.get() ?: return
-        knitPatternDrawer = KnitPatternDrawer(knitPattern, 100, 100, PreferenceManager.getDefaultSharedPreferences(context))
+        knitPatternDrawer = KnitPatternDrawer(knitPattern, 200, 200, PreferenceManager.getDefaultSharedPreferences(context))
         thumbnail = ThumbnailUtils.extractThumbnail(knitPatternDrawer.patternBitmap, 200, 200)
         AppDatabase.getAppDatabase(context).knitPatternDao().saveNewPattern(knitPattern, thumbnail, context)
     }

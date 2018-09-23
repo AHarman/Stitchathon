@@ -18,7 +18,10 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     var knitPatternDrawer: KnitPatternDrawer? = null
         set(value) {
             field = value
-            if (width > 0) invalidate()
+            if (width > 0) {
+                knitPatternDrawer?.setDisplayDimensions(width, height)
+                invalidate()
+            }
         }
 
     // TODO: Change some of these to val
@@ -38,12 +41,13 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
         if (knitPatternDrawer != null) {
-            zoomSrcRect()
+//            zoomSrcRect()
+            knitPatternDrawer?.setDisplayDimensions(w, h)
             invalidate()
         }
     }
 
-    private fun zoomSrcRect() {
+//    private fun zoomSrcRect() {
 //        val patternBitmap = knitPatternDrawer?.patternBitmap ?: return
 //        val centreX = patternSrcRectangle.centerX()
 //        val centreY = patternSrcRectangle.centerY()
@@ -65,15 +69,15 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 //        patternSrcRectangle.top = centreY - srcRectHeight / 2
 //        patternSrcRectangle.bottom = centreY + srcRectHeight / 2
 //        moveSrcRectAndCheckBounds(0, 0)
-    }
+//    }
 
-    private fun zoomPattern(fitPatternWidth: Boolean) {
+//    private fun zoomPattern(fitPatternWidth: Boolean) {
 //        this.fitPatternWidth = fitPatternWidth
 //        if (knitPatternDrawer == null)
 //            return
 //        zoomSrcRect()
 //        invalidate()
-    }
+//    }
 
     fun clearPattern() {
         this.knitPatternDrawer = null

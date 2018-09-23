@@ -136,7 +136,7 @@ class KnitPatternFragment : Fragment(),
     }
 
     fun setKnitPattern(knitPattern: KnitPattern) {
-        this.knitPatternDrawer = KnitPatternDrawer(knitPattern, knitPatternView.width, knitPatternView.height, PreferenceManager.getDefaultSharedPreferences(requireContext()))
+        this.knitPatternDrawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(requireContext()))
         knitPatternView.knitPatternDrawer = knitPatternDrawer
         updateStitchCounter()
         patternNameView?.text = knitPattern.name
