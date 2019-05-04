@@ -118,6 +118,8 @@ class KnitPatternFragment : Fragment(),
                 .edit()
                 .putBoolean(PreferenceKeys.FIT_PATTERN_WIDTH, zoomButton.isChecked)
                 .apply()
+        knitPatternDrawer?.setFitPatternWidth(zoomButton.isChecked)
+        if (zoomButton.isChecked) knitPatternView.invalidate()
     }
 
     private fun gotToStitch() {

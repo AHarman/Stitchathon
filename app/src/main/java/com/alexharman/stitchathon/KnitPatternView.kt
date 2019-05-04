@@ -2,11 +2,11 @@ package com.alexharman.stitchathon
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.preference.PreferenceManager
 import android.util.AttributeSet
 import android.view.View
-import kotlin.math.min
 
 
 class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -41,43 +41,10 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
         if (knitPatternDrawer != null) {
-//            zoomSrcRect()
             knitPatternDrawer?.setDisplayDimensions(w, h)
             invalidate()
         }
     }
-
-//    private fun zoomSrcRect() {
-//        val patternBitmap = knitPatternDrawer?.patternBitmap ?: return
-//        val centreX = patternSrcRectangle.centerX()
-//        val centreY = patternSrcRectangle.centerY()
-//        val srcRectHeight: Int
-//        val srcRectWidth: Int
-//
-//        if (fitPatternWidth) {
-//            val ratio = height.toFloat() / width.toFloat()
-//            srcRectHeight = min((ratio * patternBitmap.width).toInt(), patternBitmap.height)
-//            patternSrcRectangle.left = 0
-//            patternSrcRectangle.right = patternBitmap.width
-//        } else {
-//            srcRectWidth = min(width, patternBitmap.width)
-//            srcRectHeight = min(height, patternBitmap.height)
-//            patternSrcRectangle.left = centreX - srcRectWidth / 2
-//            patternSrcRectangle.right = centreX + srcRectWidth / 2
-//        }
-//
-//        patternSrcRectangle.top = centreY - srcRectHeight / 2
-//        patternSrcRectangle.bottom = centreY + srcRectHeight / 2
-//        moveSrcRectAndCheckBounds(0, 0)
-//    }
-
-//    private fun zoomPattern(fitPatternWidth: Boolean) {
-//        this.fitPatternWidth = fitPatternWidth
-//        if (knitPatternDrawer == null)
-//            return
-//        zoomSrcRect()
-//        invalidate()
-//    }
 
     fun clearPattern() {
         this.knitPatternDrawer = null

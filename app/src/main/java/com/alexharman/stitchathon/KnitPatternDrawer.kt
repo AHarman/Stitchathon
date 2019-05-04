@@ -13,13 +13,13 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
     private val stitchPad: Int
     private val colours: IntArray = IntArray(3)
     private var lockToCentre: Boolean
+    private var fitPatternWidth: Boolean
 
     private var stitchBitmaps: HashMap<Stitch, Bitmap>
     private var stitchPaints: HashMap<Stitch, Paint>
     private val clearPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
     private var doneOverlayPaint: Paint
     private val undoStack = Stack<Int>()
-
 
     val totalPatternHeight: Int
     val totalPatternWidth: Int
@@ -42,6 +42,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         totalPatternHeight = (knitPattern.stitches.size * (stitchSize + stitchPad) + stitchPad)
         totalPatternWidth = (knitPattern.patternWidth * (stitchSize + stitchPad) + stitchPad)
         lockToCentre = preferences.getBoolean(PreferenceKeys.LOCK_TO_CENTRE, false)
+        fitPatternWidth = preferences.getBoolean(PreferenceKeys.FIT_PATTERN_WIDTH, false)
 
         stitchPaints = createStitchPaints(knitPattern.stitchTypes)
         doneOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -123,7 +124,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         return paints
     }
 
-    fun drawPattern(patternAreaToDraw: Rect = currentView) {
+    private fun drawPattern(patternAreaToDraw: Rect = currentView) {
         val canvas = Canvas(patternBitmap)
 
         val firstRow = patternAreaToDraw.top / (stitchSize + stitchPad)
@@ -324,7 +325,37 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         if (lockToCentre) centreOnNextStitch()
     }
 
-    fun centreOnNextStitch() {
+    fun setFitPatternWidth(fitPatternWidth: Boolean) {
+        this.fitPatternWidth = fitPatternWidth
+        toggleFitPatternWidth()
+    }
+
+    private fun toggleFitPatternWidth() {
+        val centreX = currentView.centerX()
+        val centreY = currentView.centerY()
+        val currentViewHeight: Int
+        val currentViewWidth: Int
+
+        if (fitPatternWidth) {
+            val currentViewRatio = currentView.height().toFloat() / currentView.width().toFloat()
+            currentViewHeight = min((currentViewRatio * totalPatternHeight).toInt(), patternBitmap.height)
+            currentView.left = 0
+            currentView.right = totalPatternWidth
+        } else {
+            currentViewWidth = min(currentView.width(), patternBitmap.width)
+            currentViewHeight = min(currentView.height(), patternBitmap.height)
+            currentView.left = centreX - currentViewWidth / 2
+            currentView.right = centreX + currentViewWidth / 2
+        }
+
+        currentView.top = centreY - currentViewHeight / 2
+        currentView.bottom = centreY + currentViewHeight / 2
+
+        // Hacky, but ensures we're within bounds
+        shiftCurrentView(0f, 0f)
+    }
+
+    private fun centreOnNextStitch() {
         val (stitchX, stitchY) = positionOfNextStitchInPattern()
         val shiftX = (stitchX - currentView.centerX()).toFloat()
         val shiftY = (stitchY - currentView.centerY()).toFloat()
