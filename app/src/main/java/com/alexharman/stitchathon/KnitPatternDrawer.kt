@@ -131,11 +131,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         val lastRow = min(patternAreaToDraw.bottom / (stitchSize + stitchPad) + 1, knitPattern.numRows - 1)
         val firstCol = patternAreaToDraw.left / (stitchSize + stitchPad)
 
-        val scaleFactor = patternBitmap.width.toFloat() / currentView.width().toFloat()
-        val scaleMatrix = Matrix()
-        val stitchTranslateDistance = ((stitchSize + stitchPad) * scaleFactor).toInt()
-        scaleMatrix.setScale(scaleFactor, scaleFactor)
-
+        val stitchTranslateDistance = ((stitchSize + stitchPad) * getScale()).toInt()
         val bitmapAreaToDraw = findBitmapArea(patternAreaToDraw)
 
         canvas.drawRect(bitmapAreaToDraw, clearPaint)
@@ -178,21 +174,22 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         return bitmapAreaToDraw
     }
 
-    private fun drawStitch(canvas: Canvas, stitch: Stitch, isDone: Boolean, matrix: Matrix = Matrix()) {
-        val b = stitchBitmaps[stitch]
-        canvas.drawBitmap(b, matrix, if (isDone) doneOverlayPaint else null)
+    private fun drawStitch(canvas: Canvas, stitch: Stitch, isDone: Boolean) {
+        val b = stitchBitmaps[stitch] ?: return
+        canvas.drawBitmap(b, null, RectF(0f, 0f, b.width * getScale(), b.height * getScale()), if (isDone) doneOverlayPaint else null)
+//        canvas.drawBitmap(b, matrix, if (isDone) doneOverlayPaint else null)
     }
+
+    private fun getScale() : Float =
+        patternBitmap.width.toFloat() / currentView.width().toFloat()
 
     private fun drawNextStitch(isDone: Boolean) {
         val canvas = Canvas(patternBitmap)
         val stitch = knitPattern.stitches[knitPattern.currentRow][knitPattern.nextStitchInRow]
         val (xTranslate, yTranslate) = positionOfNextStitchInCurrentView()
-        val scaleFactor = patternBitmap.width.toFloat() / currentView.width().toFloat()
-        val scaleMatrix = Matrix()
-        scaleMatrix.setScale(scaleFactor, scaleFactor)
 
-        canvas.translate(xTranslate * scaleFactor, yTranslate * scaleFactor)
-        drawStitch(canvas, stitch, isDone, scaleMatrix)
+        canvas.translate(xTranslate, yTranslate)
+        drawStitch(canvas, stitch, isDone)
     }
 
     fun undo() {
@@ -260,8 +257,9 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
     }
 
     private fun positionOfNextStitchInCurrentView(): Pair<Int, Int> {
-        val (patternX, patternY) = positionOfNextStitchInPattern()
-        return Pair(patternX - currentView.left, patternY - currentView.top)
+        val scale = getScale()
+        val (patternPositionX, patternPositionY) = positionOfNextStitchInPattern()
+        return Pair((patternPositionX * scale - currentView.left).toInt(), (patternPositionY * scale - currentView.top).toInt())
     }
 
     fun incrementBlock() {
