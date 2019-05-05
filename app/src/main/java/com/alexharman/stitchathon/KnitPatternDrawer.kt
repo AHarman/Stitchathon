@@ -131,13 +131,13 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         val lastRow = min(patternAreaToDraw.bottom / (stitchSize + stitchPad) + 1, knitPattern.numRows - 1)
         val firstCol = patternAreaToDraw.left / (stitchSize + stitchPad)
 
-        val stitchTranslateDistance = ((stitchSize + stitchPad) * getScale()).toInt()
-        val bitmapAreaToDraw = findBitmapArea(patternAreaToDraw)
+        val stitchTranslateDistance = ((stitchSize + stitchPad) * getScale())
+        val bitmapAreaToDraw = findBitmapAreaToDraw(patternAreaToDraw)
 
         canvas.drawRect(bitmapAreaToDraw, clearPaint)
 
         canvas.translate(bitmapAreaToDraw.left, bitmapAreaToDraw.top)
-        canvas.translate(stitchPad, stitchPad)
+        canvas.translate(stitchPad * getScale(), stitchPad * getScale())
 
         for (row in firstRow..lastRow) {
             val lastCol = min(patternAreaToDraw.right / (stitchSize + stitchPad) + 1, knitPattern.stitches[row].size - 1)
@@ -148,19 +148,21 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
                         (row == knitPattern.currentRow && knitPattern.currentRowDirection == 1 && col < knitPattern.stitchesDoneInRow) ||
                         (row == knitPattern.currentRow && knitPattern.currentRowDirection == -1 && col > knitPattern.nextStitchInRow)
                 drawStitch(canvas, knitPattern.stitches[row][col], isDone)
-                canvas.translate(stitchTranslateDistance, 0)
+                canvas.translate(stitchTranslateDistance, 0f)
             }
             canvas.restore()
-            canvas.translate(0, stitchTranslateDistance)
+            canvas.translate(0f, stitchTranslateDistance)
         }
     }
 
-    private fun findBitmapArea(knitPatternArea: Rect): Rect {
+    // Need to start off-screen on top/left to get "half in" first row/col
+    private fun findBitmapAreaToDraw(knitPatternArea: Rect): Rect {
+        val stitchAndPadDistance = ((stitchPad + stitchSize) * getScale()).toInt()
         val pad = Rect(
-                -knitPatternArea.left % (stitchPad + stitchSize),
-                -knitPatternArea.top % (stitchPad + stitchSize),
-                (stitchPad + stitchSize) - (knitPatternArea.left % (stitchPad + stitchSize)),
-                (stitchPad + stitchSize) - (knitPatternArea.top % (stitchPad + stitchSize)))
+                -knitPatternArea.left % stitchAndPadDistance,
+                -knitPatternArea.top % stitchAndPadDistance,
+                stitchAndPadDistance - (knitPatternArea.left % stitchAndPadDistance),
+                stitchAndPadDistance - (knitPatternArea.top % stitchAndPadDistance))
         val bitmapAreaToDraw = pad +
                 Rect(knitPatternArea.left - currentView.left,
                         knitPatternArea.top - currentView.top,
@@ -177,7 +179,6 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
     private fun drawStitch(canvas: Canvas, stitch: Stitch, isDone: Boolean) {
         val b = stitchBitmaps[stitch] ?: return
         canvas.drawBitmap(b, null, RectF(0f, 0f, b.width * getScale(), b.height * getScale()), if (isDone) doneOverlayPaint else null)
-//        canvas.drawBitmap(b, matrix, if (isDone) doneOverlayPaint else null)
     }
 
     private fun getScale() : Float =
@@ -225,6 +226,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         increment(knitPattern.stitchesLeftInRow)
     }
 
+    // TODO: Needs refactoring. Draws stuff that's off screen.
     fun markStitchesTo(row: Int, col: Int) {
         Log.d("Go to", "markStitchesTo() - Row: $row, col: $col")
         undoStack.clear()
