@@ -131,6 +131,11 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         val lastRow = min(patternAreaToDraw.bottom / (stitchSize + stitchPad) + 1, knitPattern.numRows - 1)
         val firstCol = patternAreaToDraw.left / (stitchSize + stitchPad)
 
+        val scaleFactor = patternBitmap.width.toFloat() / currentView.width().toFloat()
+        val scaleMatrix = Matrix()
+        val stitchTranslateDistance = ((stitchSize + stitchPad) * scaleFactor).toInt()
+        scaleMatrix.setScale(scaleFactor, scaleFactor)
+
         val bitmapAreaToDraw = findBitmapArea(patternAreaToDraw)
 
         canvas.drawRect(bitmapAreaToDraw, clearPaint)
@@ -147,10 +152,10 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
                         (row == knitPattern.currentRow && knitPattern.currentRowDirection == 1 && col < knitPattern.stitchesDoneInRow) ||
                         (row == knitPattern.currentRow && knitPattern.currentRowDirection == -1 && col > knitPattern.nextStitchInRow)
                 drawStitch(canvas, knitPattern.stitches[row][col], isDone)
-                canvas.translate(stitchSize + stitchPad, 0)
+                canvas.translate(stitchTranslateDistance, 0)
             }
             canvas.restore()
-            canvas.translate(0, stitchSize + stitchPad)
+            canvas.translate(0, stitchTranslateDistance)
         }
     }
 
@@ -173,17 +178,21 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         return bitmapAreaToDraw
     }
 
-    private fun drawStitch(canvas: Canvas, stitch: Stitch, isDone: Boolean) {
+    private fun drawStitch(canvas: Canvas, stitch: Stitch, isDone: Boolean, matrix: Matrix = Matrix()) {
         val b = stitchBitmaps[stitch]
-        canvas.drawBitmap(b, 0f, 0f, if (isDone) doneOverlayPaint else null)
+        canvas.drawBitmap(b, matrix, if (isDone) doneOverlayPaint else null)
     }
 
     private fun drawNextStitch(isDone: Boolean) {
         val canvas = Canvas(patternBitmap)
         val stitch = knitPattern.stitches[knitPattern.currentRow][knitPattern.nextStitchInRow]
         val (xTranslate, yTranslate) = positionOfNextStitchInCurrentView()
-        canvas.translate(xTranslate, yTranslate)
-        drawStitch(canvas, stitch, isDone)
+        val scaleFactor = patternBitmap.width.toFloat() / currentView.width().toFloat()
+        val scaleMatrix = Matrix()
+        scaleMatrix.setScale(scaleFactor, scaleFactor)
+
+        canvas.translate(xTranslate * scaleFactor, yTranslate * scaleFactor)
+        drawStitch(canvas, stitch, isDone, scaleMatrix)
     }
 
     fun undo() {
@@ -333,26 +342,29 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
     private fun toggleFitPatternWidth() {
         val centreX = currentView.centerX()
         val centreY = currentView.centerY()
-        val currentViewHeight: Int
-        val currentViewWidth: Int
+        val newCurrentViewHeight: Int
+        val newCurrentViewWidth: Int
 
         if (fitPatternWidth) {
             val currentViewRatio = currentView.height().toFloat() / currentView.width().toFloat()
-            currentViewHeight = min((currentViewRatio * totalPatternHeight).toInt(), patternBitmap.height)
+            newCurrentViewHeight = min((currentViewRatio * totalPatternWidth).toInt(), totalPatternHeight)
             currentView.left = 0
             currentView.right = totalPatternWidth
         } else {
-            currentViewWidth = min(currentView.width(), patternBitmap.width)
-            currentViewHeight = min(currentView.height(), patternBitmap.height)
-            currentView.left = centreX - currentViewWidth / 2
-            currentView.right = centreX + currentViewWidth / 2
+            newCurrentViewWidth = min(currentView.width(), patternBitmap.width)
+            newCurrentViewHeight = min(currentView.height(), patternBitmap.height)
+            currentView.left = centreX - newCurrentViewWidth / 2
+            currentView.right = centreX + newCurrentViewWidth / 2
         }
 
-        currentView.top = centreY - currentViewHeight / 2
-        currentView.bottom = centreY + currentViewHeight / 2
+        currentView.top = centreY - newCurrentViewHeight / 2
+        currentView.bottom = centreY + newCurrentViewHeight / 2
 
         // Hacky, but ensures we're within bounds
+        // TODO: Refactor this method maybe?
         shiftCurrentView(0f, 0f)
+
+        drawPattern()
     }
 
     private fun centreOnNextStitch() {
