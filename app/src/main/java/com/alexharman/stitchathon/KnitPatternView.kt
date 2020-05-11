@@ -12,14 +12,16 @@ import android.view.View
 class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var backgroundColor: Int = 0
-        @JvmName("_getBackgroundColour") get() {return field}
+        @JvmName("_getBackgroundColour") get() { return field }
         @JvmName("_setBackgroundColour") set(color) { field = color }
+
+    private var patternScroller: ScrollerDrawer? = null
 
     var knitPatternDrawer: KnitPatternDrawer? = null
         set(value) {
             field = value
-            if (width > 0) {
-                knitPatternDrawer?.setDisplayDimensions(width, height)
+            if (width > 0 && value != null) {
+                patternScroller = ScrollerDrawer(width, height, value)
                 invalidate()
             }
         }
@@ -38,12 +40,15 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         bitmapToDrawPaint.isFilterBitmap = true
     }
 
+    fun scroll(distanceX: Float, distanceY: Float) {
+        patternScroller?.scroll(distanceX.toInt(), distanceY.toInt())
+        invalidate()
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
-        if (knitPatternDrawer != null) {
-            knitPatternDrawer?.setDisplayDimensions(w, h)
-            invalidate()
-        }
+        patternScroller = ScrollerDrawer(width, height, knitPatternDrawer ?: return)
+        invalidate()
     }
 
     fun clearPattern() {
@@ -54,7 +59,7 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawColor(backgroundColor)
-        val patternBitmap = knitPatternDrawer?.patternBitmap ?: return
+        val patternBitmap = patternScroller?.currentBitmap ?: return
         canvas.drawBitmap(patternBitmap, 0f, 0f, bitmapToDrawPaint)
     }
 

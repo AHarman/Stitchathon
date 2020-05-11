@@ -39,6 +39,14 @@ class KnitPattern(
     constructor(name: String = "", pattern: List<List<String>>, oddRowsOpposite: Boolean = true) :
             this(name, Array(pattern.size, { i -> pattern[i].toTypedArray() }), oddRowsOpposite)
 
+    fun isStitchDone(row: Int, col: Int): Boolean =
+            when {
+                row < currentRow -> true
+                row == currentRow && currentRowDirection == 1 && col < stitchesDoneInRow -> true
+                row == currentRow && currentRowDirection == -1 && col > nextStitchInRow -> true
+                else -> false
+            }
+
     fun increment (numStitches: Int = 1) {
         for (i in 0 until numStitches) {
             if (isFinished) return

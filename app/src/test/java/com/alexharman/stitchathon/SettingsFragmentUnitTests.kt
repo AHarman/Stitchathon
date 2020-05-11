@@ -11,7 +11,6 @@ import org.robolectric.annotation.Config
 import org.robolectric.shadows.support.v4.SupportFragmentTestUtil.startFragment
 
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class)
 class SettingsFragmentUnitTests {
 
     @Test

@@ -6,7 +6,6 @@ import android.support.v4.view.GestureDetectorCompat
 import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.Toolbar
 import android.view.*
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
@@ -50,8 +49,8 @@ class KnitPatternFragment : Fragment(),
         completeCount = view.findViewById(R.id.complete_counter)
         completeCount.text = getString(R.string.complete_counter, 0)
 
-        view.findViewById<Button>(R.id.increment_row_button).setOnClickListener { knitPatternDrawer?.incrementRow(); knitPatternView.invalidate(); updateStitchCounter() }
-        view.findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.invalidate(); updateStitchCounter() }
+//        view.findViewById<Button>(R.id.increment_row_button).setOnClickListener { knitPatternDrawer?.incrementRow(); knitPatternView.invalidate(); updateStitchCounter() }
+//        view.findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.invalidate(); updateStitchCounter() }
         knitPatternViewGestureDetector = GestureDetectorCompat(context, KnitPatternViewGestureListener())
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event) }
 
@@ -107,7 +106,7 @@ class KnitPatternFragment : Fragment(),
                 .edit()
                 .putBoolean(PreferenceKeys.LOCK_TO_CENTRE, lockButton.isChecked)
                 .apply()
-        knitPatternDrawer?.setLockToCentre(lockButton.isChecked)
+//        knitPatternDrawer?.setLockToCentre(lockButton.isChecked)
         if (lockButton.isChecked) knitPatternView.invalidate()
     }
 
@@ -118,7 +117,7 @@ class KnitPatternFragment : Fragment(),
                 .edit()
                 .putBoolean(PreferenceKeys.FIT_PATTERN_WIDTH, zoomButton.isChecked)
                 .apply()
-        knitPatternDrawer?.setFitPatternWidth(zoomButton.isChecked)
+//        knitPatternDrawer?.setFitPatternWidth(zoomButton.isChecked)
         knitPatternView.invalidate()
     }
 
@@ -132,13 +131,14 @@ class KnitPatternFragment : Fragment(),
         val knitPattern = knitPatternDrawer?.knitPattern ?: return
         val myRow = if (row < 0) knitPattern.currentRow else min(knitPattern.numRows - 1, row)
         val myCol = if (col < 0) min(knitPattern.stitchesDoneInRow, knitPattern.stitches[myRow].size - 1) else min(knitPattern.stitches[myRow].size - 1, col)
-        knitPatternDrawer?.markStitchesTo(myRow, myCol)
+//        knitPatternDrawer?.markStitchesTo(myRow, myCol)
         knitPatternView.invalidate()
         updateStitchCounter()
     }
 
     fun setKnitPattern(knitPattern: KnitPattern) {
-        this.knitPatternDrawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(requireContext()))
+        val drawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(requireContext()))
+        this.knitPatternDrawer = drawer
         knitPatternView.knitPatternDrawer = knitPatternDrawer
         updateStitchCounter()
         patternNameView?.text = knitPattern.name
@@ -169,8 +169,9 @@ class KnitPatternFragment : Fragment(),
 
     private inner class KnitPatternViewGestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            knitPatternDrawer?.increment()
-            updateStitchCounter()
+//            knitPatternDrawer?.increment()
+//            updateStitchCounter()
+            knitPatternView.scroll(60.0f, 60.0f)
             knitPatternView.invalidate()
             return true
         }
@@ -181,7 +182,7 @@ class KnitPatternFragment : Fragment(),
         }
 
         override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
-            knitPatternDrawer?.scroll(distanceX, distanceY)
+            knitPatternView.scroll(distanceX, distanceY)
             knitPatternView.invalidate()
             return true
         }
@@ -192,8 +193,11 @@ class KnitPatternFragment : Fragment(),
 
         override fun onLongPress(e: MotionEvent?) {
             // TODO: Add vibrate
-            knitPatternDrawer?.incrementBlock()
-            updateStitchCounter()
+//            knitPatternDrawer?.incrementBlock()
+//            updateStitchCounter()
+//            knitPatternView.invalidate()
+
+            knitPatternView.scroll(-60.0f, -60.0f)
             knitPatternView.invalidate()
         }
     }
