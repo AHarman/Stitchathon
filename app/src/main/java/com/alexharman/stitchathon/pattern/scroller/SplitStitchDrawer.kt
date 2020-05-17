@@ -1,8 +1,8 @@
-package com.alexharman.stitchathon
+package com.alexharman.stitchathon.pattern.scroller
 
 import android.graphics.*
 
-class SplitStitchDrawer(firstColour: Int, secondColour: Int, private val size: Int): IDrawer {
+class SplitStitchDrawer(firstColour: Int, secondColour: Int, private val size: Int): Drawer {
 
     private val bitmap = createBitmap(firstColour, secondColour, size)
 

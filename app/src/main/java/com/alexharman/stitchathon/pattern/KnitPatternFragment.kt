@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon
+package com.alexharman.stitchathon.pattern
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -6,14 +6,17 @@ import android.support.v4.view.GestureDetectorCompat
 import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.Toolbar
 import android.view.*
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import com.alexharman.stitchathon.*
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.pattern.scroller.KnitPatternDrawer
+import com.alexharman.stitchathon.pattern.scroller.KnitPatternView
 import com.alexharman.stitchathon.repository.database.AppDatabase
-import kotlin.math.min
 
 class KnitPatternFragment : Fragment(),
-        GoToStitchDialog.GoToStitchDialogListener {
+        PatternContract.View {
 
     private var patternThumbnailView: ImageView? = null
     private var patternNameView: TextView? = null
@@ -23,8 +26,10 @@ class KnitPatternFragment : Fragment(),
     private lateinit var completeCount: TextView
     private lateinit var knitPatternView: KnitPatternView
     private lateinit var knitPatternViewGestureDetector: GestureDetectorCompat
-    private var knitPatternDrawer: KnitPatternDrawer? = null
     private lateinit var db: AppDatabase
+
+    override lateinit var presenter: PatternContract.Presenter
+    private var pattern: KnitPattern? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,14 +54,10 @@ class KnitPatternFragment : Fragment(),
         completeCount = view.findViewById(R.id.complete_counter)
         completeCount.text = getString(R.string.complete_counter, 0)
 
-//        view.findViewById<Button>(R.id.increment_row_button).setOnClickListener { knitPatternDrawer?.incrementRow(); knitPatternView.invalidate(); updateStitchCounter() }
-//        view.findViewById<Button>(R.id.undo_button).setOnClickListener { knitPatternDrawer?.undo(); knitPatternView.invalidate(); updateStitchCounter() }
+        view.findViewById<Button>(R.id.increment_row_button).setOnClickListener { presenter.incrementRow() }
+        view.findViewById<Button>(R.id.undo_button).setOnClickListener { presenter.undo() }
         knitPatternViewGestureDetector = GestureDetectorCompat(context, KnitPatternViewGestureListener())
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event) }
-
-        val knitPatternDrawer = this.knitPatternDrawer
-        if (knitPatternDrawer != null)
-            knitPatternView.knitPatternDrawer = knitPatternDrawer
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -66,14 +67,13 @@ class KnitPatternFragment : Fragment(),
         patternNameView = activity.findViewById(R.id.nav_drawer_pattern_name)
         patternThumbnailView = activity.findViewById(R.id.nav_drawer_image)
         toolbar = activity.findViewById(R.id.toolbar)
-        toolbar?.title = knitPatternDrawer?.knitPattern?.name ?: getString(R.string.title_activity_main)
+        toolbar?.title = pattern?.name ?: getString(R.string.title_activity_main)
         db = AppDatabase.getAppDatabase(activity)
     }
 
     override fun onPause() {
         super.onPause()
-        if (knitPatternDrawer != null)
-            savePattern()
+        savePattern()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -82,7 +82,7 @@ class KnitPatternFragment : Fragment(),
         val lockButton = menu.findItem(R.id.lock_button)
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         lockButton.isChecked = prefs.getBoolean(PreferenceKeys.LOCK_TO_CENTRE, false)
-        lockButton.icon = context?.getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
+        lockButton.icon = context?.getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp)
         lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         zoomButton.isChecked = prefs.getBoolean(PreferenceKeys.FIT_PATTERN_WIDTH, false)
         zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
@@ -98,9 +98,23 @@ class KnitPatternFragment : Fragment(),
         }
     }
 
+    override fun patternUpdated() {
+        this.knitPatternView.invalidate()
+        updateProgressCounters()
+    }
+
+    override fun setPattern(pattern: KnitPattern?) {
+        this.pattern = pattern
+        knitPatternView.pattern = pattern
+        patternUpdated()
+        patternNameView?.text = pattern?.name
+//        patternThumbnailView?.setImageBitmap(thumbnail)
+        toolbar?.title = pattern?.name ?: getString(R.string.title_activity_main)
+    }
+
     private fun lockButtonPressed(lockButton: MenuItem) {
         lockButton.isChecked = !lockButton.isChecked
-        lockButton.icon = context?.getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp )
+        lockButton.icon = context?.getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp)
         lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
@@ -122,49 +136,21 @@ class KnitPatternFragment : Fragment(),
     }
 
     private fun gotToStitch() {
-        val pattern = knitPatternDrawer?.knitPattern ?: return
+        val pattern = pattern ?: return
         GoToStitchDialog.newInstance(pattern.currentRow, pattern.stitchesDoneInRow)
                 .show(childFragmentManager, "Go to stitch")
     }
 
-    override fun onGoToStitchReturn(row: Int, col: Int) {
-        val knitPattern = knitPatternDrawer?.knitPattern ?: return
-        val myRow = if (row < 0) knitPattern.currentRow else min(knitPattern.numRows - 1, row)
-        val myCol = if (col < 0) min(knitPattern.stitchesDoneInRow, knitPattern.stitches[myRow].size - 1) else min(knitPattern.stitches[myRow].size - 1, col)
-//        knitPatternDrawer?.markStitchesTo(myRow, myCol)
-        knitPatternView.invalidate()
-        updateStitchCounter()
-    }
-
-    fun setKnitPattern(knitPattern: KnitPattern) {
-        val drawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(requireContext()))
-        this.knitPatternDrawer = drawer
-        knitPatternView.knitPatternDrawer = knitPatternDrawer
-        updateStitchCounter()
-        patternNameView?.text = knitPattern.name
-//        patternThumbnailView?.setImageBitmap(thumbnail)
-        toolbar?.title = knitPattern.name
-    }
-
-    fun updateStitchCounter() {
-        val pattern = knitPatternDrawer?.knitPattern ?: return
-        stitchCount.text = getString(R.string.stitches_done, pattern.stitchesDoneInRow)
-        rowCount.text = getString(R.string.rows_done, pattern.currentRow)
-        completeCount.text = getString(R.string.complete_counter, 100 * pattern.totalStitchesDone / pattern.totalStitches)
+    private fun updateProgressCounters() {
+        val percentage = 100 * (pattern?.totalStitchesDone ?: 0) / (pattern?.totalStitches ?: 1)
+        stitchCount.text = getString(R.string.stitches_done, pattern?.stitchesDoneInRow ?: 0)
+        rowCount.text = getString(R.string.rows_done, pattern?.currentRow ?: 0)
+        completeCount.text = getString(R.string.complete_counter, percentage)
     }
 
     private fun savePattern() {
-        val pattern = knitPatternDrawer?.knitPattern ?: return
+        val pattern = pattern ?: return
         MainActivity.repository.saveKnitPatternChanges(pattern)
-    }
-
-    fun clearKnitPattern() {
-        this.knitPatternDrawer = null
-        knitPatternView.clearPattern()
-        patternThumbnailView?.setImageResource(R.drawable.logo)
-        patternNameView?.text = ""
-        toolbar?.title = getString(R.string.title_activity_main)
-        updateStitchCounter()
     }
 
     private inner class KnitPatternViewGestureListener : GestureDetector.SimpleOnGestureListener() {
@@ -172,7 +158,6 @@ class KnitPatternFragment : Fragment(),
 //            knitPatternDrawer?.increment()
 //            updateStitchCounter()
             knitPatternView.scroll(60.0f, 60.0f)
-            knitPatternView.invalidate()
             return true
         }
 

@@ -1,18 +1,20 @@
-package com.alexharman.stitchathon
+package com.alexharman.stitchathon.pattern.scroller
 
 import android.content.SharedPreferences
 import android.graphics.*
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
+import com.alexharman.stitchathon.PreferenceKeys
 import kotlin.collections.HashMap
 import kotlin.math.min
 
-class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPreferences): IAreaDrawer {
+// TODO: Pass in colors rather than SharedPreferences object
+class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPreferences): AreaDrawer {
     private val stitchSize: Int
     private val stitchPad: Int
 
-    private var stitchDrawers: HashMap<Stitch, IDrawer>
-    private val clearPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)//.apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
+    private var stitchDrawers: HashMap<Stitch, Drawer>
+    private val clearPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
     private val doneOverlayPaint: Paint
 
     override val overallHeight: Int
@@ -31,16 +33,14 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         overallWidth = (knitPattern.patternWidth * (stitchSize + stitchPad) + stitchPad)
 
         stitchDrawers = createStitchDrawers(knitPattern.stitchTypes, colours)
-        clearPaint.color = 0xFF00FF00.toInt()
-        clearPaint.style = Paint.Style.FILL
         doneOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         doneOverlayPaint.style = Paint.Style.FILL
         doneOverlayPaint.colorFilter = LightingColorFilter(0x00FFFFFF, 0x00888888)
         translationPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC) }
     }
 
-    private fun createStitchDrawers(stitches: Collection<Stitch>, colours: IntArray): HashMap<Stitch, IDrawer> {
-        val drawers = HashMap<Stitch, IDrawer>()
+    private fun createStitchDrawers(stitches: Collection<Stitch>, colours: IntArray): HashMap<Stitch, Drawer> {
+        val drawers = HashMap<Stitch, Drawer>()
         val stitchColours = HashMap<Stitch, Int>()
 
         // Assuming enough colours
@@ -59,7 +59,6 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         return drawers
     }
 
-
     override fun draw(canvas: Canvas, sourceArea: Rect, outputArea: Rect) {
         val padding = findSourcePadding(sourceArea)
         val paddedSourceArea = padding + sourceArea
@@ -68,7 +67,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         val lastRow = min(paddedSourceArea.bottom / (stitchSize + stitchPad), knitPattern.numRows - 1)
         val firstCol = paddedSourceArea.left / (stitchSize + stitchPad)
         var lastCol: Int
-        var saveCount = canvas.save()
+        val saveCount = canvas.save()
 
         canvas.drawRect(paddedOutputArea, clearPaint)
         canvas.translate(paddedOutputArea.left, paddedOutputArea.top)

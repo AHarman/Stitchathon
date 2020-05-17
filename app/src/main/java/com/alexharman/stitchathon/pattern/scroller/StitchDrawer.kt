@@ -1,9 +1,9 @@
-package com.alexharman.stitchathon
+package com.alexharman.stitchathon.pattern.scroller
 
 import android.graphics.Canvas
 import android.graphics.Paint
 
-class StitchDrawer(colour: Int, private val size: Int): IDrawer {
+class StitchDrawer(colour: Int, private val size: Int): Drawer {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 

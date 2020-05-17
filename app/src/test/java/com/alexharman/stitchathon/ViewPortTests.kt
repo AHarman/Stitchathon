@@ -1,6 +1,7 @@
 package com.alexharman.stitchathon;
 
 import android.graphics.Rect
+import com.alexharman.stitchathon.pattern.scroller.BoundedViewPort
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith

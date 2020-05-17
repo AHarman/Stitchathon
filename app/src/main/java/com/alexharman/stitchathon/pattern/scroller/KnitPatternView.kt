@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon
+package com.alexharman.stitchathon.pattern.scroller
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -7,7 +7,8 @@ import android.graphics.Paint
 import android.preference.PreferenceManager
 import android.util.AttributeSet
 import android.view.View
-
+import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.PreferenceKeys
 
 class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
@@ -16,23 +17,22 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         @JvmName("_setBackgroundColour") set(color) { field = color }
 
     private var patternScroller: ScrollerDrawer? = null
+    private var bitmapToDrawPaint: Paint
+    private val preferenceListener = MySharedPreferenceListener()
+    private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
-    var knitPatternDrawer: KnitPatternDrawer? = null
+    private var knitPatternDrawer: KnitPatternDrawer? = null
+    var pattern: KnitPattern? = null
         set(value) {
             field = value
             if (width > 0 && value != null) {
-                patternScroller = ScrollerDrawer(width, height, value)
+                val drawer = KnitPatternDrawer(value, prefs)
+                patternScroller = ScrollerDrawer(width, height, drawer)
                 invalidate()
             }
         }
 
-    // TODO: Change some of these to val
-    private var bitmapToDrawPaint: Paint
-
-    private val preferenceListener = MySharedPreferenceListener()
-
     init {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.registerOnSharedPreferenceChangeListener(preferenceListener)
         backgroundColor = prefs.getInt(PreferenceKeys.BACKGROUND_COLOUR, 0xFFFFFFFF)
         bitmapToDrawPaint = Paint()
@@ -47,22 +47,19 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
-        patternScroller = ScrollerDrawer(width, height, knitPatternDrawer ?: return)
-        invalidate()
-    }
-
-    fun clearPattern() {
-        this.knitPatternDrawer = null
+        patternScroller = ScrollerDrawer(width, height, knitPatternDrawer
+                ?: return)
         invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawColor(backgroundColor)
         val patternBitmap = patternScroller?.currentBitmap ?: return
+        canvas.drawColor(backgroundColor)
         canvas.drawBitmap(patternBitmap, 0f, 0f, bitmapToDrawPaint)
     }
 
+    // TODO: Check why do we need to do this
     override fun performClick(): Boolean {
         super.performClick()
         return true
@@ -82,5 +79,6 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     private fun SharedPreferences.getInt(key: String, default: Long): Int {
         return getInt(key, default.toInt())
     }
+
 }
 

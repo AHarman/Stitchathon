@@ -1,10 +1,10 @@
-package com.alexharman.stitchathon
+package com.alexharman.stitchathon.pattern.scroller
 
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 
-interface IAreaDrawer {
+interface AreaDrawer {
     fun draw(canvas: Canvas, sourceArea: Rect, outputArea: Rect)
 
     val translationPaint: Paint

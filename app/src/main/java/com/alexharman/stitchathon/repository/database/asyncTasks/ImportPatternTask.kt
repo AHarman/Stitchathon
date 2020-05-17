@@ -8,7 +8,7 @@ import android.media.ThumbnailUtils
 import android.os.AsyncTask
 import android.preference.PreferenceManager
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
-import com.alexharman.stitchathon.KnitPatternDrawer
+import com.alexharman.stitchathon.pattern.scroller.KnitPatternDrawer
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference

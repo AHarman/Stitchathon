@@ -63,8 +63,6 @@ class KnitPattern(
         }
     }
 
-    fun incrementRow() = increment(stitchesLeftInRow)
-
     fun undoStitch() {
         if (currentRow == 0 && isStartOfRow)
             return

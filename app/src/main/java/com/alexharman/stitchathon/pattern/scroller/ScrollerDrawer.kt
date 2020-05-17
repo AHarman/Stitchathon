@@ -1,11 +1,11 @@
-package com.alexharman.stitchathon
+package com.alexharman.stitchathon.pattern.scroller
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Rect
 
 // TODO: Add scaling, currently only works for scale = 1
-class ScrollerDrawer(width: Int, height: Int, private val drawer: IAreaDrawer) {
+class ScrollerDrawer(width: Int, height: Int, private val drawer: AreaDrawer) {
     var currentBitmap: Bitmap
         private set
     private var bufferBitmap: Bitmap

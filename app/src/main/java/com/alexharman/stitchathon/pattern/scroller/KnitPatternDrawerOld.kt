@@ -1,4 +1,4 @@
-//package com.alexharman.stitchathon
+package com.alexharman.stitchathon.pattern.scroller//package com.alexharman.stitchathon
 //
 //import android.content.SharedPreferences
 //import android.graphics.*

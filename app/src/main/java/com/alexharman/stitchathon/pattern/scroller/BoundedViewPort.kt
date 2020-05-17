@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon
+package com.alexharman.stitchathon.pattern.scroller
 
 import android.graphics.Rect
 

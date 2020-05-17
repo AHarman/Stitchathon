@@ -15,6 +15,9 @@ import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.pattern.KnitPatternFragment
+import com.alexharman.stitchathon.pattern.PatternContract
+import com.alexharman.stitchathon.pattern.PatternPresenter
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import com.alexharman.stitchathon.repository.KnitPatternRepository
 
@@ -26,6 +29,7 @@ class MainActivity :
 
     companion object {
         lateinit var repository: KnitPatternRepository
+        // TODO: Rename request codes
         const val READ_EXTERNAL_IMAGE = 42
         const val READ_EXTERNAL_JSON_PATTERN = 55
         const val KNIT_PATTERN_FRAGMENT = "KnitPatternFragment"
@@ -140,23 +144,27 @@ class MainActivity :
     public override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
         super.onActivityResult(requestCode, resultCode, resultData)
         if (requestCode == READ_EXTERNAL_JSON_PATTERN && resultCode == Activity.RESULT_OK) {
-            if (resultData != null) {
-                importJson(resultData.data)
+            val data = resultData?.data
+            if (data != null) {
+                importJson(data)
             }
         }
         if (requestCode == READ_EXTERNAL_IMAGE && resultCode == Activity.RESULT_OK) {
-            if (resultData != null && resultData.data != null) {
-                importImageDialog!!.setUri(resultData.data!!)
+            val data = resultData?.data
+            if (resultData != null && data != null) {
+                importImageDialog!!.setUri(data)
             }
         }
     }
 
+    // TODO: This should be in presenter or something
     fun deletePatterns(vararg patternNames: String) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         repository.deleteKnitPatterns(*patternNames)
 
         if (prefs.getString(PreferenceKeys.CURRENT_PATTERN_NAME, "") in patternNames) {
-            knitPatternFragment.clearKnitPattern()
+            // TODO: Something with this
+            knitPatternFragment.setPattern(null)
             prefs
                     .edit()
                     .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
@@ -170,7 +178,7 @@ class MainActivity :
                 .edit()
                 .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
                 .apply()
-        knitPatternFragment.clearKnitPattern()
+        knitPatternFragment.setPattern(null)
     }
 
     override fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, oddRowsOpposite: Boolean, numColours: Int) {
@@ -180,8 +188,7 @@ class MainActivity :
 
     override fun onKnitPatternOpened(pattern: KnitPattern) {
         returnToKnitPatternFragment()
-        knitPatternFragment.setKnitPattern(pattern)
-
+        PatternPresenter(knitPatternFragment, pattern).start()
         PreferenceManager.getDefaultSharedPreferences(this).edit()
                 .putString(PreferenceKeys.CURRENT_PATTERN_NAME, pattern.name)
                 .apply()
