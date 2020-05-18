@@ -15,11 +15,12 @@ import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.importimage.ImportImageDialog
 import com.alexharman.stitchathon.pattern.KnitPatternFragment
-import com.alexharman.stitchathon.pattern.PatternContract
 import com.alexharman.stitchathon.pattern.PatternPresenter
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import com.alexharman.stitchathon.repository.KnitPatternRepository
+import com.alexharman.stitchathon.selectpattern.OpenPatternFragment
 
 class MainActivity :
         AppCompatActivity(),

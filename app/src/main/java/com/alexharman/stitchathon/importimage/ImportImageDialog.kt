@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon
+package com.alexharman.stitchathon.importimage
 
 import android.app.Dialog
 import android.content.Context
@@ -13,7 +13,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.NumberPicker
 import android.widget.RadioGroup
+import com.alexharman.stitchathon.MainActivity
 import com.alexharman.stitchathon.MainActivity.Companion.READ_EXTERNAL_IMAGE
+import com.alexharman.stitchathon.R
 
 /**
  * Created by Alex on 08/01/2018.

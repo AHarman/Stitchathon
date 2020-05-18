@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon
+package com.alexharman.stitchathon.selectpattern
 
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -11,6 +11,8 @@ import android.support.v7.widget.Toolbar
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
+import com.alexharman.stitchathon.MainActivity
+import com.alexharman.stitchathon.R
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import com.alexharman.stitchathon.repository.KnitPatternRepository
 

@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon.pattern.scroller
+package com.alexharman.stitchathon.pattern.drawer
 
 import android.content.SharedPreferences
 import android.graphics.*
@@ -14,8 +14,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
     private val stitchPad: Int
 
     private var stitchDrawers: HashMap<Stitch, Drawer>
+    private val doneOverlayDrawer: DoneOverlayDrawer
     private val clearPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
-    private val doneOverlayPaint: Paint
 
     override val overallHeight: Int
     override val overallWidth: Int
@@ -32,11 +32,15 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         overallHeight = (knitPattern.stitches.size * (stitchSize + stitchPad) + stitchPad)
         overallWidth = (knitPattern.patternWidth * (stitchSize + stitchPad) + stitchPad)
 
-        stitchDrawers = createStitchDrawers(knitPattern.stitchTypes, colours)
-        doneOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        doneOverlayPaint.style = Paint.Style.FILL
-        doneOverlayPaint.colorFilter = LightingColorFilter(0x00FFFFFF, 0x00888888)
+        val doneOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.FILL
+            color = 0x88FFFFFF.toInt()
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP)
+        }
         translationPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC) }
+
+        doneOverlayDrawer = DoneOverlayDrawer(stitchSize, doneOverlayPaint)
+        stitchDrawers = createStitchDrawers(knitPattern.stitchTypes, colours)
     }
 
     private fun createStitchDrawers(stitches: Collection<Stitch>, colours: IntArray): HashMap<Stitch, Drawer> {
@@ -78,8 +82,11 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
             canvas.save()
 
             for (col in firstCol..lastCol) {
-                val isDone = knitPattern.isStitchDone(row, col)
                 stitchDrawers[knitPattern.stitches[row][col]]?.draw(canvas)
+                if(knitPattern.isStitchDone(row, col))
+                {
+                    doneOverlayDrawer.draw(canvas)
+                }
                 canvas.translate(stitchSize + stitchPad, 0)
             }
             canvas.restore()

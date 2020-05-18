@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon
+package com.alexharman.stitchathon.importimage
 
 import android.graphics.Bitmap
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
@@ -123,7 +123,7 @@ class ImageReader {
         return rDist*rDist + gDist*gDist + bDist*bDist
     }
 
-    private fun colourDistance(c1: Colour, c2:Colour): Double =
+    private fun colourDistance(c1: Colour, c2: Colour): Double =
             sqrt(sqColourDistance(c1, c2).toDouble())
 
     private data class Colour(val r: Int, val g: Int, val b: Int) {

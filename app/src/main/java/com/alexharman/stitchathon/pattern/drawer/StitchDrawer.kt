@@ -1,7 +1,8 @@
-package com.alexharman.stitchathon.pattern.scroller
+package com.alexharman.stitchathon.pattern.drawer
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import com.alexharman.stitchathon.pattern.drawer.Drawer
 
 class StitchDrawer(colour: Int, private val size: Int): Drawer {
 

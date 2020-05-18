@@ -11,8 +11,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.alexharman.stitchathon.*
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
-import com.alexharman.stitchathon.pattern.scroller.KnitPatternDrawer
-import com.alexharman.stitchathon.pattern.scroller.KnitPatternView
 import com.alexharman.stitchathon.repository.database.AppDatabase
 
 class KnitPatternFragment : Fragment(),
@@ -155,9 +153,7 @@ class KnitPatternFragment : Fragment(),
 
     private inner class KnitPatternViewGestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-//            knitPatternDrawer?.increment()
-//            updateStitchCounter()
-            knitPatternView.scroll(60.0f, 60.0f)
+            presenter.increment()
             return true
         }
 
@@ -177,13 +173,7 @@ class KnitPatternFragment : Fragment(),
         }
 
         override fun onLongPress(e: MotionEvent?) {
-            // TODO: Add vibrate
-//            knitPatternDrawer?.incrementBlock()
-//            updateStitchCounter()
-//            knitPatternView.invalidate()
-
-            knitPatternView.scroll(-60.0f, -60.0f)
-            knitPatternView.invalidate()
+            presenter.incrementBlock()
         }
     }
 }

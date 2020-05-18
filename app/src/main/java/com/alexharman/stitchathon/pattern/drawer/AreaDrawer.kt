@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon.pattern.scroller
+package com.alexharman.stitchathon.pattern.drawer
 
 import android.graphics.Canvas
 import android.graphics.Paint

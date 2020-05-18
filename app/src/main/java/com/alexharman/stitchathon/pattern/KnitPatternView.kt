@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon.pattern.scroller
+package com.alexharman.stitchathon.pattern
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -9,6 +9,8 @@ import android.util.AttributeSet
 import android.view.View
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.PreferenceKeys
+import com.alexharman.stitchathon.pattern.drawer.KnitPatternDrawer
+import com.alexharman.stitchathon.pattern.scroller.ScrollerDrawer
 
 class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
@@ -54,9 +56,10 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val patternBitmap = patternScroller?.currentBitmap ?: return
+        val scroller = patternScroller ?: return
+        scroller.draw()
         canvas.drawColor(backgroundColor)
-        canvas.drawBitmap(patternBitmap, 0f, 0f, bitmapToDrawPaint)
+        canvas.drawBitmap(scroller.currentBitmap, 0f, 0f, bitmapToDrawPaint)
     }
 
     // TODO: Check why do we need to do this
