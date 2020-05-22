@@ -4,7 +4,6 @@ import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import java.util.*
 
-// TODO: Create shared preferences repo that uses shared preferences, pass in repo here.
 class PatternPresenter(override var view: PatternContract.View, private val repository: KnitPatternDataSource):
         PatternContract.Presenter,
         KnitPatternDataSource.OpenPatternListener,
@@ -115,9 +114,8 @@ class PatternPresenter(override var view: PatternContract.View, private val repo
     }
 
     private fun openCurrentPattern() {
+        val patternName =  repository.getCurrentPatternName() ?: return
         view.showLoadingBar()
-
-        val patternName = repository.getCurrentPatternName() ?: return
         repository.openKnitPattern(patternName, this)
     }
 }
