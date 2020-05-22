@@ -1,25 +1,48 @@
 package com.alexharman.stitchathon.pattern
 
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import java.util.*
 
 // TODO: Create shared preferences repo that uses shared preferences, pass in repo here.
-class PatternPresenter(private val view: PatternContract.View, knitPattern: KnitPattern): PatternContract.Presenter {
+class PatternPresenter(override var view: PatternContract.View, private val repository: KnitPatternDataSource):
+        PatternContract.Presenter,
+        KnitPatternDataSource.OpenPatternListener,
+        KnitPatternDataSource.CurrentPatternListener {
 
-    var pattern: KnitPattern = knitPattern
-        set(value) {
-            field = value;
-            view.setPattern(value)
-        }
-
+    private var pattern: KnitPattern? = null
     private val undoStack = Stack<Int>()
 
     init {
         view.presenter = this
     }
 
-    override fun start() {
+    override fun resume() {
+        if (pattern == null || repository.getCurrentPatternName() !== pattern?.name) {
+            openCurrentPattern()
+        }
+        repository.registerCurrentPatternListener(this)
+    }
+
+    override fun pause() {
+        repository.deregisterCurrentPatternListener(this)
+        savePattern()
+    }
+
+    override fun onKnitPatternOpened(pattern: KnitPattern) {
+        this.pattern = pattern
         view.setPattern(pattern)
+        view.dismissLoadingBar()
+    }
+
+    override fun onOpenKnitPatternFail() {
+        pattern = null
+        view.setPattern(null)
+        view.dismissLoadingBar()
+    }
+
+    override fun onCurrentPatternChanged(patternName: String) {
+        openCurrentPattern()
     }
 
     override fun increment() {
@@ -28,11 +51,12 @@ class PatternPresenter(private val view: PatternContract.View, knitPattern: Knit
 
     private fun increment(numStitches: Int) {
         undoStack.push(numStitches)
-        pattern.increment(numStitches)
+        pattern?.increment(numStitches)
         view.patternUpdated()
     }
 
     override fun incrementBlock() {
+        val pattern = pattern ?: return
         val stitchType = pattern.stitches[pattern.currentRow][pattern.nextStitchInRow].type
         val currentRow = pattern.stitches[pattern.currentRow]
         var stitchesToDo = 0
@@ -44,10 +68,12 @@ class PatternPresenter(private val view: PatternContract.View, knitPattern: Knit
     }
 
     override fun incrementRow() {
+        val pattern = pattern ?: return
         increment(pattern.stitchesLeftInRow)
     }
 
     override fun goTo(row: Int, col: Int) {
+        val pattern = pattern ?: return
         while (row > pattern.currentRow) {
             increment(pattern.stitchesLeftInRow)
         }
@@ -64,6 +90,7 @@ class PatternPresenter(private val view: PatternContract.View, knitPattern: Knit
     }
 
     override fun undo() {
+        val pattern = pattern ?: return
         if (undoStack.size == 0) {
             undoRow()
         } else {
@@ -75,9 +102,22 @@ class PatternPresenter(private val view: PatternContract.View, knitPattern: Knit
     }
 
     private fun undoRow() {
+        val pattern = pattern ?: return
         do {
             // TODO: This method should just be increment(-1) on KnitPattern
             pattern.undoStitch()
         } while (!pattern.isStartOfRow)
+    }
+
+    private fun savePattern() {
+        val pattern = this.pattern ?: return
+        repository.saveKnitPatternChanges(pattern)
+    }
+
+    private fun openCurrentPattern() {
+        view.showLoadingBar()
+
+        val patternName = repository.getCurrentPatternName() ?: return
+        repository.openKnitPattern(patternName, this)
     }
 }

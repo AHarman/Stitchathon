@@ -11,33 +11,25 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.alexharman.stitchathon.*
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
-import com.alexharman.stitchathon.repository.database.AppDatabase
+import com.alexharman.stitchathon.loading.ProgressbarDialog
+import com.alexharman.stitchathon.repository.PreferenceKeys
 
-class KnitPatternFragment : Fragment(),
+class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContract.Presenter>(),
         PatternContract.View {
 
+    override val view = this
+    override lateinit var presenter: PatternContract.Presenter
     private var patternThumbnailView: ImageView? = null
     private var patternNameView: TextView? = null
     private var toolbar: Toolbar? = null
+    private var progressbarDialog: ProgressbarDialog? = null
     private lateinit var stitchCount: TextView
     private lateinit var rowCount: TextView
     private lateinit var completeCount: TextView
     private lateinit var knitPatternView: KnitPatternView
     private lateinit var knitPatternViewGestureDetector: GestureDetectorCompat
-    private lateinit var db: AppDatabase
 
-    override lateinit var presenter: PatternContract.Presenter
     private var pattern: KnitPattern? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val patternName = sharedPreferences.getString(PreferenceKeys.CURRENT_PATTERN_NAME, null)
-        if (patternName != null) {
-            (activity as MainActivity).openPattern(patternName)
-        }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_knitpattern, container, false)
@@ -66,12 +58,11 @@ class KnitPatternFragment : Fragment(),
         patternThumbnailView = activity.findViewById(R.id.nav_drawer_image)
         toolbar = activity.findViewById(R.id.toolbar)
         toolbar?.title = pattern?.name ?: getString(R.string.title_activity_main)
-        db = AppDatabase.getAppDatabase(activity)
     }
 
     override fun onPause() {
         super.onPause()
-        savePattern()
+        presenter.pause()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -110,6 +101,18 @@ class KnitPatternFragment : Fragment(),
         toolbar?.title = pattern?.name ?: getString(R.string.title_activity_main)
     }
 
+    override fun showLoadingBar() {
+        if (progressbarDialog == null) {
+            progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_load_title), getString(R.string.progress_bar_loading_pattern))
+            progressbarDialog?.show(fragmentManager, "Progress dialog")
+        }
+    }
+
+    override fun dismissLoadingBar() {
+        progressbarDialog?.dismiss()
+        progressbarDialog = null
+    }
+
     private fun lockButtonPressed(lockButton: MenuItem) {
         lockButton.isChecked = !lockButton.isChecked
         lockButton.icon = context?.getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp)
@@ -146,11 +149,6 @@ class KnitPatternFragment : Fragment(),
         completeCount.text = getString(R.string.complete_counter, percentage)
     }
 
-    private fun savePattern() {
-        val pattern = pattern ?: return
-        MainActivity.repository.saveKnitPatternChanges(pattern)
-    }
-
     private inner class KnitPatternViewGestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             presenter.increment()
@@ -176,4 +174,6 @@ class KnitPatternFragment : Fragment(),
             presenter.incrementBlock()
         }
     }
+
+
 }

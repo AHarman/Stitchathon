@@ -9,9 +9,13 @@ interface PatternContract {
         fun patternUpdated()
 
         fun setPattern(pattern: KnitPattern?)
+
+        fun showLoadingBar()
+
+        fun dismissLoadingBar()
     }
 
-    interface Presenter: BasePresenter {
+    interface Presenter: BasePresenter<View> {
         fun increment()
 
         fun incrementRow()

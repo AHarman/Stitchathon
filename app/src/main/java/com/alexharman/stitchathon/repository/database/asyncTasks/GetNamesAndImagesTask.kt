@@ -7,7 +7,7 @@ import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference
 
-class GetNamesAndImagesTask(context: Context, callback: KnitPatternDataSource.GetPatternInfoCallback) : AsyncTask<Void, Void, Array<Pair<String, Bitmap?>>>() {
+class GetNamesAndImagesTask(context: Context, callback: KnitPatternDataSource.GetPatternInfoListener) : AsyncTask<Void, Void, Array<Pair<String, Bitmap?>>>() {
     private val context = WeakReference(context)
     private val callback = WeakReference(callback)
 

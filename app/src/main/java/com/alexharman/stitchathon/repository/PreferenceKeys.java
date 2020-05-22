@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon;
+package com.alexharman.stitchathon.repository;
 
 public final class PreferenceKeys {
     public static final String STITCH_SIZE = "stitch_size";

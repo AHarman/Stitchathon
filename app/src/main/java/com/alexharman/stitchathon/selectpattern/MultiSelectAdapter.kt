@@ -83,12 +83,6 @@ abstract class MultiSelectAdapter<D>(private var dataset: MutableList<D>, privat
         }
     }
 
-    fun removeSelectedItems() {
-        selected.forEach { dataset.remove(it) }
-        selected.clear()
-        notifyDataSetChanged()
-    }
-
     fun setDataset(dataset: MutableList<D>) {
         this.dataset = dataset
         notifyDataSetChanged()

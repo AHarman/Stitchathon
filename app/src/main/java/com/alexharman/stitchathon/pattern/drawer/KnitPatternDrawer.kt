@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import android.graphics.*
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
-import com.alexharman.stitchathon.PreferenceKeys
+import com.alexharman.stitchathon.repository.PreferenceKeys
 import kotlin.collections.HashMap
 import kotlin.math.min
 

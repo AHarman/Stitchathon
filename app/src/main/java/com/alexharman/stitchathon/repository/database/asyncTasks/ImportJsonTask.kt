@@ -9,7 +9,7 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 
-internal class ImportJsonTask(context: Context, callback: KnitPatternDataSource.OpenKnitPatternCallback?) : ImportPatternTask<Uri>(context, callback) {
+internal class ImportJsonTask(context: Context, callback: KnitPatternDataSource.OpenPatternListener?) : ImportPatternTask<Uri>(context, callback) {
 
     override fun doInBackground(vararg uris: Uri): KnitPattern? {
         var knitPattern: KnitPattern? = null

@@ -7,27 +7,39 @@ import com.alexharman.stitchathon.KnitPackage.KnitPattern
 interface KnitPatternDataSource {
 
     // Currently only using this to get thumbnails and names, but might expand to more info
-    interface GetPatternInfoCallback {
+    interface GetPatternInfoListener {
 
         fun onPatternInfoReturn(result: Array<Pair<String, Bitmap?>>)
 
         fun onGetKnitPatternInfoFail()
     }
 
-    interface OpenKnitPatternCallback {
-
+    interface OpenPatternListener {
         fun onKnitPatternOpened(pattern: KnitPattern)
 
         fun onOpenKnitPatternFail()
     }
 
-    fun openKnitPattern(patternName: String, callback: OpenKnitPatternCallback)
+    interface CurrentPatternListener {
+        fun onCurrentPatternChanged(patternName: String)
+    }
 
-    fun getKnitPatternNames(callback: GetPatternInfoCallback)
+    fun registerCurrentPatternListener(listener: CurrentPatternListener)
+
+    fun deregisterCurrentPatternListener(listener: CurrentPatternListener)
+
+    fun setCurrentKnitPattern(patternName: String)
+
+    fun openKnitPattern(patternName: String, listener: OpenPatternListener?)
+
+    fun getKnitPatternNames(callback: GetPatternInfoListener)
+
+    fun getCurrentPatternName(): String?
 
     fun saveKnitPatternChanges(pattern: KnitPattern)
 
-    fun importNewJsonPattern(uri: Uri, callback: KnitPatternDataSource.OpenKnitPatternCallback?)
+    // TODO: Move this to a service or something
+    fun importNewJsonPattern(uri: Uri, callback: OpenPatternListener?)
 
     fun importNewBitmapPattern(uri: Uri,
                                name: String,
@@ -35,7 +47,7 @@ interface KnitPatternDataSource {
                                height: Int,
                                oddRowsOpposite: Boolean,
                                numColours: Int,
-                               callback: KnitPatternDataSource.OpenKnitPatternCallback?)
+                               listener: OpenPatternListener?)
 
     fun deleteAllKnitPatterns()
 

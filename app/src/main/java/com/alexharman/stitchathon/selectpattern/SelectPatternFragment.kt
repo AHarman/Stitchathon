@@ -1,8 +1,8 @@
 package com.alexharman.stitchathon.selectpattern
 
+import SelectPatternContract
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.GridLayoutManager
@@ -11,23 +11,26 @@ import android.support.v7.widget.Toolbar
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
-import com.alexharman.stitchathon.MainActivity
+import com.alexharman.stitchathon.BaseFragmentView
 import com.alexharman.stitchathon.R
-import com.alexharman.stitchathon.repository.KnitPatternDataSource
-import com.alexharman.stitchathon.repository.KnitPatternRepository
 
-class OpenPatternFragment : Fragment(),
-        KnitPatternDataSource.GetPatternInfoCallback,
+// TODO: See if we can get a MutliSelectAdapter presenter/contract?
+class SelectPatternFragment : BaseFragmentView<SelectPatternContract.View, SelectPatternContract.Presenter>(),
+        SelectPatternContract.View,
         ActionMode.Callback,
         MultiSelectAdapter.MultiSelectListener<Pair<String, Bitmap?>> {
 
+    override val view: SelectPatternFragment = this
     private lateinit var recyclerView: RecyclerView
     private var patterns = mutableListOf<Pair<String, Bitmap?>>()
     private var viewAdapter = MyAdapter(patterns, this)
     private lateinit var viewManager: RecyclerView.LayoutManager
-    private var actionMode: android.support.v7.view.ActionMode? = null
+    private var actionMode: ActionMode? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+    override lateinit var presenter: SelectPatternContract.Presenter
+
+    override fun onCreateView(inflater: LayoutInflater,
+                              container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_open_pattern, container, false)
     }
@@ -40,35 +43,33 @@ class OpenPatternFragment : Fragment(),
         recyclerView.adapter = viewAdapter
     }
 
-    override fun onPatternInfoReturn(result: Array<Pair<String, Bitmap?>>) {
-        viewAdapter.setDataset(result.toMutableList())
-        viewAdapter.notifyDataSetChanged()
-    }
-
-    override fun onGetKnitPatternInfoFail() {
-        // Do nothing I suppose?
-    }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         val toolbar = activity?.findViewById<Toolbar>(R.id.toolbar)
         toolbar?.title = getString(R.string.open_pattern_title)
-        KnitPatternRepository.getInstance(context ?: return).getKnitPatternNames(this)
+    }
+
+    override fun setAvailablePatterns(patterns: Array<Pair<String, Bitmap?>>) {
+        viewAdapter.setDataset(patterns.toMutableList())
+        viewAdapter.notifyDataSetChanged()
+    }
+
+    override fun removePatterns(patterns: Array<Pair<String, Bitmap?>>) {
+        patterns.forEach {  viewAdapter.removeItem(it) }
+        viewAdapter.notifyDataSetChanged()
     }
 
     override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        this.actionMode = mode
         mode?.menuInflater?.inflate(R.menu.delete_button, menu)
         mode?.setTitle(R.string.delete_patterns)
         return true
     }
 
-    override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        return false
-    }
+    override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?) = false
 
     override fun onDestroyActionMode(mode: ActionMode?) {
         viewAdapter.deselectAll()
+        actionMode = null
     }
 
     override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
@@ -80,7 +81,7 @@ class OpenPatternFragment : Fragment(),
     }
 
     override fun onSelectionStart() {
-        (activity as AppCompatActivity).startSupportActionMode(this)
+        actionMode = (activity as AppCompatActivity).startSupportActionMode(this)
     }
 
     override fun onSelectionEnd() {
@@ -88,14 +89,13 @@ class OpenPatternFragment : Fragment(),
     }
 
     override fun onSingleItemSelected(item: Pair<String, Bitmap?>) {
-        (activity as MainActivity?)?.openPattern(item.first)
+        presenter.selectPattern(item.first)
         activity?.supportFragmentManager?.popBackStack()
     }
 
     private fun deleteSelectedPatterns() {
         val patterns = viewAdapter.getSelectedItems().map { it.first }.toTypedArray()
-        (activity as MainActivity?)?.deletePatterns(*patterns)
-        viewAdapter.removeSelectedItems()
+        presenter.deletePatterns(patterns)
     }
 
     inner class MyAdapter(dataset: MutableList<Pair<String, Bitmap?>>, listener: MultiSelectListener<Pair<String, Bitmap?>>) :
@@ -129,4 +129,5 @@ class OpenPatternFragment : Fragment(),
             thumbnailView.setImageBitmap(data.second)
         }
     }
+
 }

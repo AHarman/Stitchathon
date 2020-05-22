@@ -9,7 +9,7 @@ import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
 
 internal class ImportImageTask(context: Context,
-                               callback: KnitPatternDataSource.OpenKnitPatternCallback?,
+                               callback: KnitPatternDataSource.OpenPatternListener?,
                                private val imageUri: Uri,
                                private val patternName: String,
                                private val width: Int,

@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon;
+package com.alexharman.stitchathon.loading;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -9,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.alexharman.stitchathon.R;
 
 /**
  * Created by Alex on 30/12/2017.

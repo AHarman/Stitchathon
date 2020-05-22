@@ -14,10 +14,10 @@ import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference
 import kotlin.math.min
 
-internal abstract class ImportPatternTask<V> internal constructor(context: Context, callback: KnitPatternDataSource.OpenKnitPatternCallback?)
+internal abstract class ImportPatternTask<V> internal constructor(context: Context, callback: KnitPatternDataSource.OpenPatternListener?)
     : AsyncTask<V, String, KnitPattern>() {
     protected var context: WeakReference<Context> = WeakReference(context)
-    private var callback: WeakReference<KnitPatternDataSource.OpenKnitPatternCallback?> = WeakReference(callback)
+    private var callback: WeakReference<KnitPatternDataSource.OpenPatternListener?> = WeakReference(callback)
 
     internal fun saveNewPattern(knitPattern: KnitPattern) {
         val context = context.get() ?: return

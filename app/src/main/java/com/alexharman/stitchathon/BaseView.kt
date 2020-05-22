@@ -1,5 +1,5 @@
 package com.alexharman.stitchathon
 
-interface BaseView<T> {
-    var presenter: T
+interface BaseView<P> {
+    var presenter: P
 }

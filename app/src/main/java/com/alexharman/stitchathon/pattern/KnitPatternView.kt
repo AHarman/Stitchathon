@@ -8,7 +8,7 @@ import android.preference.PreferenceManager
 import android.util.AttributeSet
 import android.view.View
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
-import com.alexharman.stitchathon.PreferenceKeys
+import com.alexharman.stitchathon.repository.PreferenceKeys
 import com.alexharman.stitchathon.pattern.drawer.KnitPatternDrawer
 import com.alexharman.stitchathon.pattern.scroller.ScrollerDrawer
 

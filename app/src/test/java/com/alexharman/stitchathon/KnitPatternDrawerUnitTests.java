@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.support.v7.preference.PreferenceManager;
 
 import com.alexharman.stitchathon.KnitPackage.KnitPattern;
+import com.alexharman.stitchathon.repository.PreferenceKeys;
 
 import org.junit.Before;
 import org.junit.runner.RunWith;
