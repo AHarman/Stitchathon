@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.importimage.ImportImageDialog
+import com.alexharman.stitchathon.importimage.ImportImagePresenter
 import com.alexharman.stitchathon.loading.ProgressbarDialog
 import com.alexharman.stitchathon.pattern.KnitPatternFragment
 import com.alexharman.stitchathon.pattern.PatternPresenter
@@ -27,15 +28,12 @@ import com.alexharman.stitchathon.selectpattern.SelectPatternPresenter
 
 class MainActivity :
         AppCompatActivity(),
-        KnitPatternDataSource.OpenPatternListener,
-        NavigationView.OnNavigationItemSelectedListener,
-        ImportImageDialog.ImportImageDialogListener {
+        KnitPatternDataSource.ImportPatternListener,
+        NavigationView.OnNavigationItemSelectedListener {
 
     companion object {
         lateinit var repository: KnitPatternRepository
         // TODO: Rename request codes
-        const val READ_EXTERNAL_IMAGE = 42
-        const val READ_EXTERNAL_JSON_PATTERN = 55
         const val KNIT_PATTERN_FRAGMENT = "KnitPatternFragment"
         const val OPEN_PATTERN_FRAGMENT = "OpenPatternFragment"
         const val SETTINGS_FRAGMENT = "SettingsFragment"
@@ -79,7 +77,7 @@ class MainActivity :
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_open -> startSelectPatternFragment()
-            R.id.nav_import_pattern -> selectExternalFile("application/json", READ_EXTERNAL_JSON_PATTERN)
+            R.id.nav_import_pattern -> selectExternalFile("application/json", RequestCodes.READ_EXTERNAL_JSON_PATTERN.value)
             R.id.nav_import_image -> importImage()
             R.id.nav_about_app -> AppInfoDialog().show(supportFragmentManager, "App info")
             R.id.nav_settings -> popToOrStartFragment(supportFragmentManager.findFragmentByTag(SETTINGS_FRAGMENT) ?: SettingsFragment(), SETTINGS_FRAGMENT)
@@ -128,32 +126,34 @@ class MainActivity :
         val fragment =
                 supportFragmentManager.findFragmentByTag(OPEN_PATTERN_FRAGMENT) as? SelectPatternFragment ?:
                 SelectPatternFragment()
-        fragment.presenter = SelectPatternPresenter(fragment, repository)
+        SelectPatternPresenter(fragment, repository)
         popToOrStartFragment(fragment, OPEN_PATTERN_FRAGMENT)
     }
 
     private fun importImage() {
-        importImageDialog = ImportImageDialog()
-        importImageDialog?.show(supportFragmentManager, "Importing image")
+        val dialog = ImportImageDialog()
+        ImportImagePresenter(dialog, repository)
+        dialog.show(supportFragmentManager, "Importing image")
+        importImageDialog = dialog
     }
 
     private fun importJson(uri: Uri) {
 //        showProgressBar(getString(R.string.progress_dialog_import_title), getString(R.string.progress_bar_importing_pattern))
-        repository.importNewJsonPattern(uri, this)
+        repository.importNewJsonPattern(uri.toString(), this)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
         super.onActivityResult(requestCode, resultCode, resultData)
-        if (requestCode == READ_EXTERNAL_JSON_PATTERN && resultCode == Activity.RESULT_OK) {
+        if (requestCode == RequestCodes.READ_EXTERNAL_JSON_PATTERN.value && resultCode == Activity.RESULT_OK) {
             val data = resultData?.data
             if (data != null) {
                 importJson(data)
             }
         }
-        if (requestCode == READ_EXTERNAL_IMAGE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == RequestCodes.READ_EXTERNAL_IMAGE.value && resultCode == Activity.RESULT_OK) {
             val data = resultData?.data
             if (resultData != null && data != null) {
-                importImageDialog!!.setUri(data)
+                importImageDialog?.setFilenameViewText(data)
             }
         }
     }
@@ -167,18 +167,13 @@ class MainActivity :
         knitPatternFragment.setPattern(null)
     }
 
-    override fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, oddRowsOpposite: Boolean, numColours: Int) {
-//        showProgressBar(getString(R.string.progress_dialog_import_title), getString(R.string.progress_bar_importing_pattern))
-        repository.importNewBitmapPattern(imageUri, name, width, height, oddRowsOpposite, numColours, this)
-    }
-
-    override fun onKnitPatternOpened(pattern: KnitPattern) {
+    override fun onPatternImport(pattern: KnitPattern) {
         returnToKnitPatternFragment()
         progressbarDialog?.dismiss()
         progressbarDialog = null
     }
 
-    override fun onOpenKnitPatternFail() {
-        // TODO: Error message or retry
+    override fun onPatternImportFail() {
+        TODO("Not yet implemented")
     }
 }

@@ -14,7 +14,7 @@ import kotlin.math.sqrt
  *
  * Colour quantizing is meant for jpeg artifacting and similar, this slows to a crawl on > 250 colours
  */
-
+// TODO: Split out android-specific stuff and just operate on a 2D array of pixel values
 class ImageReader {
     fun readImage(bitmap: Bitmap, name: String, stitchesWide: Int, stitchesHigh: Int, oddRowsOpposite: Boolean, numColours: Int): KnitPattern {
         val sampledBitmap: Bitmap = Bitmap.createScaledBitmap(bitmap, stitchesWide, stitchesHigh, false)

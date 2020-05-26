@@ -6,40 +6,27 @@ import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
-import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.NumberPicker
 import android.widget.RadioGroup
+import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.MainActivity
-import com.alexharman.stitchathon.MainActivity.Companion.READ_EXTERNAL_IMAGE
 import com.alexharman.stitchathon.R
+import com.alexharman.stitchathon.RequestCodes
+import com.alexharman.stitchathon.loading.ProgressbarDialog
 
-/**
- * Created by Alex on 08/01/2018.
- */
+class ImportImageDialog: BaseDialogFragmentView<ImportImageContract.View, ImportImageContract.Presenter>(),
+       ImportImageContract.View {
 
-class ImportImageDialog: DialogFragment() {
+    override val view = this
+    override lateinit var presenter: ImportImageContract.Presenter
+    // TODO: Do we need this as a property? Can we just do this.findViewById?
     private lateinit var dialogView: View
-    private var imageUri: Uri? = null
-
-    interface ImportImageDialogListener {
-        fun onImportImageDialogOK(imageUri: Uri, name: String, width: Int, height: Int, oddRowsOpposite: Boolean, numColours: Int)
-    }
-
-    // Use this instance of the interface to deliver action events
-    private lateinit var listener: ImportImageDialogListener
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        try {
-            listener = (parentFragment ?: activity) as ImportImageDialogListener
-        } catch (e: ClassCastException) {
-            throw ClassCastException(activity.toString() + " must implement ImportImageDialogListener")
-        }
-    }
+    private var progressbarDialog: ProgressbarDialog? = null
+    private var imageUri: String? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog: AlertDialog
@@ -55,7 +42,8 @@ class ImportImageDialog: DialogFragment() {
 
         dialogView.findViewById<EditText>(R.id.stitches_wide_edittext).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v as EditText, hf) })
         dialogView.findViewById<EditText>(R.id.stitches_high_edittext).setOnFocusChangeListener({ v, hf -> emptyTextCheck(v as EditText, hf) })
-        dialogView.findViewById<Button>(R.id.import_image_browse_button).setOnClickListener( { (activity as MainActivity).selectExternalFile("image/*", READ_EXTERNAL_IMAGE)})
+        // TODO: Implement router, which can register the recipients for different codes. Then we can call StartActivtiyForResult directly from here (or via the navigator!).
+        dialogView.findViewById<Button>(R.id.import_image_browse_button).setOnClickListener( { (activity as MainActivity).selectExternalFile("image/*", RequestCodes.READ_EXTERNAL_IMAGE.value)})
 
         builder.setView(dialogView)
         builder.setCancelable(false)
@@ -67,6 +55,23 @@ class ImportImageDialog: DialogFragment() {
         dialog.setOnShowListener { d: DialogInterface ->  (d as AlertDialog).getButton(Dialog.BUTTON_POSITIVE).setOnClickListener {  returnValues(d) } }
 
         return dialog
+    }
+
+    // TODO: Split out show/dismissLoadingBar into a different interface to share with KnitPatternFragment?
+    override fun showLoadingBar() {
+        if (progressbarDialog == null) {
+            progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_load_title), getString(R.string.progress_bar_loading_pattern))
+            progressbarDialog?.show(fragmentManager, "Progress dialog")
+        }
+    }
+
+    override fun dismissLoadingBar() {
+        progressbarDialog?.dismiss()
+        progressbarDialog = null
+    }
+
+    override fun patternImported(pattern: KnitPattern) {
+        dismiss()
     }
 
     private fun emptyTextCheck(v: EditText, hasFocus: Boolean) {
@@ -102,8 +107,8 @@ class ImportImageDialog: DialogFragment() {
         }
         if (formNotFull) return
         if (imageUri == null) return
+        presenter.importImage(imageUri!!, name, width!!, height!!, oddRowsOpposite, numColours)
         dialog.dismiss()
-        listener.onImportImageDialogOK(imageUri!!, name, width!!, height!!, oddRowsOpposite, numColours)
     }
 
     private fun getFileDisplayName(uri: Uri): String {
@@ -119,8 +124,8 @@ class ImportImageDialog: DialogFragment() {
         return fileName
     }
 
-    fun setUri(uri: Uri) {
-        imageUri = uri
+    fun setFilenameViewText(uri: Uri) {
+        imageUri = uri.toString()
         val fileName = getFileDisplayName(uri)
         if (fileName == "") return
 

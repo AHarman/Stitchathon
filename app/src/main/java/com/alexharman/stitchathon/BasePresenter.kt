@@ -3,7 +3,11 @@ package com.alexharman.stitchathon
 interface BasePresenter<V> {
     var view: V
 
-    fun resume() {}
+    fun resume() {
+        // Empty default method in case functionality is not required
+    }
 
-    fun pause() {}
+    fun pause() {
+        // Empty default method in case functionality is not required
+    }
 }

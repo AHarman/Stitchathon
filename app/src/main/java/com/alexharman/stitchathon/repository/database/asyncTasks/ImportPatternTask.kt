@@ -14,17 +14,19 @@ import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference
 import kotlin.math.min
 
-internal abstract class ImportPatternTask<V> internal constructor(context: Context, callback: KnitPatternDataSource.OpenPatternListener?)
+internal abstract class ImportPatternTask<V> internal constructor(context: Context, listener: KnitPatternDataSource.ImportPatternListener?)
     : AsyncTask<V, String, KnitPattern>() {
     protected var context: WeakReference<Context> = WeakReference(context)
-    private var callback: WeakReference<KnitPatternDataSource.OpenPatternListener?> = WeakReference(callback)
+    private var callback: WeakReference<KnitPatternDataSource.ImportPatternListener?> = WeakReference(listener)
 
+    // TODO: Move to repo.
     internal fun saveNewPattern(knitPattern: KnitPattern) {
         val context = context.get() ?: return
         val thumbnail = createPatternThumbnail(knitPattern, context)
         AppDatabase.getAppDatabase(context).knitPatternDao().saveNewPattern(knitPattern, thumbnail, context)
     }
 
+    // TODO: Move elsewhere
     private fun createPatternThumbnail(knitPattern: KnitPattern, context: Context): Bitmap {
         val drawer = KnitPatternDrawer(knitPattern, PreferenceManager.getDefaultSharedPreferences(context))
         val bitmap = Bitmap.createBitmap(drawer.overallWidth, drawer.overallHeight, Bitmap.Config.ARGB_8888)
@@ -43,9 +45,9 @@ internal abstract class ImportPatternTask<V> internal constructor(context: Conte
         super.onPostExecute(knitPattern)
         val callback = callback.get() ?: return
         if (knitPattern == null) {
-            callback.onOpenKnitPatternFail()
+            callback.onPatternImportFail()
         } else {
-            callback.onKnitPatternOpened(knitPattern)
+            callback.onPatternImport(knitPattern)
         }
     }
 }

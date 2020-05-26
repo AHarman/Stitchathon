@@ -17,10 +17,11 @@ class PatternPresenter(override var view: PatternContract.View, private val repo
     }
 
     override fun resume() {
-        if (pattern == null || repository.getCurrentPatternName() !== pattern?.name) {
+        repository.registerCurrentPatternListener(this)
+        val currentPatternName = repository.getCurrentPatternName()
+        if ((pattern == null && currentPatternName != null) || currentPatternName != pattern?.name) {
             openCurrentPattern()
         }
-        repository.registerCurrentPatternListener(this)
     }
 
     override fun pause() {

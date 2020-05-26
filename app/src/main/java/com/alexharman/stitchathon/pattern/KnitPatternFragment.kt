@@ -1,7 +1,6 @@
 package com.alexharman.stitchathon.pattern
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.support.v4.view.GestureDetectorCompat
 import android.support.v7.preference.PreferenceManager
 import android.support.v7.widget.Toolbar
@@ -9,8 +8,9 @@ import android.view.*
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import com.alexharman.stitchathon.*
+import com.alexharman.stitchathon.BaseFragmentView
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.R
 import com.alexharman.stitchathon.loading.ProgressbarDialog
 import com.alexharman.stitchathon.repository.PreferenceKeys
 
@@ -48,6 +48,7 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
         view.findViewById<Button>(R.id.undo_button).setOnClickListener { presenter.undo() }
         knitPatternViewGestureDetector = GestureDetectorCompat(context, KnitPatternViewGestureListener())
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event) }
+        knitPatternView.pattern = this.pattern
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -58,11 +59,6 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
         patternThumbnailView = activity.findViewById(R.id.nav_drawer_image)
         toolbar = activity.findViewById(R.id.toolbar)
         toolbar?.title = pattern?.name ?: getString(R.string.title_activity_main)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        presenter.pause()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

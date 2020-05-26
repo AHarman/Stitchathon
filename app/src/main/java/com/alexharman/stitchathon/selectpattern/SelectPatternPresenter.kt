@@ -10,6 +10,10 @@ class SelectPatternPresenter(
     SelectPatternContract.Presenter,
     KnitPatternDataSource.GetPatternInfoListener {
 
+    init {
+        view.presenter = this
+    }
+
     override fun resume() {
         repository.getKnitPatternNames(this)
     }

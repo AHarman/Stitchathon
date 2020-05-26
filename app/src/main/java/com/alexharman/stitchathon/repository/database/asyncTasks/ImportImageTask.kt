@@ -8,19 +8,20 @@ import com.alexharman.stitchathon.importimage.ImageReader
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
 
-internal class ImportImageTask(context: Context,
-                               callback: KnitPatternDataSource.OpenPatternListener?,
-                               private val imageUri: Uri,
-                               private val patternName: String,
-                               private val width: Int,
-                               private val height: Int,
-                               private val oddRowsOpposite: Boolean,
-                               private val numColours: Int) : ImportPatternTask<Void>(context, callback) {
+internal class ImportImageTask(
+        context: Context,
+        callback: KnitPatternDataSource.ImportPatternListener?,
+        private val imageUri: String,
+        private val patternName: String,
+        private val width: Int,
+        private val height: Int,
+        private val oddRowsOpposite: Boolean,
+        private val numColours: Int) : ImportPatternTask<Void>(context, callback) {
 
     private lateinit var sourceImg: Bitmap
 
     override fun doInBackground(vararg voids: Void): KnitPattern {
-        sourceImg = readImageFile(imageUri)!!
+        sourceImg = readImageFile(Uri.parse(imageUri))!!
         val knitPattern = ImageReader().readImage(sourceImg, patternName, width, height, oddRowsOpposite, numColours)
         saveNewPattern(knitPattern)
         return knitPattern
@@ -34,7 +35,7 @@ internal class ImportImageTask(context: Context,
         try {
             val inputStream = context.contentResolver.openInputStream(uri)
             bitmap = BitmapFactory.decodeStream(inputStream, null, opts)
-            inputStream.close()
+            inputStream?.close()
         } catch (e: Exception) {
             e.printStackTrace()
         }

@@ -27,9 +27,14 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     var pattern: KnitPattern? = null
         set(value) {
             field = value
-            if (width > 0 && value != null) {
-                val drawer = KnitPatternDrawer(value, prefs)
-                patternScroller = ScrollerDrawer(width, height, drawer)
+            if (value == null) {
+                knitPatternDrawer = null
+                patternScroller = null
+                return
+            }
+            knitPatternDrawer = KnitPatternDrawer(value, prefs)
+            if (width > 0) {
+                patternScroller = ScrollerDrawer(width, height, knitPatternDrawer ?: return)
                 invalidate()
             }
         }
@@ -42,15 +47,10 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
         bitmapToDrawPaint.isFilterBitmap = true
     }
 
-    fun scroll(distanceX: Float, distanceY: Float) {
-        patternScroller?.scroll(distanceX.toInt(), distanceY.toInt())
-        invalidate()
-    }
 
     override fun onSizeChanged(w: Int, h: Int, oldW: Int, oldH: Int) {
         super.onSizeChanged(w, h, oldW, oldH)
-        patternScroller = ScrollerDrawer(width, height, knitPatternDrawer
-                ?: return)
+        patternScroller = ScrollerDrawer(width, height, knitPatternDrawer ?: return)
         invalidate()
     }
 
@@ -66,6 +66,11 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
     override fun performClick(): Boolean {
         super.performClick()
         return true
+    }
+
+    fun scroll(distanceX: Float, distanceY: Float) {
+        patternScroller?.scroll(distanceX.toInt(), distanceY.toInt())
+        invalidate()
     }
 
     inner class MySharedPreferenceListener: SharedPreferences.OnSharedPreferenceChangeListener {

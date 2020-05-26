@@ -25,10 +25,9 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
         }
     }
 
+    private val currentPatternListeners = ArrayList<KnitPatternDataSource.CurrentPatternListener>()
     private val sharedPreferences: WeakReference<SharedPreferences> =
             WeakReference(PreferenceManager.getDefaultSharedPreferences(context))
-
-    private val currentPatternListeners = ArrayList<KnitPatternDataSource.CurrentPatternListener>()
 
     override fun registerCurrentPatternListener(listener: KnitPatternDataSource.CurrentPatternListener) {
         if (!currentPatternListeners.contains(listener))
@@ -46,6 +45,7 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
                 ?.edit()
                 ?.putString(PreferenceKeys.CURRENT_PATTERN_NAME, patternName)
                 ?.apply()
+        currentPatternListeners.forEach { it.onCurrentPatternChanged(patternName) }
     }
 
     override fun getCurrentPatternName(): String? =
@@ -55,8 +55,8 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
         SavePatternChangesTask(dao).execute(pattern)
     }
 
-    override fun openKnitPattern(patternName: String, listener: KnitPatternDataSource.OpenPatternListener?) {
-        val context = context.get() ?: return listener?.onOpenKnitPatternFail() ?: Unit
+    override fun openKnitPattern(patternName: String, listener: KnitPatternDataSource.OpenPatternListener) {
+        val context = context.get() ?: return listener.onOpenKnitPatternFail() ?: Unit
         OpenPatternTask(context, listener).execute(patternName)
     }
 
@@ -65,20 +65,20 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
         GetNamesAndImagesTask(context, callback).execute()
     }
 
-    override fun importNewJsonPattern(uri: Uri, callback: KnitPatternDataSource.OpenPatternListener?) {
+    override fun importNewJsonPattern(uri: String, listener: KnitPatternDataSource.ImportPatternListener?) {
         val context = context.get()
         when {
-            context != null -> ImportJsonTask(context, callback).execute(uri)
-            callback != null -> callback.onOpenKnitPatternFail()
+            context != null -> ImportJsonTask(context, listener).execute(uri)
+            listener != null -> listener.onPatternImportFail()
             else -> return
         }
     }
 
-    override fun importNewBitmapPattern(uri: Uri, name: String, width: Int, height: Int, oddRowsOpposite: Boolean, numColours: Int, listener: KnitPatternDataSource.OpenPatternListener?) {
+    override fun importNewBitmapPattern(uri: String, name: String, width: Int, height: Int, oddRowsOpposite: Boolean, numColours: Int, listener: KnitPatternDataSource.ImportPatternListener?) {
         val context = context.get()
         when {
             context != null -> ImportImageTask(context, listener, uri, name, width, height, oddRowsOpposite, numColours).execute()
-            listener != null -> listener.onOpenKnitPatternFail()
+            listener != null -> listener.onPatternImportFail()
             else -> return
         }
     }
@@ -98,6 +98,5 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
                     .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
                     .apply()
         }
-
     }
 }
