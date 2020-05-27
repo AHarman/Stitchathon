@@ -4,17 +4,18 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Rect
 import com.alexharman.stitchathon.pattern.drawer.AreaDrawer
+import kotlin.math.min
 
 // TODO: Add scaling, currently only works for scale = 1
-class ScrollerDrawer(width: Int, height: Int, private val drawer: AreaDrawer) {
-    var currentBitmap: Bitmap
+class ScrollerDrawer(private val viewWidth: Int, private val viewHeight: Int, private val drawer: AreaDrawer) {
+    var currentBitmap: Bitmap = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_8888)
         private set
-    private var bufferBitmap: Bitmap
-    private val viewPort = BoundedViewPort(Rect(0, 0, width, height), Rect(0, 0, drawer.overallWidth, drawer.overallHeight))
+    private var bufferBitmap: Bitmap = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_8888)
+    private val viewPort = BoundedViewPort(
+            Rect(0, 0, min(viewWidth, drawer.overallWidth), min(viewHeight, drawer.overallHeight)),
+            Rect(0, 0, drawer.overallWidth, drawer.overallHeight))
 
     init {
-        currentBitmap = Bitmap.createBitmap(viewPort.width(), viewPort.height(), Bitmap.Config.ARGB_8888)
-        bufferBitmap = Bitmap.createBitmap(viewPort.width(), viewPort.height(), Bitmap.Config.ARGB_8888)
         draw()
     }
 
@@ -30,8 +31,20 @@ class ScrollerDrawer(width: Int, height: Int, private val drawer: AreaDrawer) {
 
     fun draw() {
         val canvas = Canvas(currentBitmap)
-        canvas.drawARGB(0xFF, 0xFF, 0xFF, 0xFF)
-        drawer.draw(canvas, viewPort.toRect(), Rect(0, 0, viewPort.width(), viewPort.height()))
+        draw(canvas, viewPort.currentView, Rect(0, 0, viewPort.width(), viewPort.height()))
+    }
+
+    private fun draw(canvas: Canvas, source: Rect, destination: Rect) {
+        drawer.draw(canvas, source, centerDrawingX(destination))
+    }
+
+    private fun centerDrawingX(drawingDestination: Rect): Rect {
+        val offset =
+                if (viewWidth > drawer.overallWidth)
+                    (viewWidth - drawer.overallWidth) / 2
+                else
+                    0
+        return Rect(drawingDestination).apply { offset(offset, 0)}
     }
 
     // Shift image and draw "new" segments
@@ -57,21 +70,20 @@ class ScrollerDrawer(width: Int, height: Int, private val drawer: AreaDrawer) {
         if (offsetX < 0) {
             val sourceToDraw = Rect(viewPort.left, viewPort.top, viewPort.left - offsetX, viewPort.bottom)
             val canvasToDraw = Rect(0, 0, offsetX, viewPort.height())
-            drawer.draw(canvas, sourceToDraw, canvasToDraw)
+            draw(canvas, sourceToDraw, canvasToDraw)
         } else if (offsetX > 0) {
             val sourceToDraw = Rect(viewPort.right - offsetX, viewPort.top, viewPort.right, viewPort.bottom)
             val canvasToDraw = Rect(viewPort.width() - offsetX, 0, viewPort.width(), viewPort.height())
-            drawer.draw(canvas, sourceToDraw, canvasToDraw)
+            draw(canvas, sourceToDraw, canvasToDraw)
         }
-
         if (offsetY < 0) {
             val sourceToDraw = Rect(viewPort.left, viewPort.top, viewPort.right, viewPort.top - offsetY)
             val canvasToDraw = Rect(0, 0, viewPort.width(), -offsetY)
-            drawer.draw(canvas, sourceToDraw, canvasToDraw)
+            draw(canvas, sourceToDraw, canvasToDraw)
         } else if (offsetY > 0) {
             val sourceToDraw = Rect(viewPort.left, viewPort.bottom - offsetY, viewPort.right, viewPort.bottom)
             val canvasToDraw = Rect(0, viewPort.height() - offsetY, viewPort.width(), viewPort.height())
-            drawer.draw(canvas, sourceToDraw, canvasToDraw)
+            draw(canvas, sourceToDraw, canvasToDraw)
         }
     }
 }
