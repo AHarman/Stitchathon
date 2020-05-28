@@ -1,6 +1,6 @@
 package com.alexharman.stitchathon.selectpattern
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 
 abstract class MultiSelectAdapter<D>(private var dataset: MutableList<D>, private val listener: MultiSelectListener<D>) :
         RecyclerView.Adapter<SelectableViewHolder<D>>() {

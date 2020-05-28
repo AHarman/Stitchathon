@@ -21,7 +21,7 @@
             android:orientation="vertical"
             android:layout_alignParentBottom="true"
             android:id="@id/bottom_section">
-            <android.support.constraint.ConstraintLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/pattern_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -54,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     app:layout_constraintEnd_toEndOf="parent"/>
-            </android.support.constraint.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
             <LinearLayout
                 style="?android:attr/buttonBarStyle"
                 android:id="@+id/bottom_buttons"

@@ -3,10 +3,10 @@ package com.alexharman.stitchathon
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v7.app.AlertDialog
 import android.text.method.LinkMovementMethod
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
 
 /**
  * Created by Alex on 30/12/2017.

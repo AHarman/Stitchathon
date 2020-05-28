@@ -1,6 +1,6 @@
 package com.alexharman.stitchathon.repository.database
 
-import android.arch.persistence.room.*
+import androidx.room.*
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

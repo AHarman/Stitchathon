@@ -3,7 +3,7 @@ package com.alexharman.stitchathon.repository
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
-import android.support.v7.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import com.alexharman.stitchathon.repository.database.KnitPatternDao

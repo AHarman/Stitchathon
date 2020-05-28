@@ -4,10 +4,10 @@ import android.app.Dialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v7.app.AlertDialog
-import android.support.v7.preference.Preference.OnPreferenceClickListener
-import android.support.v7.preference.PreferenceManager
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
+import androidx.preference.Preference.OnPreferenceClickListener
+import androidx.preference.PreferenceManager
 import com.alexharman.stitchathon.repository.PreferenceKeys
 import com.kunzisoft.androidclearchroma.ChromaPreferenceFragmentCompat
 

@@ -1,8 +1,8 @@
 package com.alexharman.stitchathon.importimage
 
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
 import android.view.View
+import androidx.fragment.app.DialogFragment
 import com.alexharman.stitchathon.BasePresenter
 import com.alexharman.stitchathon.BaseView
 

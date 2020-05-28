@@ -48,7 +48,7 @@
         android:layout_marginBottom="5dp"
         android:layout_marginTop="5dp"
         android:orientation="horizontal">
-        <android.support.v4.widget.Space
+        <androidx.legacy.widget.Space
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="0.5"/>
@@ -59,7 +59,7 @@
             android:text="@string/stitch_count_label"
             android:textStyle="bold"
             android:layout_weight="1"/>
-        <android.support.v4.widget.Space
+        <androidx.legacy.widget.Space
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="0.5"/>
@@ -73,7 +73,7 @@
             android:minEms="4"
             android:textAlignment="center"
             android:layout_weight="1"/>
-        <android.support.v4.widget.Space
+        <androidx.legacy.widget.Space
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="0.5"/>
@@ -87,7 +87,7 @@
             android:minEms="4"
             android:textAlignment="center"
             android:layout_weight="1"/>
-        <android.support.v4.widget.Space
+        <androidx.legacy.widget.Space
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="0.5"/>
@@ -98,26 +98,26 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center">
-        <android.support.v4.widget.Space
+        <androidx.legacy.widget.Space
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"/>
-        <android.support.v7.widget.AppCompatRadioButton
+        <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/rows_radio_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="@string/rows_radio_button_text"/>
-        <android.support.v4.widget.Space
+        <androidx.legacy.widget.Space
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"/>
-        <android.support.v7.widget.AppCompatRadioButton
+        <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/rounds_radio_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/rounds_radio_button_text"/>
-        <android.support.v4.widget.Space
+        <androidx.legacy.widget.Space
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"/>
@@ -132,7 +132,7 @@
             android:layout_gravity="center"
             android:textStyle="bold"
             android:text="@string/number_of_colours_label"/>
-        <android.support.v4.widget.Space
+        <androidx.legacy.widget.Space
             android:layout_width="50dp"
             android:layout_height="wrap_content" />
         <NumberPicker

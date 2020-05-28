@@ -1,7 +1,7 @@
 package com.alexharman.stitchathon.selectpattern
 
-import android.support.v7.widget.RecyclerView
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 
 abstract class SelectableViewHolder<D>(val view: View): RecyclerView.ViewHolder(view) {
 

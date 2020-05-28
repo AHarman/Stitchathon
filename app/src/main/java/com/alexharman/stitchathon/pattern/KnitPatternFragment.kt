@@ -1,9 +1,9 @@
 package com.alexharman.stitchathon.pattern
 
 import android.os.Bundle
-import android.support.v4.view.GestureDetectorCompat
-import android.support.v7.preference.PreferenceManager
-import android.support.v7.widget.Toolbar
+import androidx.core.view.GestureDetectorCompat
+import androidx.preference.PreferenceManager
+import androidx.appcompat.widget.Toolbar
 import android.view.*
 import android.widget.Button
 import android.widget.ImageView

@@ -3,14 +3,11 @@ package com.alexharman.stitchathon.pattern
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v7.app.AlertDialog
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
 import com.alexharman.stitchathon.R
-import java.lang.NullPointerException
 
 class GoToStitchDialog: DialogFragment() {
     private lateinit var presenter: PatternContract.Presenter

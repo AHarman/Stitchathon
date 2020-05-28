@@ -232,53 +232,6 @@ class KnitPatternUnitTests {
     }
 
     @Test
-    fun givenOnForwardRow_ifIncrementRow_thenRowIncremented() {
-        val pattern = KnitPattern("", testStitches, true, 0, 0)
-
-        pattern.incrementRow()
-
-        assertEquals(1, pattern.currentRow)
-    }
-
-    @Test
-    fun givenOnForwardRow_ifIncrementRow_then0StitchesDoneInRow() {
-        val pattern = KnitPattern("", testStitches, true, 0, 0)
-
-        pattern.incrementRow()
-
-        assertEquals(0, pattern.stitchesDoneInRow)
-    }
-
-    @Test
-    fun givenOnReverseRow_ifIncrementRow_thenRowIncremented() {
-        val pattern = KnitPattern("", testStitches, true, 1,0)
-
-        pattern.incrementRow()
-
-        assertEquals(2, pattern.currentRow)
-    }
-
-    @Test
-    fun givenOnReverseRow_ifIncrementRow_then0StitchesDoneInRow() {
-        val pattern = KnitPattern("", testStitches, true, 1,0)
-
-        pattern.incrementRow()
-
-        assertEquals(0, pattern.stitchesDoneInRow)
-    }
-
-    @Test
-    fun givenOnLastRow_ifIncrementRow_thenFinish() {
-        val initialNextStitch = 5
-        val initialRow = testPatternHeight - 1
-        val pattern = KnitPattern("", testStitches, true, initialRow, initialNextStitch)
-
-        pattern.incrementRow()
-
-        assert(pattern.isFinished)
-    }
-
-    @Test
     fun givenEnoughSpaceInForwardRow_ifUndoStitch_thenCorrectAmountDone() {
         val initialNextStitch = 5
         val expected = initialNextStitch - 1
