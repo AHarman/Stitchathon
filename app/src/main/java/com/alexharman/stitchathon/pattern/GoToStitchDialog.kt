@@ -24,7 +24,7 @@ class GoToStitchDialog: DialogFragment() {
         }
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         try {
             presenter = ((parentFragment ?: activity) as PatternContract.View).presenter
@@ -39,7 +39,7 @@ class GoToStitchDialog: DialogFragment() {
         val currentRow = arguments?.getInt("currentRow") ?: 0
         val currentCol = arguments?.getInt("currentCol") ?: 0
 
-        dialogView = activity!!.layoutInflater.inflate(R.layout.go_to_stitch_dialog, null)
+        dialogView = requireActivity().layoutInflater.inflate(R.layout.go_to_stitch_dialog, null)
 
         dialogView.findViewById<EditText>(R.id.go_to_stitch_row_edittext)?.hint = currentRow.toString()
         dialogView.findViewById<EditText>(R.id.go_to_stitch_col_edittext)?.hint = currentCol.toString()
@@ -62,6 +62,6 @@ class GoToStitchDialog: DialogFragment() {
         val col = colEditText.text.toString().toIntOrNull() ?: colEditText.hint.toString().toIntOrNull() ?: -1
 
         presenter.goTo(row, col)
-        dialog.dismiss()
+        dialog?.dismiss()
     }
 }

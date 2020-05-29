@@ -67,9 +67,8 @@ class MainActivity :
     }
 
     private fun returnToKnitPatternFragment() {
-        val fragManager = supportFragmentManager ?: return
-        if (fragManager.backStackEntryCount > 0) {
-            fragManager.popBackStack(fragManager.getBackStackEntryAt(0).id, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            supportFragmentManager.popBackStack(supportFragmentManager.getBackStackEntryAt(0).id, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
 

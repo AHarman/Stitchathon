@@ -1,13 +1,13 @@
 package com.alexharman.stitchathon.pattern
 
 import android.os.Bundle
-import androidx.core.view.GestureDetectorCompat
-import androidx.preference.PreferenceManager
-import androidx.appcompat.widget.Toolbar
 import android.view.*
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GestureDetectorCompat
+import androidx.preference.PreferenceManager
 import com.alexharman.stitchathon.BaseFragmentView
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.R
@@ -100,7 +100,7 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
     override fun showLoadingBar() {
         if (progressbarDialog == null) {
             progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_load_title), getString(R.string.progress_bar_loading_pattern))
-            progressbarDialog?.show(fragmentManager, "Progress dialog")
+            progressbarDialog?.show(parentFragmentManager, "Progress dialog")
         }
     }
 

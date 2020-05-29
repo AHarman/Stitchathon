@@ -1,66 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen  xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen  xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <androidx.preference.PreferenceCategory
+    <PreferenceCategory
         android:title="@string/app_options_stitch_options_title">
-        <androidx.preference.EditTextPreference
+        <EditTextPreference
             android:defaultValue="@integer/default_stitch_size"
-            android:key="stitch_size"
-            android:title="@string/app_options_stitch_size_title"
+            app:key="stitch_size"
+            app:title="@string/app_options_stitch_size_title"
             android:inputType="numberDecimal" />
-        <androidx.preference.EditTextPreference
+        <EditTextPreference
             android:defaultValue="@integer/default_stitch_pad"
-            android:key="stitch_padding"
-            android:title="@string/app_options_stitch_pad_title"
+            app:key="stitch_padding"
+            app:title="@string/app_options_stitch_pad_title"
             android:inputType="numberDecimal" />
-    </androidx.preference.PreferenceCategory>
+    </PreferenceCategory>
 
-    <androidx.preference.PreferenceCategory
+    <PreferenceCategory
         android:title="@string/app_options_colour_options_title">
         <com.kunzisoft.androidclearchroma.ChromaPreferenceCompat
-            android:key="bg_colour"
-            android:title="@string/options_bg_colour_title"
-            android:summary="[color]"
+            app:key="bg_colour"
+            app:title="@string/options_bg_colour_title"
+            app:summary="[color]"
             app:chromaShapePreview="ROUNDED_SQUARE"
             app:chromaColorMode="RGB"
             app:chromaIndicatorMode="HEX"
-            android:defaultValue="@color/default_pattern_background_colour" />
+            app:defaultValue="@color/default_pattern_background_colour" />
         <com.kunzisoft.androidclearchroma.ChromaPreferenceCompat
-            android:key="colour_1"
-            android:title="@string/options_stitch_colour_title_1"
-            android:summary="[color]"
+            app:key="colour_1"
+            app:title="@string/options_stitch_colour_title_1"
+            app:summary="[color]"
             app:chromaShapePreview="ROUNDED_SQUARE"
             app:chromaColorMode="RGB"
             app:chromaIndicatorMode="HEX"
-            android:defaultValue="@color/default_stitch_colour_1" />
+            app:defaultValue="@color/default_stitch_colour_1" />
         <com.kunzisoft.androidclearchroma.ChromaPreferenceCompat
-            android:key="colour_2"
-            android:title="@string/options_stitch_colour_title_2"
-            android:summary="[color]"
+            app:key="colour_2"
+            app:title="@string/options_stitch_colour_title_2"
+            app:summary="[color]"
             app:chromaShapePreview="ROUNDED_SQUARE"
             app:chromaColorMode="RGB"
             app:chromaIndicatorMode="HEX"
-            android:defaultValue="@color/default_stitch_colour_2" />
+            app:defaultValue="@color/default_stitch_colour_2" />
         <com.kunzisoft.androidclearchroma.ChromaPreferenceCompat
-            android:key="colour_3"
-            android:title="@string/options_stitch_colour_title_3"
-            android:summary="[color]"
+            app:key="colour_3"
+            app:title="@string/options_stitch_colour_title_3"
+            app:summary="[color]"
             app:chromaShapePreview="ROUNDED_SQUARE"
             app:chromaColorMode="RGB"
             app:chromaIndicatorMode="HEX"
-            android:defaultValue="@color/default_stitch_colour_3" />
-    </androidx.preference.PreferenceCategory>
+            app:defaultValue="@color/default_stitch_colour_3" />
+    </PreferenceCategory>
 
-    <androidx.preference.PreferenceCategory
-        android:title="@string/app_options_other_options_title">
-        <androidx.preference.Preference
-            android:title="@string/app_options_delete_all_title"
-            android:summary="@string/app_options_delete_all_summary"
-            android:key="delete_all" />
-        <androidx.preference.Preference
-            android:title="@string/app_options_reset_prefs_title"
-            android:summary="@string/app_options_reset_prefs_summary"
-            android:key="reset_preferences">
-        </androidx.preference.Preference>
-    </androidx.preference.PreferenceCategory>
-</androidx.preference.PreferenceScreen>
+    <PreferenceCategory
+        app:title="@string/app_options_other_options_title">
+        <Preference
+            app:title="@string/app_options_delete_all_title"
+            app:summary="@string/app_options_delete_all_summary"
+            app:key="delete_all" />
+        <Preference
+            app:title="@string/app_options_reset_prefs_title"
+            app:summary="@string/app_options_reset_prefs_summary"
+            app:key="reset_preferences">
+        </Preference>
+    </PreferenceCategory>
+</PreferenceScreen>

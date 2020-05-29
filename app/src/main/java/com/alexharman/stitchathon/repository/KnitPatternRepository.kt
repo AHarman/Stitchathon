@@ -2,7 +2,6 @@ package com.alexharman.stitchathon.repository
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.net.Uri
 import androidx.preference.PreferenceManager
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.repository.database.AppDatabase
@@ -56,7 +55,7 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
     }
 
     override fun openKnitPattern(patternName: String, listener: KnitPatternDataSource.OpenPatternListener) {
-        val context = context.get() ?: return listener.onOpenKnitPatternFail() ?: Unit
+        val context = context.get() ?: return listener.onOpenKnitPatternFail()
         OpenPatternTask(context, listener).execute(patternName)
     }
 

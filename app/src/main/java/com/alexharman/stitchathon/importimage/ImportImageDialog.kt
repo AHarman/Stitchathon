@@ -6,12 +6,12 @@ import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
-import androidx.appcompat.app.AlertDialog
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.NumberPicker
 import android.widget.RadioGroup
+import androidx.appcompat.app.AlertDialog
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.MainActivity
 import com.alexharman.stitchathon.R
@@ -30,7 +30,7 @@ class ImportImageDialog: BaseDialogFragmentView<ImportImageContract.View, Import
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog: AlertDialog
-        val inflater = activity!!.layoutInflater
+        val inflater = requireActivity().layoutInflater
         val builder = AlertDialog.Builder(activity as Context)
         dialogView = inflater.inflate(R.layout.import_image_dialog, null)
 
@@ -61,7 +61,7 @@ class ImportImageDialog: BaseDialogFragmentView<ImportImageContract.View, Import
     override fun showLoadingBar() {
         if (progressbarDialog == null) {
             progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_load_title), getString(R.string.progress_bar_loading_pattern))
-            progressbarDialog?.show(fragmentManager, "Progress dialog")
+            progressbarDialog?.show(parentFragmentManager, "Progress dialog")
         }
     }
 
@@ -114,7 +114,7 @@ class ImportImageDialog: BaseDialogFragmentView<ImportImageContract.View, Import
     private fun getFileDisplayName(uri: Uri): String {
         var fileName = ""
         if (uri.scheme == "content") {
-            val cursor = activity!!.contentResolver.query(uri, null, null, null, null)
+            val cursor = requireActivity().contentResolver.query(uri, null, null, null, null)
             cursor.use {
                 if (cursor.moveToFirst()) {
                     fileName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))

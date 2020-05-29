@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceClickListener
 import androidx.preference.PreferenceManager
 import com.alexharman.stitchathon.repository.PreferenceKeys
@@ -22,7 +23,7 @@ class SettingsFragment: ChromaPreferenceFragmentCompat(), SharedPreferences.OnSh
         if (key == null || sharedPreferences == null) return
         if (key == PreferenceKeys.STITCH_SIZE ||
                 key == PreferenceKeys.STITCH_PAD) {
-            findPreference(key).summary = sharedPreferences.getString(key, "")
+            findPreference<Preference>(key)?.summary = sharedPreferences.getString(key, "")
         }
     }
 
@@ -43,7 +44,7 @@ class SettingsFragment: ChromaPreferenceFragmentCompat(), SharedPreferences.OnSh
     }
 
     private fun setPrefListeners() {
-        findPreference(PreferenceKeys.RESET_PREFS).onPreferenceClickListener =
+        findPreference<Preference>(PreferenceKeys.RESET_PREFS)?.onPreferenceClickListener =
                 OnPreferenceClickListener {
                     val bundle = Bundle()
                     val dialog = ConfirmDialogFragment()
@@ -51,10 +52,10 @@ class SettingsFragment: ChromaPreferenceFragmentCompat(), SharedPreferences.OnSh
                     bundle.putString("message", getString(R.string.reset_application_preferences_message))
                     dialog.arguments = bundle
                     dialog.setTargetFragment(this, RESET_ALL_PREFS)
-                    dialog.show(fragmentManager, "ResetPrefs")
+                    dialog.show(parentFragmentManager, "ResetPrefs")
                     true
                 }
-        findPreference(PreferenceKeys.DELETE_ALL).onPreferenceClickListener =
+        findPreference<Preference>(PreferenceKeys.DELETE_ALL)?.onPreferenceClickListener =
                 OnPreferenceClickListener {
                     val bundle = Bundle()
                     val dialog = ConfirmDialogFragment()
@@ -62,15 +63,15 @@ class SettingsFragment: ChromaPreferenceFragmentCompat(), SharedPreferences.OnSh
                     bundle.putString("message", getString(R.string.delete_all_patterns_dialog_message))
                     dialog.arguments = bundle
                     dialog.setTargetFragment(this, DELETE_ALL_PATTERNS)
-                    dialog.show(fragmentManager, "DeleteAll")
+                    dialog.show(parentFragmentManager, "DeleteAll")
                     true
                 }
     }
 
     private fun updateSummaryValues() {
         val prefs = preferenceScreen.sharedPreferences
-        findPreference(PreferenceKeys.STITCH_SIZE).summary = prefs.getString(PreferenceKeys.STITCH_SIZE, "")
-        findPreference(PreferenceKeys.STITCH_PAD).summary = prefs.getString(PreferenceKeys.STITCH_PAD, "")
+        findPreference<Preference>(PreferenceKeys.STITCH_SIZE)?.summary = prefs.getString(PreferenceKeys.STITCH_SIZE, "")
+        findPreference<Preference>(PreferenceKeys.STITCH_PAD)?.summary = prefs.getString(PreferenceKeys.STITCH_PAD, "")
     }
 
     fun onDialogConfirm(opcode: Int) {
@@ -95,7 +96,7 @@ class SettingsFragment: ChromaPreferenceFragmentCompat(), SharedPreferences.OnSh
                     .setTitle(arguments?.getString("title"))
                     .setMessage(arguments?.getString("message"))
                     .setNegativeButton(R.string.cancel, null)
-                    .setPositiveButton(R.string.OK, { _, _ -> (targetFragment as SettingsFragment).onDialogConfirm(targetRequestCode) })
+                    .setPositiveButton(R.string.OK) { _, _ -> (targetFragment as SettingsFragment).onDialogConfirm(targetRequestCode) }
             return builder.create()
         }
     }
