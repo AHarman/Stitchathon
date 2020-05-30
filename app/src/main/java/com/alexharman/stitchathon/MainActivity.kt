@@ -24,6 +24,8 @@ import com.alexharman.stitchathon.repository.KnitPatternRepository
 import com.alexharman.stitchathon.repository.PreferenceKeys
 import com.alexharman.stitchathon.selectpattern.SelectPatternFragment
 import com.alexharman.stitchathon.selectpattern.SelectPatternPresenter
+import com.alexharman.stitchathon.settings.SettingsFragment
+import com.alexharman.stitchathon.settings.SettingsPresenter
 import com.google.android.material.navigation.NavigationView
 
 class MainActivity :
@@ -79,7 +81,7 @@ class MainActivity :
             R.id.nav_import_pattern -> selectExternalFile("application/json", RequestCodes.READ_EXTERNAL_JSON_PATTERN.value)
             R.id.nav_import_image -> importImage()
             R.id.nav_about_app -> AppInfoDialog().show(supportFragmentManager, "App info")
-            R.id.nav_settings -> popToOrStartFragment(supportFragmentManager.findFragmentByTag(SETTINGS_FRAGMENT) ?: SettingsFragment(), SETTINGS_FRAGMENT)
+            R.id.nav_settings -> showSettings()
         }
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
@@ -119,6 +121,14 @@ class MainActivity :
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = type
         startActivityForResult(intent, requestCode)
+    }
+
+    private fun showSettings() {
+        val fragment =
+                supportFragmentManager.findFragmentByTag(SETTINGS_FRAGMENT) as? SettingsFragment ?:
+                SettingsFragment()
+        SettingsPresenter(fragment, repository)
+        popToOrStartFragment(fragment, SETTINGS_FRAGMENT)
     }
 
     private fun startSelectPatternFragment() {

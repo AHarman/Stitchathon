@@ -2,21 +2,23 @@
 <PreferenceScreen  xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
-        android:title="@string/app_options_stitch_options_title">
+        app:title="@string/app_options_stitch_options_title">
         <EditTextPreference
             android:defaultValue="@integer/default_stitch_size"
             app:key="stitch_size"
             app:title="@string/app_options_stitch_size_title"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            app:useSimpleSummaryProvider="true"/>
         <EditTextPreference
             android:defaultValue="@integer/default_stitch_pad"
             app:key="stitch_padding"
             app:title="@string/app_options_stitch_pad_title"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            app:useSimpleSummaryProvider="true"/>
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/app_options_colour_options_title">
+        app:title="@string/app_options_colour_options_title">
         <com.kunzisoft.androidclearchroma.ChromaPreferenceCompat
             app:key="bg_colour"
             app:title="@string/options_bg_colour_title"

@@ -1,7 +1,6 @@
 package com.alexharman.stitchathon.repository
 
 import android.graphics.Bitmap
-import android.net.Uri
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 
 interface KnitPatternDataSource {
@@ -60,4 +59,6 @@ interface KnitPatternDataSource {
     fun deleteAllKnitPatterns()
 
     fun deleteKnitPatterns(vararg patternNames: String)
+
+    fun clearPreferences()
 }

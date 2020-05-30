@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.R
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import com.alexharman.stitchathon.repository.database.KnitPatternDao
 import com.alexharman.stitchathon.repository.database.asyncTasks.*
@@ -97,5 +98,14 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
                     .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
                     .apply()
         }
+    }
+
+    override fun clearPreferences() {
+        sharedPreferences
+                .get()
+                ?.edit()
+                ?.clear()
+                ?.apply()
+        PreferenceManager.setDefaultValues(context.get(), R.xml.preferences, true)
     }
 }

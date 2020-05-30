@@ -3,6 +3,7 @@ package com.alexharman.stitchathon
 import android.content.Context
 import androidx.preference.PreferenceManager
 import com.alexharman.stitchathon.repository.PreferenceKeys
+import com.alexharman.stitchathon.settings.SettingsFragment
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
