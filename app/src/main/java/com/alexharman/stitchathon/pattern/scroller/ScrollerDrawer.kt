@@ -1,8 +1,6 @@
 package com.alexharman.stitchathon.pattern.scroller
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Rect
+import android.graphics.*
 import com.alexharman.stitchathon.pattern.drawer.AreaDrawer
 import kotlin.math.min
 
@@ -11,9 +9,12 @@ class ScrollerDrawer(private val viewWidth: Int, private val viewHeight: Int, pr
     var currentBitmap: Bitmap = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_8888)
         private set
     private var bufferBitmap: Bitmap = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_8888)
-    private val viewPort = BoundedViewPort(
-            Rect(0, 0, min(viewWidth, drawer.overallWidth), min(viewHeight, drawer.overallHeight)),
-            Rect(0, 0, drawer.overallWidth, drawer.overallHeight))
+    private var viewPort = createViewPort()
+    private var baseDestination = createBaseDestRect()
+    private val translationPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC) }
+
+    private val currentZoom: Float
+        get() = baseDestination.width().toFloat() / viewPort.currentView.width()
 
     init {
         draw()
@@ -31,20 +32,39 @@ class ScrollerDrawer(private val viewWidth: Int, private val viewHeight: Int, pr
 
     fun draw() {
         val canvas = Canvas(currentBitmap)
-        draw(canvas, viewPort.currentView, Rect(0, 0, viewPort.width(), viewPort.height()))
+        drawer.draw(canvas, viewPort.currentView, baseDestination)
     }
 
-    private fun draw(canvas: Canvas, source: Rect, destination: Rect) {
-        drawer.draw(canvas, source, centerDrawingX(destination))
+    fun setZoomToPatternWidth() {
+        setZoom(viewWidth.toFloat() / drawer.overallWidth.toFloat())
     }
 
-    private fun centerDrawingX(drawingDestination: Rect): Rect {
-        val offset =
+    fun setZoom(zoom: Float) {
+        viewPort = createViewPort(zoom)
+    }
+
+    private fun createBaseDestRect(): Rect {
+        val left =
                 if (viewWidth > drawer.overallWidth)
                     (viewWidth - drawer.overallWidth) / 2
                 else
                     0
-        return Rect(drawingDestination).apply { offset(offset, 0)}
+        val right =
+                if (viewWidth > drawer.overallWidth)
+                    left + (viewWidth - drawer.overallWidth) / 2
+                else
+                    viewWidth
+        return Rect(left, 0, right, min(viewHeight, drawer.overallHeight))
+    }
+
+    private fun createViewPort(zoom: Float = 1.0f): BoundedViewPort {
+        return BoundedViewPort(
+                Rect(
+                        0,
+                        0,
+                        (min((viewWidth / zoom).toInt(), drawer.overallWidth)),
+                        (min((viewHeight /  zoom).toInt(), drawer.overallHeight))),
+                Rect(0, 0, drawer.overallWidth, drawer.overallHeight))
     }
 
     // Shift image and draw "new" segments
@@ -58,7 +78,7 @@ class ScrollerDrawer(private val viewWidth: Int, private val viewHeight: Int, pr
         val tempBitmap = currentBitmap
         currentBitmap = bufferBitmap
         bufferBitmap = tempBitmap
-        Canvas(currentBitmap).drawBitmap(bufferBitmap, -offsetX.toFloat(), -offsetY.toFloat(), drawer.translationPaint)
+        Canvas(currentBitmap).drawBitmap(bufferBitmap, -offsetX.toFloat(), -offsetY.toFloat(), translationPaint)
 
         // Not strictly necessary if everything is working properly, but doing it for debug purposes
         Canvas(bufferBitmap).drawARGB(0xFF, 0xFF, 0xFF, 0xFF)
@@ -69,21 +89,25 @@ class ScrollerDrawer(private val viewWidth: Int, private val viewHeight: Int, pr
         val canvas = Canvas(currentBitmap)
         if (offsetX < 0) {
             val sourceToDraw = Rect(viewPort.left, viewPort.top, viewPort.left - offsetX, viewPort.bottom)
-            val canvasToDraw = Rect(0, 0, offsetX, viewPort.height())
-            draw(canvas, sourceToDraw, canvasToDraw)
+            val destination = Rect(0, 0, offsetX, viewPort.height())
+            if (destination.intersect(baseDestination))
+                drawer.draw(canvas, sourceToDraw, destination)
         } else if (offsetX > 0) {
             val sourceToDraw = Rect(viewPort.right - offsetX, viewPort.top, viewPort.right, viewPort.bottom)
-            val canvasToDraw = Rect(viewPort.width() - offsetX, 0, viewPort.width(), viewPort.height())
-            draw(canvas, sourceToDraw, canvasToDraw)
+            val destination = Rect(viewPort.width() - offsetX, 0, viewPort.width(), viewPort.height())
+            if (destination.intersect(baseDestination))
+                drawer.draw(canvas, sourceToDraw, destination)
         }
         if (offsetY < 0) {
             val sourceToDraw = Rect(viewPort.left, viewPort.top, viewPort.right, viewPort.top - offsetY)
-            val canvasToDraw = Rect(0, 0, viewPort.width(), -offsetY)
-            draw(canvas, sourceToDraw, canvasToDraw)
+            val destination = Rect(0, 0, viewPort.width(), -offsetY)
+            if (destination.intersect(baseDestination))
+                drawer.draw(canvas, sourceToDraw, destination)
         } else if (offsetY > 0) {
             val sourceToDraw = Rect(viewPort.left, viewPort.bottom - offsetY, viewPort.right, viewPort.bottom)
-            val canvasToDraw = Rect(0, viewPort.height() - offsetY, viewPort.width(), viewPort.height())
-            draw(canvas, sourceToDraw, canvasToDraw)
+            val destination = Rect(0, viewPort.height() - offsetY, viewPort.width(), viewPort.height())
+            if (destination.intersect(baseDestination))
+                drawer.draw(canvas, sourceToDraw, destination)
         }
     }
 }

@@ -8,9 +8,9 @@ import android.preference.PreferenceManager
 import android.util.AttributeSet
 import android.view.View
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
-import com.alexharman.stitchathon.repository.PreferenceKeys
 import com.alexharman.stitchathon.pattern.drawer.KnitPatternDrawer
 import com.alexharman.stitchathon.pattern.scroller.ScrollerDrawer
+import com.alexharman.stitchathon.repository.PreferenceKeys
 
 class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
@@ -70,6 +70,16 @@ class KnitPatternView(context: Context, attrs: AttributeSet) : View(context, att
 
     fun scroll(distanceX: Float, distanceY: Float) {
         patternScroller?.scroll(distanceX.toInt(), distanceY.toInt())
+        invalidate()
+    }
+
+    fun setZoomToPatternWidth() {
+        patternScroller?.setZoomToPatternWidth()
+        invalidate()
+    }
+
+    fun setZoom(zoom: Float) {
+        patternScroller?.setZoom(zoom)
         invalidate()
     }
 

@@ -1,15 +1,17 @@
 package com.alexharman.stitchathon.pattern.drawer
 
 import android.graphics.*
-import com.alexharman.stitchathon.pattern.drawer.Drawer
 
-class SplitStitchDrawer(firstColour: Int, secondColour: Int, private val size: Int): Drawer {
+class SplitStitchDrawer(firstColour: Int, secondColour: Int, stitchSize: Int): AreaDrawer {
 
-    private val bitmap = createBitmap(firstColour, secondColour, size)
+    private val bitmap = createBitmap(firstColour, secondColour, stitchSize)
 
-    override fun draw(canvas: Canvas) {
-        canvas.drawBitmap(bitmap, null, Rect(0, 0, size, size), null)
+    override fun draw(canvas: Canvas, sourceArea: Rect?, outputArea: Rect) {
+        canvas.drawBitmap(bitmap, sourceArea, outputArea, null)
     }
+
+    override val overallWidth = stitchSize
+    override val overallHeight = stitchSize
 
     private fun createBitmap(firstColour: Int, secondColour: Int, size: Int): Bitmap {
         val firstPaint = Paint(Paint.ANTI_ALIAS_FLAG)

@@ -118,7 +118,7 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
                 .putBoolean(PreferenceKeys.LOCK_TO_CENTRE, lockButton.isChecked)
                 .apply()
 //        knitPatternDrawer?.setLockToCentre(lockButton.isChecked)
-        if (lockButton.isChecked) knitPatternView.invalidate()
+//        if (lockButton.isChecked) knitPatternView.invalidate()
     }
 
     private fun zoomButtonPressed(zoomButton: MenuItem) {
@@ -128,8 +128,10 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
                 .edit()
                 .putBoolean(PreferenceKeys.FIT_PATTERN_WIDTH, zoomButton.isChecked)
                 .apply()
-//        knitPatternDrawer?.setFitPatternWidth(zoomButton.isChecked)
-        knitPatternView.invalidate()
+        if (zoomButton.isChecked)
+            knitPatternView.setZoomToPatternWidth()
+        else
+            knitPatternView.setZoom(1.0F)
     }
 
     private fun gotToStitch() {
@@ -158,7 +160,6 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
 
         override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
             knitPatternView.scroll(distanceX, distanceY)
-            knitPatternView.invalidate()
             return true
         }
 

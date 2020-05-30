@@ -5,7 +5,6 @@ import android.graphics.*
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import com.alexharman.stitchathon.repository.PreferenceKeys
-import kotlin.collections.HashMap
 import kotlin.math.min
 
 // TODO: Pass in colors rather than SharedPreferences object
@@ -13,13 +12,12 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
     private val stitchSize: Int
     private val stitchPad: Int
 
-    private var stitchDrawers: HashMap<Stitch, Drawer>
+    private var stitchDrawers: HashMap<Stitch, AreaDrawer>
     private val doneOverlayDrawer: DoneOverlayDrawer
     private val clearPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
 
     override val overallHeight: Int
     override val overallWidth: Int
-    override val translationPaint: Paint
 
     init {
         val colours = IntArray(3)
@@ -37,14 +35,13 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
             color = 0x88FFFFFF.toInt()
             xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP)
         }
-        translationPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC) }
 
         doneOverlayDrawer = DoneOverlayDrawer(stitchSize, doneOverlayPaint)
         stitchDrawers = createStitchDrawers(knitPattern.stitchTypes, colours)
     }
 
-    private fun createStitchDrawers(stitches: Collection<Stitch>, colours: IntArray): HashMap<Stitch, Drawer> {
-        val drawers = HashMap<Stitch, Drawer>()
+    private fun createStitchDrawers(stitches: Collection<Stitch>, colours: IntArray): HashMap<Stitch, AreaDrawer> {
+        val drawers = HashMap<Stitch, AreaDrawer>()
         val stitchColours = HashMap<Stitch, Int>()
 
         // Assuming enough colours
@@ -63,34 +60,40 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         return drawers
     }
 
-    override fun draw(canvas: Canvas, sourceArea: Rect, outputArea: Rect) {
+    override fun draw(canvas: Canvas, sourceArea: Rect?, outputArea: Rect) {
+        drawInternal(canvas, sourceArea ?: Rect(0, 0, overallWidth, overallHeight), outputArea);
+    }
+
+    private fun drawInternal(canvas: Canvas, sourceArea: Rect, outputArea: Rect) {
+        val scale = outputArea.width() / sourceArea.width().toFloat()
         val padding = findSourcePadding(sourceArea)
         val paddedSourceArea = padding + sourceArea
-        val paddedOutputArea = padding + outputArea
+        val paddedOutputArea = padding * scale + outputArea
         val firstRow = paddedSourceArea.top / (stitchSize + stitchPad)
         val lastRow = min(paddedSourceArea.bottom / (stitchSize + stitchPad), knitPattern.numRows - 1)
         val firstCol = paddedSourceArea.left / (stitchSize + stitchPad)
         var lastCol: Int
+        val stitchDest = Rect(0, 0, (stitchSize * scale).toInt(), (stitchSize * scale).toInt())
         val saveCount = canvas.save()
 
         canvas.drawRect(paddedOutputArea, clearPaint)
         canvas.translate(paddedOutputArea.left, paddedOutputArea.top)
-        canvas.translate(stitchPad, stitchPad)
+        canvas.translate(stitchPad * scale, stitchPad * scale)
 
         for (row in firstRow..lastRow) {
             lastCol = min(paddedSourceArea.right / (stitchSize + stitchPad) + 1, knitPattern.stitches[row].size - 1)
             canvas.save()
 
             for (col in firstCol..lastCol) {
-                stitchDrawers[knitPattern.stitches[row][col]]?.draw(canvas)
+                stitchDrawers[knitPattern.stitches[row][col]]?.draw(canvas, null, stitchDest)
+
                 if(knitPattern.isStitchDone(row, col))
-                {
-                    doneOverlayDrawer.draw(canvas)
-                }
-                canvas.translate(stitchSize + stitchPad, 0)
+                    doneOverlayDrawer.draw(canvas, null, stitchDest)
+
+                canvas.translate((stitchSize + stitchPad) * scale, 0F)
             }
             canvas.restore()
-            canvas.translate(0, stitchSize + stitchPad)
+            canvas.translate(0F, (stitchSize + stitchPad) * scale)
         }
 
         canvas.restoreToCount(saveCount)
