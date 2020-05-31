@@ -57,7 +57,7 @@ class ScrollerDrawer(private val viewWidth: Int, private val viewHeight: Int, pr
         return Rect(left, 0, right, min(viewHeight, drawer.overallHeight))
     }
 
-    private fun createViewPort(zoom: Float = 1.0f): BoundedViewPort {
+    private fun createViewPort(zoom: Float = 1f): BoundedViewPort {
         return BoundedViewPort(
                 Rect(
                         0,

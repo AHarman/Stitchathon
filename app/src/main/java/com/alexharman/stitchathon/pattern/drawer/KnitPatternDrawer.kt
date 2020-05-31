@@ -12,7 +12,7 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
     private val stitchSize: Int
     private val stitchPad: Int
 
-    private var stitchDrawers: HashMap<Stitch, AreaDrawer>
+    private var stitchDrawers: HashMap<Stitch, ScaleDrawer>
     private val doneOverlayDrawer: DoneOverlayDrawer
     private val clearPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
 
@@ -40,8 +40,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         stitchDrawers = createStitchDrawers(knitPattern.stitchTypes, colours)
     }
 
-    private fun createStitchDrawers(stitches: Collection<Stitch>, colours: IntArray): HashMap<Stitch, AreaDrawer> {
-        val drawers = HashMap<Stitch, AreaDrawer>()
+    private fun createStitchDrawers(stitches: Collection<Stitch>, colours: IntArray): HashMap<Stitch, ScaleDrawer> {
+        val drawers = HashMap<Stitch, ScaleDrawer>()
         val stitchColours = HashMap<Stitch, Int>()
 
         // Assuming enough colours
@@ -73,7 +73,6 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         val lastRow = min(paddedSourceArea.bottom / (stitchSize + stitchPad), knitPattern.numRows - 1)
         val firstCol = paddedSourceArea.left / (stitchSize + stitchPad)
         var lastCol: Int
-        val stitchDest = Rect(0, 0, (stitchSize * scale).toInt(), (stitchSize * scale).toInt())
         val saveCount = canvas.save()
 
         canvas.drawRect(paddedOutputArea, clearPaint)
@@ -85,10 +84,10 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
             canvas.save()
 
             for (col in firstCol..lastCol) {
-                stitchDrawers[knitPattern.stitches[row][col]]?.draw(canvas, null, stitchDest)
+                stitchDrawers[knitPattern.stitches[row][col]]?.draw(canvas, scale)
 
                 if(knitPattern.isStitchDone(row, col))
-                    doneOverlayDrawer.draw(canvas, null, stitchDest)
+                    doneOverlayDrawer.draw(canvas, scale)
 
                 canvas.translate((stitchSize + stitchPad) * scale, 0F)
             }

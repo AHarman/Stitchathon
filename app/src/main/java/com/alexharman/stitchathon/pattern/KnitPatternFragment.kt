@@ -131,7 +131,7 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
         if (zoomButton.isChecked)
             knitPatternView.setZoomToPatternWidth()
         else
-            knitPatternView.setZoom(1.0F)
+            knitPatternView.setZoom(1F)
     }
 
     private fun gotToStitch() {
