@@ -11,7 +11,8 @@ class PatternPresenter(override var view: PatternContract.View, private val repo
 
     private var pattern: KnitPattern? = null
     private val undoStack = Stack<Int>()
-    override var fitPatternWidth: Boolean = false
+    override var fitPatternWidth = false
+    override var lockToCurrentStitch = false
 
     init {
         view.presenter = this

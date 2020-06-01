@@ -17,6 +17,7 @@ interface PatternContract {
 
     interface Presenter: BasePresenter<View> {
         var fitPatternWidth: Boolean
+        var lockToCurrentStitch: Boolean
 
         fun increment()
 
