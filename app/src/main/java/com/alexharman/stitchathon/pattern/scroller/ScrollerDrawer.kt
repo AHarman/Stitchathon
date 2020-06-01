@@ -41,20 +41,24 @@ class ScrollerDrawer(private val viewWidth: Int, private val viewHeight: Int, pr
 
     fun setZoom(zoom: Float) {
         viewPort = createViewPort(zoom)
+        baseDestination = createBaseDestRect(zoom)
+        Canvas(currentBitmap).drawColor(0x00000000, PorterDuff.Mode.CLEAR)
     }
 
-    private fun createBaseDestRect(): Rect {
+    private fun createBaseDestRect(zoom: Float = 1F): Rect {
+        val scaledDrawerWidth = (drawer.overallWidth * zoom).toInt()
+        val scaledDrawerHeight = (drawer.overallHeight * zoom).toInt()
         val left =
-                if (viewWidth > drawer.overallWidth)
-                    (viewWidth - drawer.overallWidth) / 2
+                if (viewWidth > scaledDrawerWidth)
+                    (viewWidth - scaledDrawerWidth) / 2
                 else
                     0
         val right =
-                if (viewWidth > drawer.overallWidth)
-                    left + (viewWidth - drawer.overallWidth) / 2
+                if (viewWidth > scaledDrawerWidth)
+                    left + scaledDrawerWidth
                 else
                     viewWidth
-        return Rect(left, 0, right, min(viewHeight, drawer.overallHeight))
+        return Rect(left, 0, right, min(viewHeight, scaledDrawerHeight))
     }
 
     private fun createViewPort(zoom: Float = 1f): BoundedViewPort {
@@ -62,8 +66,8 @@ class ScrollerDrawer(private val viewWidth: Int, private val viewHeight: Int, pr
                 Rect(
                         0,
                         0,
-                        (min((viewWidth / zoom).toInt(), drawer.overallWidth)),
-                        (min((viewHeight /  zoom).toInt(), drawer.overallHeight))),
+                        min((viewWidth / zoom).toInt(), drawer.overallWidth),
+                        min((viewHeight /  zoom).toInt(), drawer.overallHeight)),
                 Rect(0, 0, drawer.overallWidth, drawer.overallHeight))
     }
 
