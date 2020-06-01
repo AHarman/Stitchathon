@@ -23,6 +23,7 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
     private var patternNameView: TextView? = null
     private var toolbar: Toolbar? = null
     private var progressbarDialog: ProgressbarDialog? = null
+    private lateinit var menu: Menu
     private lateinit var stitchCount: TextView
     private lateinit var rowCount: TextView
     private lateinit var completeCount: TextView
@@ -63,20 +64,21 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.main, menu)
+        this.menu = menu
+
         val zoomButton = menu.findItem(R.id.zoom_button)
         val lockButton = menu.findItem(R.id.lock_button)
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         lockButton.isChecked = prefs.getBoolean(PreferenceKeys.LOCK_TO_CENTRE, false)
         lockButton.icon = context?.getDrawable(if (lockButton.isChecked) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp)
         lockButton.icon.alpha = resources.getInteger(if (lockButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
-        zoomButton.isChecked = prefs.getBoolean(PreferenceKeys.FIT_PATTERN_WIDTH, false)
-        zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
+        zoomButton.icon.alpha = resources.getInteger(if (presenter.fitPatternWidth) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId){
             R.id.action_settings -> true
-            R.id.zoom_button -> { zoomButtonPressed(item); true }
+            R.id.zoom_button -> { fitToPatternWidthButtonPressed(); true }
             R.id.go_to_stitch_button -> { gotToStitch(); true }
             R.id.lock_button -> { lockButtonPressed(item); true }
             else -> super.onOptionsItemSelected(item)
@@ -121,14 +123,12 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
 //        if (lockButton.isChecked) knitPatternView.invalidate()
     }
 
-    private fun zoomButtonPressed(zoomButton: MenuItem) {
-        zoomButton.isChecked = !zoomButton.isChecked
-        zoomButton.icon.alpha = resources.getInteger(if (zoomButton.isChecked) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
-        PreferenceManager.getDefaultSharedPreferences(context)
-                .edit()
-                .putBoolean(PreferenceKeys.FIT_PATTERN_WIDTH, zoomButton.isChecked)
-                .apply()
-        if (zoomButton.isChecked)
+    private fun fitToPatternWidthButtonPressed() {
+        presenter.fitPatternWidth = !presenter.fitPatternWidth
+        val zoomButton = menu.findItem(R.id.zoom_button)
+        zoomButton.isChecked = presenter.fitPatternWidth
+        zoomButton.icon.alpha = resources.getInteger(if (presenter.fitPatternWidth) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
+        if (presenter.fitPatternWidth)
             knitPatternView.setZoomToPatternWidth()
         else
             knitPatternView.setZoom(1F)

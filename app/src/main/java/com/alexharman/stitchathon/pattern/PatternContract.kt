@@ -16,6 +16,8 @@ interface PatternContract {
     }
 
     interface Presenter: BasePresenter<View> {
+        var fitPatternWidth: Boolean
+
         fun increment()
 
         fun incrementRow()
