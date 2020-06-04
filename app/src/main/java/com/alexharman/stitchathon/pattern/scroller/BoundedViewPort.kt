@@ -18,7 +18,7 @@ class BoundedViewPort(val currentView: Rect, val viewportBounds: Rect) {
 
     private fun keepOffsetWithinBounds(shiftX: Int, shiftY: Int): Pair<Int, Int> {
         val myShiftX: Int = when {
-            currentView.left + shiftX < viewportBounds.left -> currentView.left - viewportBounds.left
+            currentView.left + shiftX < viewportBounds.left -> viewportBounds.left - currentView.left
             currentView.right + shiftX > viewportBounds.right -> viewportBounds.right - currentView.right
             else -> shiftX
         }

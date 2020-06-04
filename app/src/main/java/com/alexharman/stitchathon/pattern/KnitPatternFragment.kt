@@ -120,7 +120,6 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
         lockButton.isChecked = presenter.lockToCurrentStitch
         lockButton.icon = context?.getDrawable(if (presenter.lockToCurrentStitch) R.drawable.ic_lock_closed_white_24dp else R.drawable.ic_lock_open_white_24dp)
         lockButton.icon.alpha = resources.getInteger(if (presenter.lockToCurrentStitch) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
-//        knitPatternDrawer?.setLockToCentre(lockButton.isChecked)
     }
 
     private fun fitToPatternWidthButtonPressed() {

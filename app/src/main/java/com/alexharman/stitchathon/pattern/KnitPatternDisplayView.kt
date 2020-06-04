@@ -63,7 +63,6 @@ class KnitPatternDisplayView(context: Context, attrs: AttributeSet) : View(conte
             patternScroller = ScrollerDrawer(width, height, knitPatternDrawer ?: return)
             invalidate()
         }
-
     }
 
     fun scroll(distanceX: Float, distanceY: Float) {

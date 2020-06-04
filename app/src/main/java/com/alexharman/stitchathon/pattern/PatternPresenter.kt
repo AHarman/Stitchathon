@@ -13,6 +13,13 @@ class PatternPresenter(override var view: PatternContract.View, private val repo
     private val undoStack = Stack<Int>()
     override var fitPatternWidth = false
     override var lockToCurrentStitch = false
+        set(value) {
+            field = value
+            val pattern = pattern ?: return
+            if (value) {
+                view.scrollToStitch(pattern.currentRow, pattern.nextStitchInRow)
+            }
+        }
 
     init {
         view.presenter = this
@@ -34,6 +41,7 @@ class PatternPresenter(override var view: PatternContract.View, private val repo
     override fun onKnitPatternOpened(pattern: KnitPattern) {
         this.pattern = pattern
         view.setPattern(pattern, repository.getPatternPreferences(pattern.name))
+        view.scrollToStitch(pattern.currentRow, pattern.nextStitchInRow)
         view.dismissLoadingBar()
     }
 
@@ -52,9 +60,12 @@ class PatternPresenter(override var view: PatternContract.View, private val repo
     }
 
     private fun increment(numStitches: Int) {
+        val pattern = pattern ?: return
         undoStack.push(numStitches)
-        pattern?.increment(numStitches)
+        pattern.increment(numStitches)
         view.patternUpdated()
+        if (lockToCurrentStitch)
+            view.scrollToStitch(pattern.currentRow, pattern.nextStitchInRow)
     }
 
     override fun incrementBlock() {
@@ -102,6 +113,8 @@ class PatternPresenter(override var view: PatternContract.View, private val repo
                 pattern.undoStitch()
             }
         }
+        if (lockToCurrentStitch)
+            view.scrollToStitch(pattern.currentRow, pattern.nextStitchInRow)
         view.patternUpdated()
     }
 

@@ -1,11 +1,11 @@
 package com.alexharman.stitchathon.repository.database
 
-import androidx.room.*
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
+import androidx.room.*
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import java.io.BufferedReader
