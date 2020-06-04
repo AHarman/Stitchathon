@@ -173,7 +173,7 @@ class MainActivity :
                 .edit()
                 .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
                 .apply()
-        knitPatternFragment.setPattern(null)
+        knitPatternFragment.setPattern(null, null)
     }
 
     override fun onPatternImport(pattern: KnitPattern) {

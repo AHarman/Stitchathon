@@ -1,16 +1,15 @@
 package com.alexharman.stitchathon.pattern.drawer
 
-import android.content.SharedPreferences
 import android.graphics.*
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.KnitPackage.KnitPatternPreferences
 import com.alexharman.stitchathon.KnitPackage.Stitch
-import com.alexharman.stitchathon.repository.PreferenceKeys
 import kotlin.math.min
 
 // TODO: Pass in colors rather than SharedPreferences object
-class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPreferences): AreaDrawer {
-    private val stitchSize: Int
-    private val stitchPad: Int
+class KnitPatternDrawer(private val knitPattern: KnitPattern, preferences: KnitPatternPreferences): AreaDrawer {
+    private val stitchSize = preferences.stitchSize
+    private val stitchPad = preferences.stitchPad
 
     private var stitchDrawers: HashMap<Stitch, ScaleDrawer>
     private val doneOverlayDrawer: DoneOverlayDrawer
@@ -20,13 +19,6 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
     override val overallWidth: Int
 
     init {
-        val colours = IntArray(3)
-        colours[0] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_1, -1)
-        colours[1] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_2, -1)
-        colours[2] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_3, -1)
-
-        stitchSize = preferences.getInt(PreferenceKeys.STITCH_SIZE, 0)
-        stitchPad = preferences.getInt(PreferenceKeys.STITCH_PAD, 0)
         overallHeight = (knitPattern.stitches.size * (stitchSize + stitchPad) + stitchPad)
         overallWidth = (knitPattern.patternWidth * (stitchSize + stitchPad) + stitchPad)
 
@@ -37,10 +29,10 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         }
 
         doneOverlayDrawer = DoneOverlayDrawer(stitchSize, doneOverlayPaint)
-        stitchDrawers = createStitchDrawers(knitPattern.stitchTypes, colours)
+        stitchDrawers = createStitchDrawers(knitPattern.stitchTypes, preferences.stitchColors)
     }
 
-    private fun createStitchDrawers(stitches: Collection<Stitch>, colours: IntArray): HashMap<Stitch, ScaleDrawer> {
+    private fun createStitchDrawers(stitches: Collection<Stitch>, colours: Array<Int>): HashMap<Stitch, ScaleDrawer> {
         val drawers = HashMap<Stitch, ScaleDrawer>()
         val stitchColours = HashMap<Stitch, Int>()
 

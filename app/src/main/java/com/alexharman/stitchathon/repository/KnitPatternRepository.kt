@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.KnitPackage.KnitPatternPreferences
 import com.alexharman.stitchathon.R
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import com.alexharman.stitchathon.repository.database.KnitPatternDao
@@ -107,5 +108,20 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
                 ?.clear()
                 ?.apply()
         PreferenceManager.setDefaultValues(context.get(), R.xml.preferences, true)
+    }
+
+    override fun getPatternPreferences(patternName: String): KnitPatternPreferences {
+        val prefs = sharedPreferences.get()!!
+        val context = context.get()!!
+        return KnitPatternPreferences(
+                backgroundColor = prefs.getInt(PreferenceKeys.BACKGROUND_COLOUR, R.color.default_pattern_background_colour),
+                stitchColors = arrayOf(
+                        prefs.getInt(PreferenceKeys.STITCH_COLOUR_1, context.getColor(R.color.default_stitch_colour_1)),
+                        prefs.getInt(PreferenceKeys.STITCH_COLOUR_2, context.getColor(R.color.default_stitch_colour_2)),
+                        prefs.getInt(PreferenceKeys.STITCH_COLOUR_3, context.getColor(R.color.default_stitch_colour_3))
+                ),
+                stitchPad = prefs.getInt(PreferenceKeys.STITCH_PAD, 1),
+                stitchSize = prefs.getInt(PreferenceKeys.STITCH_SIZE, 1)
+        )
     }
 }

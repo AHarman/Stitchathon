@@ -9,6 +9,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GestureDetectorCompat
 import com.alexharman.stitchathon.BaseFragmentView
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.KnitPackage.KnitPatternPreferences
 import com.alexharman.stitchathon.R
 import com.alexharman.stitchathon.loading.ProgressbarDialog
 
@@ -25,10 +26,11 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
     private lateinit var stitchCount: TextView
     private lateinit var rowCount: TextView
     private lateinit var completeCount: TextView
-    private lateinit var knitPatternView: KnitPatternView
+    private lateinit var knitPatternView: KnitPatternDisplayView
     private lateinit var knitPatternViewGestureDetector: GestureDetectorCompat
 
     private var pattern: KnitPattern? = null
+    private var patternPreferences: KnitPatternPreferences? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_knitpattern, container, false)
@@ -47,7 +49,7 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
         view.findViewById<Button>(R.id.undo_button).setOnClickListener { presenter.undo() }
         knitPatternViewGestureDetector = GestureDetectorCompat(context, KnitPatternViewGestureListener())
         knitPatternView.setOnTouchListener { _, event -> knitPatternViewGestureDetector.onTouchEvent(event) }
-        knitPatternView.pattern = this.pattern
+        knitPatternView.setPattern(pattern, patternPreferences)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -87,9 +89,10 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
         updateProgressCounters()
     }
 
-    override fun setPattern(pattern: KnitPattern?) {
+    override fun setPattern(pattern: KnitPattern?, patternPreferences: KnitPatternPreferences?) {
         this.pattern = pattern
-        knitPatternView.pattern = pattern
+        this.patternPreferences = patternPreferences
+        knitPatternView.setPattern(pattern, patternPreferences)
         patternUpdated()
         patternNameView?.text = pattern?.name
 //        patternThumbnailView?.setImageBitmap(thumbnail)
@@ -164,6 +167,4 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
             presenter.incrementBlock()
         }
     }
-
-
 }

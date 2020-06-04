@@ -33,13 +33,13 @@ class PatternPresenter(override var view: PatternContract.View, private val repo
 
     override fun onKnitPatternOpened(pattern: KnitPattern) {
         this.pattern = pattern
-        view.setPattern(pattern)
+        view.setPattern(pattern, repository.getPatternPreferences(pattern.name))
         view.dismissLoadingBar()
     }
 
     override fun onOpenKnitPatternFail() {
         pattern = null
-        view.setPattern(null)
+        view.setPattern(null, null)
         view.dismissLoadingBar()
     }
 

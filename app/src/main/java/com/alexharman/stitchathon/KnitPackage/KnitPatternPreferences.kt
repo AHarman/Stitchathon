@@ -1,7 +1,8 @@
 package com.alexharman.stitchathon.KnitPackage
 
 class KnitPatternPreferences(
-        val stitchColors: IntArray,
+        val stitchColors: Array<Int>,
         val backgroundColor: Int,
         val stitchSize: Int,
-        val stitchPad: Int)
+        val stitchPad: Int) {
+}
