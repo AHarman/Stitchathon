@@ -9,6 +9,8 @@ interface PatternContract {
     interface View: BaseView<Presenter> {
         fun patternUpdated()
 
+        fun scrollToStitch(row: Int, col: Int)
+
         fun setPattern(pattern: KnitPattern?, patternPreferences: KnitPatternPreferences?)
 
         fun showLoadingBar()

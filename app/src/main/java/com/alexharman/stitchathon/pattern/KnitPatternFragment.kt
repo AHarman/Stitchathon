@@ -111,6 +111,10 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
         progressbarDialog = null
     }
 
+    override fun scrollToStitch(row: Int, col: Int) {
+        knitPatternView.scrollToStitch(row, col)
+    }
+
     private fun lockButtonPressed(lockButton: MenuItem) {
         presenter.lockToCurrentStitch = !presenter.lockToCurrentStitch
         lockButton.isChecked = presenter.lockToCurrentStitch

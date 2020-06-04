@@ -77,18 +77,20 @@ class PatternPresenter(override var view: PatternContract.View, private val repo
     override fun goTo(row: Int, col: Int) {
         val pattern = pattern ?: return
         while (row > pattern.currentRow) {
-            increment(pattern.stitchesLeftInRow)
+            pattern.increment(pattern.stitchesLeftInRow)
         }
         while (row < pattern.currentRow) {
             undoRow()
         }
         while (col > pattern.stitchesDoneInRow) {
-            increment()
+            pattern.increment()
         }
         while (col < pattern.stitchesDoneInRow) {
             pattern.undoStitch()
         }
         undoStack.clear()
+        view.scrollToStitch(row, col)
+        view.patternUpdated()
     }
 
     override fun undo() {

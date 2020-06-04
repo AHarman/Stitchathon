@@ -21,6 +21,7 @@ class KnitPatternDisplayView(context: Context, attrs: AttributeSet) : View(conte
 
     private var knitPatternDrawer: KnitPatternDrawer? = null
     private var pattern: KnitPattern? = null
+    private var patternPrefs: KnitPatternPreferences? = null
 
     init {
         bitmapToDrawPaint.isAntiAlias = true
@@ -49,6 +50,7 @@ class KnitPatternDisplayView(context: Context, attrs: AttributeSet) : View(conte
 
     fun setPattern(pattern: KnitPattern?, preferences: KnitPatternPreferences?) {
         this.pattern = pattern
+        this.patternPrefs = preferences
         if (pattern == null || preferences == null) {
             knitPatternDrawer = null
             patternScroller = null
@@ -66,6 +68,14 @@ class KnitPatternDisplayView(context: Context, attrs: AttributeSet) : View(conte
 
     fun scroll(distanceX: Float, distanceY: Float) {
         patternScroller?.scroll(distanceX.toInt(), distanceY.toInt())
+        invalidate()
+    }
+
+    fun scrollToStitch(row: Int, col: Int) {
+        val prefs = patternPrefs ?: return
+        val x = ((col + 0.5) * (prefs.stitchSize + prefs.stitchPad)).toInt()
+        val y = ((row + 0.5) * (prefs.stitchSize + prefs.stitchPad)).toInt()
+        patternScroller?.centreOn(x, y)
         invalidate()
     }
 

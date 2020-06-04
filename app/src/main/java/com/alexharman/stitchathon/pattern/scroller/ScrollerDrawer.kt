@@ -25,7 +25,9 @@ class ScrollerDrawer(private val viewWidth: Int, private val viewHeight: Int, pr
         drawAfterOffset(adjustedOffsetX, adjustedOffsetY)
     }
 
-    fun scrollTo(left: Int, top: Int) {
+    fun centreOn(x: Int, y: Int) {
+        val left = x - viewPort.currentView.width() / 2
+        val top = y - viewPort.currentView.height() / 2
         val (adjustedOffsetX, adjustedOffsetY) = viewPort.offsetTo(left, top)
         drawAfterOffset(adjustedOffsetX, adjustedOffsetY)
     }
