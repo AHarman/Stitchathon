@@ -25,8 +25,8 @@ class KnitPatternDrawer(val knitPattern: KnitPattern, preferences: SharedPrefere
         colours[1] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_2, -1)
         colours[2] = preferences.getInt(PreferenceKeys.STITCH_COLOUR_3, -1)
 
-        stitchSize = preferences.getString(PreferenceKeys.STITCH_SIZE, "0")!!.toInt()
-        stitchPad = preferences.getString(PreferenceKeys.STITCH_PAD, "0")!!.toInt()
+        stitchSize = preferences.getInt(PreferenceKeys.STITCH_SIZE, 0)
+        stitchPad = preferences.getInt(PreferenceKeys.STITCH_PAD, 0)
         overallHeight = (knitPattern.stitches.size * (stitchSize + stitchPad) + stitchPad)
         overallWidth = (knitPattern.patternWidth * (stitchSize + stitchPad) + stitchPad)
 

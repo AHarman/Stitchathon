@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen  xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
         app:title="@string/app_options_stitch_options_title">
-        <EditTextPreference
+        <com.alexharman.stitchathon.settings.EditNumberTextPreference
             android:defaultValue="@integer/default_stitch_size"
             app:key="stitch_size"
             app:title="@string/app_options_stitch_size_title"
-            android:inputType="numberDecimal"
-            app:useSimpleSummaryProvider="true"/>
-        <EditTextPreference
+            app:useSimpleSummaryProvider="true"
+            />
+        <com.alexharman.stitchathon.settings.EditNumberTextPreference
             android:defaultValue="@integer/default_stitch_pad"
             app:key="stitch_padding"
             app:title="@string/app_options_stitch_pad_title"
-            android:inputType="numberDecimal"
             app:useSimpleSummaryProvider="true"/>
     </PreferenceCategory>
 

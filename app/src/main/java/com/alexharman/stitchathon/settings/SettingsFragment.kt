@@ -3,10 +3,8 @@ package com.alexharman.stitchathon.settings
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.text.InputType
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
-import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceClickListener
 import com.alexharman.stitchathon.R
@@ -24,11 +22,6 @@ class SettingsFragment: ChromaPreferenceFragmentCompat(), SettingsContract.View 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
         setPrefListeners()
-        findPreference<EditTextPreference>(PreferenceKeys.STITCH_PAD)
-                ?.setOnBindEditTextListener { it.inputType = InputType.TYPE_CLASS_NUMBER }
-        findPreference<EditTextPreference>(PreferenceKeys.STITCH_SIZE)
-                ?.setOnBindEditTextListener { it.inputType = InputType.TYPE_CLASS_NUMBER }
-
     }
 
     private fun setPrefListeners() {
