@@ -32,7 +32,7 @@ internal class ImportJsonTask(context: Context, listener: KnitPatternDataSource.
                 line = reader.readLine() ?: break
                 stringBuilder.append(line)
             }
-            inputStream.close()
+            inputStream?.close()
             reader.close()
         } catch (e: IOException) {
             e.printStackTrace()

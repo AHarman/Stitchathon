@@ -6,7 +6,6 @@ import com.alexharman.stitchathon.KnitPackage.KnitPatternPreferences
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import kotlin.math.min
 
-// TODO: Pass in colors rather than SharedPreferences object
 class KnitPatternDrawer(private val knitPattern: KnitPattern, preferences: KnitPatternPreferences): AreaDrawer {
     private val stitchSize = preferences.stitchSize
     private val stitchPad = preferences.stitchPad

@@ -135,8 +135,8 @@ abstract class KnitPatternDao {
         opts.inMutable = true
         try {
             val inputStream = context.contentResolver.openInputStream(pathUri)
-            bitmap = BitmapFactory.decodeStream(inputStream, null, opts)
-            inputStream.close()
+            bitmap = BitmapFactory.decodeStream(inputStream, null, opts)!!
+            inputStream?.close()
         } catch (e: Exception) {
             e.printStackTrace()
             throw e

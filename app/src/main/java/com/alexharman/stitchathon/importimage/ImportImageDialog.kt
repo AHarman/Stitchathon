@@ -57,7 +57,6 @@ class ImportImageDialog: BaseDialogFragmentView<ImportImageContract.View, Import
         return dialog
     }
 
-    // TODO: Split out show/dismissLoadingBar into a different interface to share with KnitPatternFragment?
     override fun showLoadingBar() {
         if (progressbarDialog == null) {
             progressbarDialog = ProgressbarDialog.newInstance(getString(R.string.progress_dialog_load_title), getString(R.string.progress_bar_loading_pattern))
@@ -116,7 +115,7 @@ class ImportImageDialog: BaseDialogFragmentView<ImportImageContract.View, Import
         if (uri.scheme == "content") {
             val cursor = requireActivity().contentResolver.query(uri, null, null, null, null)
             cursor.use {
-                if (cursor.moveToFirst()) {
+                if (cursor?.moveToFirst() == true) {
                     fileName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
                 }
             }

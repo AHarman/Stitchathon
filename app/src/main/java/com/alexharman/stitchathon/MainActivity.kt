@@ -35,7 +35,6 @@ class MainActivity :
 
     companion object {
         lateinit var repository: KnitPatternRepository
-        // TODO: Rename request codes
         const val KNIT_PATTERN_FRAGMENT = "KnitPatternFragment"
         const val OPEN_PATTERN_FRAGMENT = "OpenPatternFragment"
         const val SETTINGS_FRAGMENT = "SettingsFragment"
