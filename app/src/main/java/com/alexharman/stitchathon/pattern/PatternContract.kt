@@ -11,6 +11,10 @@ interface PatternContract {
 
         fun scrollToStitch(row: Int, col: Int)
 
+        fun zoomToPatternWidth()
+
+        fun resetZoom()
+
         fun setPattern(pattern: KnitPattern?, patternPreferences: KnitPatternPreferences?)
 
         fun showLoadingBar()

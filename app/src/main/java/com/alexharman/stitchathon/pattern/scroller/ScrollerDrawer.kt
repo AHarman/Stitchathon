@@ -42,7 +42,12 @@ class ScrollerDrawer(private val viewWidth: Int, private val viewHeight: Int, pr
     }
 
     fun setZoom(zoom: Float) {
+        val centreX = viewPort.currentView.centerX()
+        val centreY = viewPort.currentView.centerY()
         viewPort = createViewPort(zoom)
+        viewPort.offsetTo(
+                centreX - viewPort.currentView.width() / 2,
+                centreY - viewPort.currentView.height() /2)
         baseDestination = createBaseDestRect(zoom)
         Canvas(currentBitmap).drawColor(0x00000000, PorterDuff.Mode.CLEAR)
     }

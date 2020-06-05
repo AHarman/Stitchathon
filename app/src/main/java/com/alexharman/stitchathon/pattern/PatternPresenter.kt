@@ -12,6 +12,17 @@ class PatternPresenter(override var view: PatternContract.View, private val repo
     private var pattern: KnitPattern? = null
     private val undoStack = Stack<Int>()
     override var fitPatternWidth = false
+        set(value) {
+            field = value
+            val pattern = pattern ?: return
+            if (value) {
+                view.zoomToPatternWidth()
+            } else {
+                view.resetZoom()
+                view.scrollToStitch(pattern.currentRow, pattern.nextStitchInRow)
+            }
+        }
+
     override var lockToCurrentStitch = false
         set(value) {
             field = value

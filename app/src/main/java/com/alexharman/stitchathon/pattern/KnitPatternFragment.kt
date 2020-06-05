@@ -78,7 +78,7 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
         return when (item.itemId){
             R.id.action_settings -> true
             R.id.zoom_button -> { fitToPatternWidthButtonPressed(); true }
-            R.id.go_to_stitch_button -> { gotToStitch(); true }
+            R.id.go_to_stitch_button -> { openGotToStitchDialog(); true }
             R.id.lock_button -> { lockButtonPressed(item); true }
             else -> super.onOptionsItemSelected(item)
         }
@@ -115,6 +115,14 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
         knitPatternView.scrollToStitch(row, col)
     }
 
+    override fun zoomToPatternWidth() {
+        knitPatternView.setZoomToPatternWidth()
+    }
+
+    override fun resetZoom() {
+        knitPatternView.setZoom(1F)
+    }
+
     private fun lockButtonPressed(lockButton: MenuItem) {
         presenter.lockToCurrentStitch = !presenter.lockToCurrentStitch
         lockButton.isChecked = presenter.lockToCurrentStitch
@@ -127,13 +135,9 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
         val zoomButton = menu.findItem(R.id.zoom_button)
         zoomButton.isChecked = presenter.fitPatternWidth
         zoomButton.icon.alpha = resources.getInteger(if (presenter.fitPatternWidth) R.integer.icon_alpha_selected else R.integer.icon_alpha_unselected)
-        if (presenter.fitPatternWidth)
-            knitPatternView.setZoomToPatternWidth()
-        else
-            knitPatternView.setZoom(1F)
     }
 
-    private fun gotToStitch() {
+    private fun openGotToStitchDialog() {
         val pattern = pattern ?: return
         GoToStitchDialog.newInstance(pattern.currentRow, pattern.stitchesDoneInRow)
                 .show(childFragmentManager, "Go to stitch")
