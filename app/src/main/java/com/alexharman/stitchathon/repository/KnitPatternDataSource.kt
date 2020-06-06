@@ -44,8 +44,13 @@ interface KnitPatternDataSource {
 
     fun saveKnitPatternChanges(pattern: KnitPattern)
 
-    // TODO: Move this to a service or something
-    fun importNewJsonPattern(uri: String, listener: ImportPatternListener? = null)
+    // TODO: Move this to a service or something, have "save new pattern" as a repo method
+    fun importNewJsonPattern(
+            uri: String,
+            name: String,
+            oddRowsOpposite: Boolean,
+            listener: ImportPatternListener? = null
+    )
 
     fun importNewBitmapPattern(
             uri: String,

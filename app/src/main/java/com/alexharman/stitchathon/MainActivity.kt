@@ -2,7 +2,6 @@ package com.alexharman.stitchathon
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -16,6 +15,8 @@ import androidx.preference.PreferenceManager
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.importimage.ImportImageDialog
 import com.alexharman.stitchathon.importimage.ImportImagePresenter
+import com.alexharman.stitchathon.importjson.ImportJsonDialog
+import com.alexharman.stitchathon.importjson.ImportJsonPresenter
 import com.alexharman.stitchathon.loading.ProgressbarDialog
 import com.alexharman.stitchathon.pattern.KnitPatternFragment
 import com.alexharman.stitchathon.pattern.PatternPresenter
@@ -41,6 +42,7 @@ class MainActivity :
     }
 
     private var importImageDialog: ImportImageDialog? = null
+    private var importJsonDialog: ImportJsonDialog? = null
     private var knitPatternFragment = KnitPatternFragment()
     private var progressbarDialog: ProgressbarDialog? = null
 
@@ -58,12 +60,10 @@ class MainActivity :
 
     override fun onBackPressed() {
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START)
-        } else if (supportFragmentManager.backStackEntryCount > 0) {
-            returnToKnitPatternFragment()
-        } else {
-            super.onBackPressed()
+        when {
+            drawer.isDrawerOpen(GravityCompat.START) -> { drawer.closeDrawer(GravityCompat.START)}
+            supportFragmentManager.backStackEntryCount > 0 -> { returnToKnitPatternFragment() }
+            else -> { super.onBackPressed() }
         }
     }
 
@@ -77,7 +77,7 @@ class MainActivity :
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.nav_open -> startSelectPatternFragment()
-            R.id.nav_import_pattern -> selectExternalFile("application/json", RequestCodes.READ_EXTERNAL_JSON_PATTERN.value)
+            R.id.nav_import_pattern -> importJson()
             R.id.nav_import_image -> importImage()
             R.id.nav_about_app -> AppInfoDialog().show(supportFragmentManager, "App info")
             R.id.nav_settings -> showSettings()
@@ -116,7 +116,7 @@ class MainActivity :
     }
 
     internal fun selectExternalFile(type: String, requestCode: Int) {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = type
         startActivityForResult(intent, requestCode)
@@ -145,9 +145,12 @@ class MainActivity :
         importImageDialog = dialog
     }
 
-    private fun importJson(uri: Uri) {
-//        showProgressBar(getString(R.string.progress_dialog_import_title), getString(R.string.progress_bar_importing_pattern))
-        repository.importNewJsonPattern(uri.toString(), this)
+    private fun importJson() {
+        val dialog = ImportJsonDialog()
+        ImportJsonPresenter(dialog, repository)
+        dialog.show(supportFragmentManager, "Importing image")
+        importJsonDialog = dialog
+        selectExternalFile("application/json", RequestCodes.READ_EXTERNAL_JSON_PATTERN.value)
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
@@ -155,13 +158,13 @@ class MainActivity :
         if (requestCode == RequestCodes.READ_EXTERNAL_JSON_PATTERN.value && resultCode == Activity.RESULT_OK) {
             val data = resultData?.data
             if (data != null) {
-                importJson(data)
+                importImageDialog?.setFilenameViewText(data)
             }
         }
         if (requestCode == RequestCodes.READ_EXTERNAL_IMAGE.value && resultCode == Activity.RESULT_OK) {
             val data = resultData?.data
-            if (resultData != null && data != null) {
-                importImageDialog?.setFilenameViewText(data)
+            if (data != null) {
+                importJsonDialog?.setFilenameViewText(data)
             }
         }
     }

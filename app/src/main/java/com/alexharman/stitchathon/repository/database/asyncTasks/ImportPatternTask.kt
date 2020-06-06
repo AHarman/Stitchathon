@@ -16,8 +16,8 @@ import com.alexharman.stitchathon.repository.PreferenceKeys
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference
 
-internal abstract class ImportPatternTask<V> internal constructor(context: Context, listener: KnitPatternDataSource.ImportPatternListener?)
-    : AsyncTask<V, String, KnitPattern>() {
+internal abstract class ImportPatternTask internal constructor(context: Context, listener: KnitPatternDataSource.ImportPatternListener?):
+        AsyncTask<Void, String, KnitPattern>() {
     protected var context: WeakReference<Context> = WeakReference(context)
     private var callback: WeakReference<KnitPatternDataSource.ImportPatternListener?> = WeakReference(listener)
 

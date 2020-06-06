@@ -9,12 +9,18 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 
-internal class ImportJsonTask(context: Context, listener: KnitPatternDataSource.ImportPatternListener?) : ImportPatternTask<String>(context, listener) {
+internal class ImportJsonTask(
+        context: Context,
+        listener: KnitPatternDataSource.ImportPatternListener?,
+        private val uri: String,
+        private val name: String,
+        private val oddRowsOpposite: Boolean):
+        ImportPatternTask(context, listener) {
 
-    override fun doInBackground(vararg uris: String): KnitPattern? {
+    override fun doInBackground(vararg voids: Void): KnitPattern? {
         var knitPattern: KnitPattern? = null
         try {
-            knitPattern = KnitPatternParser.createKnitPattern(readTextFile(Uri.parse(uris[0])))
+            knitPattern = KnitPatternParser.createKnitPattern(readTextFile(Uri.parse(uri)))
             saveNewPattern(knitPattern)
         } catch (e: Throwable) {
             e.printStackTrace()

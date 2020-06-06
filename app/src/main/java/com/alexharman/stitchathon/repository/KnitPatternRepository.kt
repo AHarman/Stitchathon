@@ -66,16 +66,27 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
         GetNamesAndImagesTask(context, callback).execute()
     }
 
-    override fun importNewJsonPattern(uri: String, listener: KnitPatternDataSource.ImportPatternListener?) {
+    override fun importNewJsonPattern(
+            uri: String,
+            name: String,
+            oddRowsOpposite: Boolean,
+            listener: KnitPatternDataSource.ImportPatternListener?) {
         val context = context.get()
         when {
-            context != null -> ImportJsonTask(context, listener).execute(uri)
+            context != null -> ImportJsonTask(context, listener, uri, name, oddRowsOpposite).execute()
             listener != null -> listener.onPatternImportFail()
             else -> return
         }
     }
 
-    override fun importNewBitmapPattern(uri: String, name: String, width: Int, height: Int, oddRowsOpposite: Boolean, numColours: Int, listener: KnitPatternDataSource.ImportPatternListener?) {
+    override fun importNewBitmapPattern(
+            uri: String,
+            name: String,
+            width: Int,
+            height: Int,
+            oddRowsOpposite: Boolean,
+            numColours: Int,
+            listener: KnitPatternDataSource.ImportPatternListener?) {
         val context = context.get()
         when {
             context != null -> ImportImageTask(context, listener, uri, name, width, height, oddRowsOpposite, numColours).execute()

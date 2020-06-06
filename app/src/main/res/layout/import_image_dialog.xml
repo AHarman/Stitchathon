@@ -1,143 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="10dp">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <EditText
-            android:inputType="text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textAlignment="center"
-            android:layout_gravity="bottom"
-            android:hint="@string/select_image"
-            android:enabled="false"
-            android:id="@+id/import_image_browse_edittext"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/browse"
-            android:id="@+id/import_image_browse_button"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="@string/import_image_pattern_name_label"
-            android:textStyle="bold"
-            android:labelFor="@id/pattern_name_edittext"/>
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:textAlignment="center"
-            android:inputType="text"
-            android:id="@+id/pattern_name_edittext"/>
-    </LinearLayout>
-    <LinearLayout
+    android:layout_margin="16dp"
+    android:orientation="vertical">
+    <!--TODO: Have labels left with a boundary and fields right-->
+    <EditText
+        android:id="@+id/pattern_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp"
-        android:orientation="horizontal">
-        <androidx.legacy.widget.Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="@string/stitch_count_label"
-            android:textStyle="bold"
-            android:layout_weight="1"/>
-        <androidx.legacy.widget.Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"/>
-        <EditText
-            android:id="@+id/stitches_wide_edittext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:hint="@string/stitches_wide"
-            android:inputType="number"
-            android:minEms="4"
-            android:textAlignment="center"
-            android:layout_weight="1"/>
-        <androidx.legacy.widget.Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"/>
-        <EditText
-            android:id="@+id/stitches_high_edittext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:hint="@string/stitches_high"
-            android:inputType="number"
-            android:minEms="4"
-            android:textAlignment="center"
-            android:layout_weight="1"/>
-        <androidx.legacy.widget.Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"/>
-    </LinearLayout>
-    <RadioGroup
-        android:id="@+id/rows_rounds_radiogroup"
+        android:layout_marginVertical="16dp"
+        android:ems="10"
+        android:hint="@string/pattern_name_hint"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        app:layout_constraintBottom_toTopOf="@id/rows_or_rounds"
+        app:layout_constraintTop_toBottomOf="@id/select_image_file" />
+
+    <EditText
+        android:id="@+id/stitches_wide_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="@string/stitches_wide"
+        android:inputType="number"
+        android:minEms="4"
+        android:textAlignment="center"
+        android:importantForAutofill="no"
+        app:layout_constraintEnd_toEndOf="@id/stitches_high_edittext"
+        app:layout_constraintStart_toEndOf="@id/stitches_label"
+        app:layout_constraintTop_toBottomOf="@id/stitches_barrier_top"
+        app:layout_constraintBottom_toBottomOf="@id/stitches_barrier_bottom" />
+
+    <EditText
+        android:id="@+id/stitches_high_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="@string/stitches_high"
+        android:inputType="number"
+        android:minEms="4"
+        android:textAlignment="center"
+        android:importantForAutofill="no"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/stitches_wide_edittext"
+        app:layout_constraintTop_toBottomOf="@id/stitches_barrier_top"
+        app:layout_constraintBottom_toBottomOf="@id/stitches_barrier_bottom"/>
+
+    <TextView
+        android:id="@+id/stitches_label"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/stitch_count_label"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/stitches_wide_edittext"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/stitches_barrier_top"
+        app:layout_constraintBottom_toBottomOf="@id/stitches_barrier_bottom"/>
+
+    <include
+        android:id="@+id/select_image_file"
+        layout="@layout/select_file"
+        app:layout_constraintBottom_toTopOf="@id/pattern_name"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <include
+        android:id="@+id/rows_or_rounds"
+        layout="@layout/rows_rounds_radio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-        <androidx.legacy.widget.Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-        <androidx.appcompat.widget.AppCompatRadioButton
-            android:id="@+id/rows_radio_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/rows_radio_button_text"/>
-        <androidx.legacy.widget.Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-        <androidx.appcompat.widget.AppCompatRadioButton
-            android:id="@+id/rounds_radio_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rounds_radio_button_text"/>
-        <androidx.legacy.widget.Space
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-    </RadioGroup>
-    <LinearLayout
-        android:layout_width="match_parent"
+        app:layout_constraintBottom_toTopOf="@id/stitches_barrier_top"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/pattern_name"
+        android:layout_marginBottom="16dp"/>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/stitches_barrier_bottom"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textStyle="bold"
-            android:text="@string/number_of_colours_label"/>
-        <androidx.legacy.widget.Space
-            android:layout_width="50dp"
-            android:layout_height="wrap_content" />
-        <NumberPicker
-            android:id="@+id/import_image_numpicker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-</LinearLayout>
+        app:barrierDirection="bottom" />
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/stitches_barrier_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top" />
+
+    <TextView
+        android:id="@+id/colours_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textStyle="bold"
+        android:text="@string/number_of_colours_label"
+        app:layout_constraintTop_toBottomOf="@id/stitches_barrier_bottom"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/colours_numpicker" />
+    <NumberPicker
+        android:id="@+id/colours_numpicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/stitches_barrier_bottom"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/colours_label"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

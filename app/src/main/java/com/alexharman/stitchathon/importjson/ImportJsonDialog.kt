@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon.importimage
+package com.alexharman.stitchathon.importjson
 
 import android.app.Dialog
 import android.content.Context
@@ -9,7 +9,6 @@ import android.provider.OpenableColumns
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.NumberPicker
 import android.widget.RadioGroup
 import androidx.appcompat.app.AlertDialog
 import com.alexharman.stitchathon.BaseDialogFragmentView
@@ -19,11 +18,12 @@ import com.alexharman.stitchathon.R
 import com.alexharman.stitchathon.RequestCodes
 import com.alexharman.stitchathon.loading.ProgressbarDialog
 
-class ImportImageDialog: BaseDialogFragmentView<ImportImageContract.View, ImportImageContract.Presenter>(),
-       ImportImageContract.View {
+// TODO: Create import file base dialog
+class ImportJsonDialog: BaseDialogFragmentView<ImportJsonContract.View, ImportJsonContract.Presenter>(),
+       ImportJsonContract.View {
 
     override val view = this
-    override lateinit var presenter: ImportImageContract.Presenter
+    override lateinit var presenter: ImportJsonContract.Presenter
     // TODO: Do we need this as a property? Can we just do this.findViewById?
     private lateinit var dialogView: View
     private var progressbarDialog: ProgressbarDialog? = null
@@ -33,13 +33,7 @@ class ImportImageDialog: BaseDialogFragmentView<ImportImageContract.View, Import
         val dialog: AlertDialog
         val inflater = requireActivity().layoutInflater
         val builder = AlertDialog.Builder(activity as Context)
-        dialogView = inflater.inflate(R.layout.import_image_dialog, null)
-
-        val numberPicker: NumberPicker = dialogView.findViewById(R.id.colours_numpicker) as NumberPicker
-        numberPicker.maxValue = 20
-        numberPicker.minValue = 2
-        numberPicker.value = 2
-        numberPicker.wrapSelectorWheel = false
+        val dialogView = inflater.inflate(R.layout.import_image_dialog, null)
 
         dialogView.findViewById<EditText>(R.id.stitches_wide_edittext).setOnFocusChangeListener { v, hf -> emptyTextCheck(v as EditText, hf) }
         dialogView.findViewById<EditText>(R.id.stitches_high_edittext).setOnFocusChangeListener { v, hf -> emptyTextCheck(v as EditText, hf) }
@@ -91,23 +85,22 @@ class ImportImageDialog: BaseDialogFragmentView<ImportImageContract.View, Import
         val height = heightView.text.toString().toIntOrNull()
         val rowsOrRounds = dialogView.findViewById<RadioGroup>(R.id.rows_or_rounds)
         val oddRowsOpposite = rowsOrRounds.checkedRadioButtonId == R.id.rows_button
-        val numPicker = dialogView.findViewById<NumberPicker>(R.id.colours_numpicker)
-        val numColours = numPicker.value
-        var formNotFull = false
+        var formError = false
 
         if (name.isEmpty()) name = nameView.hint.toString()
 
         if (width == null) {
             widthView.error = getString(R.string.empty_string_error)
-            formNotFull = true
+            formError = true
         }
         if (height == null) {
             heightView.error = getString(R.string.empty_string_error)
-            formNotFull = true
+            formError = true
         }
-        if (formNotFull) return
+        if (formError) return
         if (imageUri == null) return
-        presenter.importImage(imageUri!!, name, width!!, height!!, oddRowsOpposite, numColours)
+
+        presenter.importJson(imageUri!!, name, oddRowsOpposite)
         dialog.dismiss()
     }
 
@@ -124,6 +117,7 @@ class ImportImageDialog: BaseDialogFragmentView<ImportImageContract.View, Import
         return fileName
     }
 
+    // TODO: This can probably be better?
     fun setFilenameViewText(uri: Uri) {
         imageUri = uri.toString()
         val fileName = getFileDisplayName(uri)

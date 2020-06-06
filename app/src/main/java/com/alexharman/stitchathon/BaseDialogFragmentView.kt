@@ -1,10 +1,8 @@
-package com.alexharman.stitchathon.importimage
+package com.alexharman.stitchathon
 
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.DialogFragment
-import com.alexharman.stitchathon.BasePresenter
-import com.alexharman.stitchathon.BaseView
 
 abstract class BaseDialogFragmentView<V: BaseView<P>, P: BasePresenter<V>>: DialogFragment(), BaseView<P> {
     protected abstract val view: V
