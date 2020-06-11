@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <Button
+        android:id="@+id/import_file_browse_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/browse"
+        app:layout_constraintBottom_toBottomOf="@id/select_file_barrier"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/file_url_edittext"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/file_url_edittext"
+        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:enabled="false"
+        android:focusable="true"
+        android:hint="@string/select_file"
+        android:importantForAutofill="no"
+        android:inputType="textUri"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintEnd_toStartOf="@id/import_file_browse_button"
+        app:layout_constraintBottom_toBottomOf="@id/select_file_barrier"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/pattern_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="16dp"
+        android:ems="10"
+        android:hint="@string/pattern_name_hint"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        app:layout_constraintTop_toBottomOf="@id/select_file_barrier"
+        app:layout_constraintBottom_toTopOf="@id/rows_rounds_barrier"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/rows_rounds_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="@string/rows_or_rounds"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/pattern_name"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <RadioGroup
+        android:id="@+id/rows_or_rounds"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toEndOf="@id/rows_rounds_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/pattern_name"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1">
+
+        <RadioButton
+            android:id="@+id/rows_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/rows_radio_button_text" />
+
+        <RadioButton
+            android:id="@+id/rounds_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/rounds_radio_button_text" />
+    </RadioGroup>
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/select_file_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top" />
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/rows_rounds_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="rows_rounds_title,rows_or_rounds"
+        app:barrierDirection="top" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,6 +10,7 @@ import com.alexharman.stitchathon.KnitPackage.KnitPatternPreferences
 import com.alexharman.stitchathon.pattern.drawer.KnitPatternDrawer
 import com.alexharman.stitchathon.pattern.scroller.ScrollerDrawer
 
+// TODO: Just use preferences, do away with this property
 class KnitPatternDisplayView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var backgroundColor: Int = 0

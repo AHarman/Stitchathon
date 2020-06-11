@@ -27,6 +27,7 @@
     <string name="stitches_high">height</string>
     <string name="number_of_colours_label">Number of colours:</string>
     <string name="import_image_dialog_title">Import options</string>
+    <string name="import_json_dialog_title">Import options</string>
     <string name="OK">OK</string>
     <string name="cancel">Cancel</string>
     <string name="import_image_pattern_name_label">Pattern name:</string>
@@ -73,6 +74,6 @@
     <string name="fit_pattern_width">Fit to screen</string>
     <string name="rows_radio_button_text">Rows</string>
     <string name="rounds_radio_button_text">Rounds</string>
-    <string name="rows_or_rounds">Rows or rounds</string>
+    <string name="rows_or_rounds">Rows or rounds:</string>
     <string name="pattern_name_hint">Pattern Name</string>
 </resources>

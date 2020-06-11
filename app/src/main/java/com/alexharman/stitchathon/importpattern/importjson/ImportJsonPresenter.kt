@@ -1,11 +1,13 @@
-package com.alexharman.stitchathon.importjson
+package com.alexharman.stitchathon.importpattern.importjson
 
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
+import com.alexharman.stitchathon.importpattern.BaseImportPatternPresenter
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
 
 class ImportJsonPresenter(
         override var view: ImportJsonContract.View,
         private val repository: KnitPatternDataSource) :
+        BaseImportPatternPresenter<ImportJsonContract.View>(),
         ImportJsonContract.Presenter,
         KnitPatternDataSource.ImportPatternListener {
 
@@ -13,7 +15,9 @@ class ImportJsonPresenter(
         view.presenter = this
     }
 
-    override fun importJson(uri: String, name: String, oddRowsOpposite: Boolean) {
+    override fun importButtonPressed() {
+        val uri = uri ?: return
+        val name = name ?: return
         view.showLoadingBar()
         repository.importNewJsonPattern(uri, name, oddRowsOpposite, this)
     }

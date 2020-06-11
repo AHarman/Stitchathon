@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon.importimage
+package com.alexharman.stitchathon.importpattern.importimage
 
 import android.graphics.Bitmap
 import com.alexharman.stitchathon.KnitPackage.KnitPattern

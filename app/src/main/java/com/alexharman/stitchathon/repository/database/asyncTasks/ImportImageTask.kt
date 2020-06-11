@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
-import com.alexharman.stitchathon.importimage.ImageReader
+import com.alexharman.stitchathon.importpattern.importimage.ImageReader
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
 
 internal class ImportImageTask(

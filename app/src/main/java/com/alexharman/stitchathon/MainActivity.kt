@@ -1,7 +1,5 @@
 package com.alexharman.stitchathon
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -12,15 +10,12 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.preference.PreferenceManager
-import com.alexharman.stitchathon.KnitPackage.KnitPattern
-import com.alexharman.stitchathon.importimage.ImportImageDialog
-import com.alexharman.stitchathon.importimage.ImportImagePresenter
-import com.alexharman.stitchathon.importjson.ImportJsonDialog
-import com.alexharman.stitchathon.importjson.ImportJsonPresenter
-import com.alexharman.stitchathon.loading.ProgressbarDialog
+import com.alexharman.stitchathon.importpattern.importimage.ImportImageDialog
+import com.alexharman.stitchathon.importpattern.importimage.ImportImagePresenter
+import com.alexharman.stitchathon.importpattern.importjson.ImportJsonDialog
+import com.alexharman.stitchathon.importpattern.importjson.ImportJsonPresenter
 import com.alexharman.stitchathon.pattern.KnitPatternFragment
 import com.alexharman.stitchathon.pattern.PatternPresenter
-import com.alexharman.stitchathon.repository.KnitPatternDataSource
 import com.alexharman.stitchathon.repository.KnitPatternRepository
 import com.alexharman.stitchathon.repository.PreferenceKeys
 import com.alexharman.stitchathon.selectpattern.SelectPatternFragment
@@ -31,7 +26,6 @@ import com.google.android.material.navigation.NavigationView
 
 class MainActivity :
         AppCompatActivity(),
-        KnitPatternDataSource.ImportPatternListener,
         NavigationView.OnNavigationItemSelectedListener {
 
     companion object {
@@ -41,10 +35,7 @@ class MainActivity :
         const val SETTINGS_FRAGMENT = "SettingsFragment"
     }
 
-    private var importImageDialog: ImportImageDialog? = null
-    private var importJsonDialog: ImportJsonDialog? = null
     private var knitPatternFragment = KnitPatternFragment()
-    private var progressbarDialog: ProgressbarDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,13 +106,6 @@ class MainActivity :
         }
     }
 
-    internal fun selectExternalFile(type: String, requestCode: Int) {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.type = type
-        startActivityForResult(intent, requestCode)
-    }
-
     private fun showSettings() {
         val fragment =
                 supportFragmentManager.findFragmentByTag(SETTINGS_FRAGMENT) as? SettingsFragment ?:
@@ -142,31 +126,12 @@ class MainActivity :
         val dialog = ImportImageDialog()
         ImportImagePresenter(dialog, repository)
         dialog.show(supportFragmentManager, "Importing image")
-        importImageDialog = dialog
     }
 
     private fun importJson() {
         val dialog = ImportJsonDialog()
         ImportJsonPresenter(dialog, repository)
         dialog.show(supportFragmentManager, "Importing image")
-        importJsonDialog = dialog
-        selectExternalFile("application/json", RequestCodes.READ_EXTERNAL_JSON_PATTERN.value)
-    }
-
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
-        super.onActivityResult(requestCode, resultCode, resultData)
-        if (requestCode == RequestCodes.READ_EXTERNAL_JSON_PATTERN.value && resultCode == Activity.RESULT_OK) {
-            val data = resultData?.data
-            if (data != null) {
-                importImageDialog?.setFilenameViewText(data)
-            }
-        }
-        if (requestCode == RequestCodes.READ_EXTERNAL_IMAGE.value && resultCode == Activity.RESULT_OK) {
-            val data = resultData?.data
-            if (data != null) {
-                importJsonDialog?.setFilenameViewText(data)
-            }
-        }
     }
 
     fun deleteAllPatterns() {
@@ -176,15 +141,5 @@ class MainActivity :
                 .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
                 .apply()
         knitPatternFragment.setPattern(null, null)
-    }
-
-    override fun onPatternImport(pattern: KnitPattern) {
-        returnToKnitPatternFragment()
-        progressbarDialog?.dismiss()
-        progressbarDialog = null
-    }
-
-    override fun onPatternImportFail() {
-        TODO("Not yet implemented")
     }
 }
