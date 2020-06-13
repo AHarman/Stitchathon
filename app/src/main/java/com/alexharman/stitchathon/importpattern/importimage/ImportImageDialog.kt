@@ -22,14 +22,22 @@ class ImportImageDialog:
         return createDialog(R.string.import_image_dialog_title, R.layout.import_image_dialog)
     }
 
-    override fun modifyDialogView(view: View) {
-        super.modifyDialogView(view)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val numberPicker = view.findViewById<NumberPicker>(R.id.colours_numpicker)
         numberPicker.maxValue = 20
         numberPicker.minValue = 2
         numberPicker.value = 2
         numberPicker.wrapSelectorWheel = false
+        numberPicker.setOnValueChangedListener{ _, _, newVal -> presenter.numColours = newVal}
+        presenter.numColours = numberPicker.value
+
+        view.findViewById<EditText>(R.id.stitches_high_edittext)
+                .setOnFocusChangeListener() { v, hasFocus -> if (!hasFocus) presenter.stitchesHigh = (v as EditText).text.toString().toIntOrNull() }
+        view.findViewById<EditText>(R.id.stitches_wide_edittext)
+                .setOnFocusChangeListener() { v, hasFocus -> if (!hasFocus) presenter.stitchesWide = (v as EditText).text.toString().toIntOrNull() }
+
     }
 
     override fun getFormValues() {
@@ -43,17 +51,15 @@ class ImportImageDialog:
 
     override fun verifyFields(): Boolean {
         var formError = super.verifyFields()
-        val view = requireView()
+        val dialog = requireDialog()
 
-        val stitchesWideView = view.findViewById<EditText>(R.id.stitches_wide_edittext)
-        if (stitchesWideView.text.isNullOrBlank()) {
-            stitchesWideView.error = getString(R.string.empty_string_error)
+        if (presenter.stitchesWide == null || presenter.stitchesWide < 0)) {
+            dialog.findViewById<EditText>(R.id.stitches_wide_edittext).error = getString(R.string.empty_string_error)
             formError = true
         }
 
-        val stitchesHighView = view.findViewById<EditText>(R.id.stitches_high_edittext)
-        if (stitchesHighView.text.isNullOrBlank()) {
-            stitchesHighView.error = getString(R.string.empty_string_error)
+        if (presenter.stitchesWide == null || presenter.stitchesWide < 0) {
+            dialog.findViewById<EditText>(R.id.stitches_high_edittext).error = getString(R.string.empty_string_error)
             formError = true
         }
 

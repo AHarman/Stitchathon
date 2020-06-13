@@ -20,7 +20,7 @@ internal class ImportJsonTask(
     override fun doInBackground(vararg voids: Void): KnitPattern? {
         var knitPattern: KnitPattern? = null
         try {
-            knitPattern = KnitPatternParser.createKnitPattern(readTextFile(Uri.parse(uri)))
+            knitPattern = KnitPatternParser.createKnitPattern(readTextFile(Uri.parse(uri)), name, oddRowsOpposite)
             saveNewPattern(knitPattern)
         } catch (e: Throwable) {
             e.printStackTrace()

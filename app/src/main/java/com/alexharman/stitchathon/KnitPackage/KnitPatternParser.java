@@ -18,14 +18,12 @@ import java.util.regex.Pattern;
 
 public class KnitPatternParser {
 
-    public static KnitPattern createKnitPattern(String stringJsonPattern) throws JSONException {
+    public static KnitPattern createKnitPattern(String stringJsonPattern, String name, boolean oddRowsOpposite) throws JSONException {
         JSONObject json = new JSONObject(stringJsonPattern);
-        return new KnitPattern(json.getString("name"), parseJSON(json), true);
+        return new KnitPattern(name, parseJSON(json), oddRowsOpposite);
     }
 
     private static ArrayList<ArrayList<String>> parseJSON(JSONObject jsonPattern) throws JSONException {
-        String patternName = jsonPattern.getString("name");
-        Log.d("Parse", "Name: " + patternName);
         ArrayList<String> properties = extractProperties(jsonPattern);
         ArrayList<ArrayList<String>> stringPattern = extractPattern(jsonPattern);
         HashMap<String, ArrayList<ArrayList<String>>> subpatterns = extractSubpatterns(jsonPattern);
@@ -43,7 +41,6 @@ public class KnitPatternParser {
                 }
             }
         }
-        Log.d("Parse", "Done on " + patternName);
         return stringPattern;
     }
 

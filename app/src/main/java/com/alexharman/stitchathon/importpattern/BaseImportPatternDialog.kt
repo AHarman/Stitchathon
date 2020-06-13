@@ -11,6 +11,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.RadioGroup
+import androidx.annotation.CallSuper
+import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
@@ -36,11 +38,11 @@ abstract class BaseImportPatternDialog<V: BaseImportPatternContract.View<P>, P: 
         val inflater = requireActivity().layoutInflater
         val builder = AlertDialog.Builder(activity as Context)
         val dialogView = inflater.inflate(layoutId, null)
-        modifyDialogView(dialogView)
+        onViewCreated(dialogView, null)
 
         builder.setView(dialogView)
         builder.setCancelable(false)
-        builder.setTitle(R.string.import_image_dialog_title)
+        builder.setTitle(titleId)
         builder.setCancelable(false)
         builder.setPositiveButton(R.string.OK) { _, _ -> onOkPressed() }
         builder.setNegativeButton(R.string.cancel) { _, _ -> dismiss() }
@@ -49,20 +51,52 @@ abstract class BaseImportPatternDialog<V: BaseImportPatternContract.View<P>, P: 
         return dialog
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateViewData()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == fileOpenRequestCode.value && resultCode == Activity.RESULT_OK) {
             val uri = data?.data
             if (uri != null) {
-                setUri(uri)
+                presenter.uri = uri.toString()
+                if (presenter.name.isNullOrBlank()) {
+                    presenter.name = removeFileExtension(getFileName(uri))
+                }
             }
         }
     }
 
-    protected open fun modifyDialogView(view: View) {
+    @CallSuper
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         view.findViewById<Button>(R.id.import_file_browse_button).setOnClickListener { selectFile() }
-        view.findViewById<EditText>(R.id.file_url_edittext).setOnClickListener { selectFile() }
+        view.findViewById<EditText>(R.id.file_uri_edittext).setOnClickListener { selectFile() }
+        view.findViewById<EditText>(R.id.pattern_name)
+                .setOnFocusChangeListener() { v, hasFocus -> if (!hasFocus) presenter.name = (v as EditText).text.toString() }
+
+        val radioGroup = view.findViewById<RadioGroup>(R.id.rows_or_rounds)
+        radioGroup.setOnCheckedChangeListener { _, checkedId -> radioButtonPressed(checkedId) }
+        radioButtonPressed(radioGroup.checkedRadioButtonId)
     }
 
+    // TODO: I imagine this is where ViewModel comes in handy...
+    // Needed because URL field (and therefore name field) may change when view is null.
+    private fun updateViewData() {
+        val dialog = requireDialog()
+
+        if (!presenter.uri.isNullOrBlank()) {
+            val uriView = dialog.findViewById<EditText>(R.id.file_uri_edittext)
+            val filename = getFileName(Uri.parse(presenter.uri))
+            uriView.setText(filename)
+        }
+
+        if (!presenter.name.isNullOrBlank()) {
+            dialog.findViewById<EditText>(R.id.pattern_name).setText(presenter.name)
+        }
+    }
 
     override fun showLoadingBar() {
         if (progressbarDialog == null) {
@@ -87,15 +121,19 @@ abstract class BaseImportPatternDialog<V: BaseImportPatternContract.View<P>, P: 
         startActivityForResult(intent, fileOpenRequestCode.value)
     }
 
+    private fun radioButtonPressed(@IdRes checkedId: Int) {
+        presenter.oddRowsOpposite = checkedId == R.id.rows_button
+    }
+
     private fun onOkPressed() {
         val fieldErrors = verifyFields()
         if (fieldErrors)
             return
 
-        getFormValues()
         presenter.importButtonPressed()
     }
 
+    @CallSuper
     protected open fun getFormValues() {
         val view = requireView()
         presenter.uri = fileUri.toString()
@@ -111,12 +149,12 @@ abstract class BaseImportPatternDialog<V: BaseImportPatternContract.View<P>, P: 
         presenter.oddRowsOpposite = rowsRoundsRadio.checkedRadioButtonId == R.id.rows_button
     }
 
+    @CallSuper
     protected open fun verifyFields(): Boolean {
-        val view = requireView()
+        val dialog = requireDialog()
 
-        val urlEditText = view.findViewById<EditText>(R.id.file_url_edittext)
-        if (urlEditText.text.isNullOrBlank()) {
-            urlEditText.error = getString(R.string.empty_string_error)
+        if (presenter.uri.isNullOrBlank()) {
+            dialog.findViewById<EditText>(R.id.file_uri_edittext).error = getString(R.string.empty_string_error)
             return true
         }
 
@@ -137,13 +175,4 @@ abstract class BaseImportPatternDialog<V: BaseImportPatternContract.View<P>, P: 
     }
 
     private fun removeFileExtension(filename: String) = filename.split(Regex("\\..+$"))[0]
-
-    private fun setUri(uri: Uri) {
-        fileUri = uri
-        val view = getView() ?: return
-        val filename = getFileName(uri)
-        val filenameNoExt = removeFileExtension(filename)
-        (view.findViewById(R.id.file_url_edittext) as EditText).setText(filename)
-        (view.findViewById(R.id.pattern_name) as EditText).hint = filenameNoExt
-    }
 }
