@@ -10,12 +10,7 @@ import com.alexharman.stitchathon.KnitPackage.KnitPatternPreferences
 import com.alexharman.stitchathon.pattern.drawer.KnitPatternDrawer
 import com.alexharman.stitchathon.pattern.scroller.ScrollerDrawer
 
-// TODO: Just use preferences, do away with this property
 class KnitPatternDisplayView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-
-    private var backgroundColor: Int = 0
-        @JvmName("_getBackgroundColour") get
-        @JvmName("_setBackgroundColour") set
 
     private var patternScroller: ScrollerDrawer? = null
     private var bitmapToDrawPaint: Paint = Paint()
@@ -39,7 +34,7 @@ class KnitPatternDisplayView(context: Context, attrs: AttributeSet) : View(conte
         super.onDraw(canvas)
         val scroller = patternScroller ?: return
         scroller.draw()
-        canvas.drawColor(backgroundColor)
+        canvas.drawColor(patternPrefs?.backgroundColor ?: 0xFFFFFFFF.toInt())
         canvas.drawBitmap(scroller.currentBitmap, 0f, 0f, bitmapToDrawPaint)
     }
 
@@ -58,7 +53,6 @@ class KnitPatternDisplayView(context: Context, attrs: AttributeSet) : View(conte
             return
         }
 
-        backgroundColor = preferences.backgroundColor
         knitPatternDrawer = KnitPatternDrawer(pattern, preferences)
         if (width > 0) {
             patternScroller = ScrollerDrawer(width, height, knitPatternDrawer ?: return)

@@ -98,6 +98,11 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
     override fun deleteAllKnitPatterns() {
         val context = context.get() ?: return
         DeleteAllPatternsTask(context).execute()
+        val prefs = sharedPreferences.get() ?: return
+        prefs
+                .edit()
+                .remove(PreferenceKeys.CURRENT_PATTERN_NAME)
+                .apply()
     }
 
     override fun deleteKnitPatterns(vararg patternNames: String) {
