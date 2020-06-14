@@ -25,6 +25,7 @@ class ImportImagePresenter(
         val stitchesHigh = stitchesHigh ?: return
         val stitchesWide = stitchesWide ?: return
         val numColours = numColours ?: return
+        view.showLoadingBar()
         repository.importNewBitmapPattern(uri, name, stitchesWide, stitchesHigh, oddRowsOpposite, numColours, this)
     }
 

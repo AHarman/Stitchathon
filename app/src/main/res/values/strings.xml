@@ -76,4 +76,6 @@
     <string name="rounds_radio_button_text">Rounds</string>
     <string name="rows_or_rounds">Rows or rounds:</string>
     <string name="pattern_name_hint">Pattern Name</string>
+    <string name="reset_app_prefs_message">Reset all preferences to their default values. This cannot be undone</string>
+    <string name="delete_all_patterns_message">Delete all patterns and their progress. This cannot be undone.</string>
 </resources>

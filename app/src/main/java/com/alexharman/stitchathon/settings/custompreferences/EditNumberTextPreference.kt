@@ -1,4 +1,4 @@
-package com.alexharman.stitchathon.settings
+package com.alexharman.stitchathon.settings.custompreferences
 
 import android.content.Context
 import android.content.res.TypedArray
