@@ -11,10 +11,10 @@ class ConfirmDialogPreference(context: Context?, attrs: AttributeSet?) : DialogP
         fun onDialogConfirm()
     }
 
-    var listener: OnDialogConfirmListener? = null
+    var listener: (() -> Unit)? = null
         private set
 
-    fun setOnDialogConfirmListener(listener: OnDialogConfirmListener) {
+    fun setOnDialogConfirmListener(listener: () -> Unit) {
         this.listener = listener
     }
 }

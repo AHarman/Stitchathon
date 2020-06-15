@@ -5,7 +5,6 @@ import androidx.preference.Preference
 import com.alexharman.stitchathon.R
 import com.alexharman.stitchathon.repository.PreferenceKeys
 import com.alexharman.stitchathon.settings.custompreferences.ConfirmDialogPreference
-import com.alexharman.stitchathon.settings.custompreferences.ConfirmDialogPreference.OnDialogConfirmListener
 import com.alexharman.stitchathon.settings.custompreferences.ConfirmDialogPreferenceFragment
 import com.kunzisoft.androidclearchroma.ChromaPreferenceFragmentCompat
 
@@ -19,17 +18,9 @@ class SettingsFragment: ChromaPreferenceFragmentCompat(), SettingsContract.View 
 
     private fun setPrefListeners() {
         findPreference<ConfirmDialogPreference>(PreferenceKeys.RESET_PREFS)
-                ?.setOnDialogConfirmListener(object: OnDialogConfirmListener {
-                    override fun onDialogConfirm() {
-                        presenter.clearAllPreferences()
-                    }
-                })
+                ?.setOnDialogConfirmListener { presenter.clearAllPreferences() }
         findPreference<ConfirmDialogPreference>(PreferenceKeys.DELETE_ALL)
-                ?.setOnDialogConfirmListener(object: OnDialogConfirmListener {
-                    override fun onDialogConfirm() {
-                        presenter.deleteAllPatterns()
-                    }
-                })
+                ?.setOnDialogConfirmListener { presenter.deleteAllPatterns() }
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference?) {
