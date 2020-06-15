@@ -22,7 +22,7 @@ internal class ImportImageTask(
 
     override fun doInBackground(vararg voids: Void): KnitPattern {
         sourceImg = readImageFile(Uri.parse(imageUri))!!
-        val knitPattern = ImageReader().readImage(sourceImg, patternName, width, height, oddRowsOpposite, numColours)
+        val knitPattern = ImageReader.readImage(sourceImg, patternName, width, height, oddRowsOpposite, numColours)
         saveNewPattern(knitPattern)
         return knitPattern
     }
