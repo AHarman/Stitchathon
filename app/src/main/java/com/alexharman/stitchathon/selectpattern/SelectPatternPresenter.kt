@@ -1,5 +1,6 @@
 package com.alexharman.stitchathon.selectpattern
 
+import SelectPatternContract
 import android.graphics.Bitmap
 import com.alexharman.stitchathon.repository.KnitPatternDataSource
 
@@ -15,15 +16,16 @@ class SelectPatternPresenter(
     }
 
     override fun resume() {
-        repository.getKnitPatternNames(this)
+        repository.getKnitPatternsInfo(this)
     }
 
     override fun selectPattern(patternName: String) {
         repository.setCurrentKnitPattern(patternName)
     }
 
-    override fun deletePatterns(patternNames: Array<String>) {
-        repository.deleteKnitPatterns(*patternNames)
+    override fun deletePatterns(patternNames: Collection<String>) {
+        repository.deleteKnitPatterns(patternNames)
+        view.removePatterns(patternNames)
     }
 
     override fun onPatternInfoReturn(result: Array<Pair<String, Bitmap?>>) =

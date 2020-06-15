@@ -61,7 +61,7 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
         OpenPatternTask(context, listener).execute(patternName)
     }
 
-    override fun getKnitPatternNames(callback: KnitPatternDataSource.GetPatternInfoListener) {
+    override fun getKnitPatternsInfo(callback: KnitPatternDataSource.GetPatternInfoListener) {
         val context = context.get() ?: return callback.onGetKnitPatternInfoFail()
         GetNamesAndImagesTask(context, callback).execute()
     }
@@ -105,9 +105,9 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
                 .apply()
     }
 
-    override fun deleteKnitPatterns(vararg patternNames: String) {
+    override fun deleteKnitPatterns(patternNames: Collection<String>) {
         val context = context.get() ?: return
-        DeletePatternsTask(context).execute(*patternNames)
+        DeletePatternsTask(context).execute(*patternNames.toTypedArray())
         if (getCurrentPatternName() in patternNames) {
             val prefs = sharedPreferences.get() ?: return
             prefs

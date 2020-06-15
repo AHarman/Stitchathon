@@ -54,8 +54,10 @@ class SelectPatternFragment : BaseFragmentView<SelectPatternContract.View, Selec
         viewAdapter.notifyDataSetChanged()
     }
 
-    override fun removePatterns(patterns: Array<Pair<String, Bitmap?>>) {
-        patterns.forEach {  viewAdapter.removeItem(it) }
+    override fun removePatterns(patterns: Collection<String>) {
+        viewAdapter
+                .findItems { patterns.contains(it.first) }
+                .forEach { viewAdapter.removeItem(it)}
         viewAdapter.notifyDataSetChanged()
     }
 
@@ -94,7 +96,7 @@ class SelectPatternFragment : BaseFragmentView<SelectPatternContract.View, Selec
     }
 
     private fun deleteSelectedPatterns() {
-        val patterns = viewAdapter.getSelectedItems().map { it.first }.toTypedArray()
+        val patterns = viewAdapter.getSelectedItems().map { it.first }
         presenter.deletePatterns(patterns)
     }
 

@@ -19,7 +19,7 @@ class ConfirmDialogPreferenceFragment(): PreferenceDialogFragmentCompat() {
     override fun onDialogClosed(positiveResult: Boolean) {
         if (positiveResult) {
             val pref = preference as? ConfirmDialogPreference
-            pref?.listener?.onDialogConfirm()
+            pref?.listener?.invoke()
         }
     }
 }

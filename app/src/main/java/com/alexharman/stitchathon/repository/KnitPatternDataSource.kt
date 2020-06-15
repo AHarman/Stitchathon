@@ -38,7 +38,7 @@ interface KnitPatternDataSource {
 
     fun openKnitPattern(patternName: String, listener: OpenPatternListener)
 
-    fun getKnitPatternNames(callback: GetPatternInfoListener)
+    fun getKnitPatternsInfo(callback: GetPatternInfoListener)
 
     fun getCurrentPatternName(): String?
 
@@ -64,7 +64,7 @@ interface KnitPatternDataSource {
 
     fun deleteAllKnitPatterns()
 
-    fun deleteKnitPatterns(vararg patternNames: String)
+    fun deleteKnitPatterns(patternNames: Collection<String>)
 
     fun getPatternPreferences(patternName: String): KnitPatternPreferences
 

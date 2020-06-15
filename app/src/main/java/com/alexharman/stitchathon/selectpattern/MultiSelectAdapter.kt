@@ -64,6 +64,10 @@ abstract class MultiSelectAdapter<D>(private var dataset: MutableList<D>, privat
         }
     }
 
+    fun findItems(predicate: (D) -> Boolean): Collection<D> {
+        return dataset.filter(predicate)
+    }
+
     fun addItem(item: D, position: Int) {
         dataset.add(position, item)
         notifyItemInserted(position)
