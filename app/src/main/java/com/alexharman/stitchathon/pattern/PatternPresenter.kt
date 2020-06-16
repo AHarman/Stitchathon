@@ -39,8 +39,10 @@ class PatternPresenter(override var view: PatternContract.View, private val repo
     override fun resume() {
         repository.registerCurrentPatternListener(this)
         val currentPatternName = repository.getCurrentPatternName()
-        if ((pattern == null && currentPatternName != null) || currentPatternName != pattern?.name) {
+        if (currentPatternName != null && currentPatternName != pattern?.name) {
             openCurrentPattern()
+        } else if (currentPatternName == null && pattern != null) {
+            view.setPattern(null, null)
         }
     }
 
