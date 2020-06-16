@@ -34,9 +34,9 @@ class ImportImageDialog:
         presenter.numColours = numberPicker.value
 
         view.findViewById<EditText>(R.id.stitches_high_edittext)
-                .setOnFocusChangeListener() { v, hasFocus -> if (!hasFocus) presenter.stitchesHigh = (v as EditText).text.toString().toIntOrNull() }
+                .addTextChangedListener { newText -> presenter.stitchesHigh = newText.toIntOrNull() }
         view.findViewById<EditText>(R.id.stitches_wide_edittext)
-                .setOnFocusChangeListener() { v, hasFocus -> if (!hasFocus) presenter.stitchesWide = (v as EditText).text.toString().toIntOrNull() }
+                .addTextChangedListener { newText -> presenter.stitchesWide = newText.toIntOrNull() }
 
     }
 
@@ -53,12 +53,13 @@ class ImportImageDialog:
         var formError = super.verifyFields()
         val dialog = requireDialog()
 
-        if (presenter.stitchesWide == null || presenter.stitchesWide < 0)) {
+        val stitchesWide = presenter.stitchesWide
+        if (stitchesWide == null || stitchesWide < 0) {
             dialog.findViewById<EditText>(R.id.stitches_wide_edittext).error = getString(R.string.empty_string_error)
             formError = true
         }
-
-        if (presenter.stitchesWide == null || presenter.stitchesWide < 0) {
+        val stitchesHigh = presenter.stitchesHigh
+        if (stitchesWide == null || stitchesWide < 0) {
             dialog.findViewById<EditText>(R.id.stitches_high_edittext).error = getString(R.string.empty_string_error)
             formError = true
         }
