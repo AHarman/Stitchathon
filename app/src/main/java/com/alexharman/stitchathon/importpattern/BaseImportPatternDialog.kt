@@ -43,12 +43,15 @@ abstract class BaseImportPatternDialog<V: BaseImportPatternContract.View<P>, P: 
         onViewCreated(dialogView, null)
 
         builder.setView(dialogView)
-        builder.setCancelable(false)
         builder.setTitle(titleId)
-        builder.setCancelable(false)
-        builder.setPositiveButton(R.string.OK) { _, _ -> onOkPressed() }
+        builder.setPositiveButton(R.string.OK, null)
         builder.setNegativeButton(R.string.cancel) { _, _ -> dismiss() }
         dialog = builder.create()
+
+        // Needed so we can keep the dialog open if the positive button is pressed
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { onOkPressed() }
+        }
 
         return dialog
     }
