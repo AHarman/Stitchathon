@@ -6,6 +6,7 @@ import androidx.preference.PreferenceManager
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.KnitPatternPreferences
 import com.alexharman.stitchathon.R
+import com.alexharman.stitchathon.repository.KnitPatternDataSource.*
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import com.alexharman.stitchathon.repository.database.KnitPatternDao
 import com.alexharman.stitchathon.repository.database.asyncTasks.*
@@ -26,18 +27,27 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
         }
     }
 
-    private val currentPatternListeners = ArrayList<KnitPatternDataSource.CurrentPatternListener>()
+    private val currentPatternListeners = mutableSetOf<CurrentPatternListener>()
+    private val importPatternListeners = mutableSetOf<ImportPatternListener>()
     private val sharedPreferences: WeakReference<SharedPreferences> =
             WeakReference(PreferenceManager.getDefaultSharedPreferences(context))
 
-    override fun registerCurrentPatternListener(listener: KnitPatternDataSource.CurrentPatternListener) {
-        if (!currentPatternListeners.contains(listener))
-            currentPatternListeners.add(listener)
+    override fun registerCurrentPatternListener(listener: CurrentPatternListener) {
+        currentPatternListeners.add(listener)
     }
 
-    override fun deregisterCurrentPatternListener(listener: KnitPatternDataSource.CurrentPatternListener) {
+    override fun deregisterCurrentPatternListener(listener: CurrentPatternListener) {
         if (currentPatternListeners.contains(listener))
             currentPatternListeners.remove(listener)
+    }
+
+    override fun registerPatternImportedListener(listener: ImportPatternListener) {
+         importPatternListeners.add(listener)
+    }
+
+    override fun deregisterPatternImportedListener(listener: ImportPatternListener) {
+        if (importPatternListeners.contains(listener))
+            importPatternListeners.remove(listener)
     }
 
     override fun setCurrentKnitPattern(patternName: String) {
@@ -56,12 +66,12 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
         SavePatternChangesTask(dao).execute(pattern)
     }
 
-    override fun openKnitPattern(patternName: String, listener: KnitPatternDataSource.OpenPatternListener) {
+    override fun openKnitPattern(patternName: String, listener: OpenPatternListener) {
         val context = context.get() ?: return listener.onOpenKnitPatternFail()
         OpenPatternTask(context, listener).execute(patternName)
     }
 
-    override fun getKnitPatternsInfo(callback: KnitPatternDataSource.GetPatternInfoListener) {
+    override fun getKnitPatternsInfo(callback: GetPatternInfoListener) {
         val context = context.get() ?: return callback.onGetKnitPatternInfoFail()
         GetNamesAndImagesTask(context, callback).execute()
     }
@@ -70,13 +80,16 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
             uri: String,
             name: String,
             oddRowsOpposite: Boolean,
-            listener: KnitPatternDataSource.ImportPatternListener?) {
-        val context = context.get()
-        when {
-            context != null -> ImportJsonTask(context, listener, uri, name, oddRowsOpposite).execute()
-            listener != null -> listener.onPatternImportFail()
-            else -> return
-        }
+            listener: ImportPatternListener?) {
+
+        val listeners =
+                if (listener != null)
+                    setOf(*importPatternListeners.toTypedArray(), listener)
+                else
+                    setOf(*importPatternListeners.toTypedArray())
+
+        val context = context.get() ?: return listeners.forEach { it.onPatternImportFail() }
+        ImportJsonTask(context, listeners, uri, name, oddRowsOpposite).execute()
     }
 
     override fun importNewBitmapPattern(
@@ -86,13 +99,17 @@ class KnitPatternRepository private constructor(context: Context): KnitPatternDa
             height: Int,
             oddRowsOpposite: Boolean,
             numColours: Int,
-            listener: KnitPatternDataSource.ImportPatternListener?) {
-        val context = context.get()
-        when {
-            context != null -> ImportImageTask(context, listener, uri, name, width, height, oddRowsOpposite, numColours).execute()
-            listener != null -> listener.onPatternImportFail()
-            else -> return
-        }
+            listener: ImportPatternListener?) {
+
+        val listeners =
+                if (listener != null)
+                    setOf(*importPatternListeners.toTypedArray(), listener)
+                else
+                    setOf(*importPatternListeners.toTypedArray())
+
+        val context = Companion.context.get() ?: return listeners.forEach { it.onPatternImportFail() }
+
+        ImportImageTask(context, listeners, uri, name, width, height, oddRowsOpposite, numColours).execute()
     }
 
     override fun deleteAllKnitPatterns() {

@@ -11,15 +11,14 @@ import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.KnitPatternPreferences
 import com.alexharman.stitchathon.R
 import com.alexharman.stitchathon.pattern.drawer.KnitPatternDrawer
-import com.alexharman.stitchathon.repository.KnitPatternDataSource
+import com.alexharman.stitchathon.repository.KnitPatternDataSource.ImportPatternListener
 import com.alexharman.stitchathon.repository.PreferenceKeys
 import com.alexharman.stitchathon.repository.database.AppDatabase
 import java.lang.ref.WeakReference
 
-internal abstract class ImportPatternTask internal constructor(context: Context, listener: KnitPatternDataSource.ImportPatternListener?):
+internal abstract class ImportPatternTask internal constructor(context: Context, private val listeners: Collection<ImportPatternListener>):
         AsyncTask<Void, String, KnitPattern>() {
     protected var context: WeakReference<Context> = WeakReference(context)
-    private var callback: WeakReference<KnitPatternDataSource.ImportPatternListener?> = WeakReference(listener)
 
     // TODO: Move to repo.
     internal fun saveNewPattern(knitPattern: KnitPattern) {
@@ -55,11 +54,10 @@ internal abstract class ImportPatternTask internal constructor(context: Context,
 
     override fun onPostExecute(knitPattern: KnitPattern?) {
         super.onPostExecute(knitPattern)
-        val callback = callback.get() ?: return
         if (knitPattern == null) {
-            callback.onPatternImportFail()
+            listeners.forEach { it.onPatternImportFail() }
         } else {
-            callback.onPatternImport(knitPattern)
+            listeners.forEach{ it.onPatternImport(knitPattern) }
         }
     }
 }

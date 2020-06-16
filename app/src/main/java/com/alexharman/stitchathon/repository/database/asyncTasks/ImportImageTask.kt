@@ -6,17 +6,17 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.importpattern.importimage.ImageReader
-import com.alexharman.stitchathon.repository.KnitPatternDataSource
+import com.alexharman.stitchathon.repository.KnitPatternDataSource.ImportPatternListener
 
 internal class ImportImageTask(
         context: Context,
-        callback: KnitPatternDataSource.ImportPatternListener?,
+        listeners: Collection<ImportPatternListener>,
         private val imageUri: String,
         private val patternName: String,
         private val width: Int,
         private val height: Int,
         private val oddRowsOpposite: Boolean,
-        private val numColours: Int) : ImportPatternTask(context, callback) {
+        private val numColours: Int) : ImportPatternTask(context, listeners) {
 
     private lateinit var sourceImg: Bitmap
 

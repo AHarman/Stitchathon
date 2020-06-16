@@ -34,6 +34,10 @@ interface KnitPatternDataSource {
 
     fun deregisterCurrentPatternListener(listener: CurrentPatternListener)
 
+    fun registerPatternImportedListener(listener: ImportPatternListener)
+
+    fun deregisterPatternImportedListener(listener: ImportPatternListener)
+
     fun setCurrentKnitPattern(patternName: String)
 
     fun openKnitPattern(patternName: String, listener: OpenPatternListener)

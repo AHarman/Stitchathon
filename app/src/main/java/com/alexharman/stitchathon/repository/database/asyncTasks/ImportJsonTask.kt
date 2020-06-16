@@ -4,18 +4,18 @@ import android.content.Context
 import android.net.Uri
 import com.alexharman.stitchathon.KnitPackage.KnitPattern
 import com.alexharman.stitchathon.KnitPackage.KnitPatternParser
-import com.alexharman.stitchathon.repository.KnitPatternDataSource
+import com.alexharman.stitchathon.repository.KnitPatternDataSource.ImportPatternListener
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 
 internal class ImportJsonTask(
         context: Context,
-        listener: KnitPatternDataSource.ImportPatternListener?,
+        listeners: Collection<ImportPatternListener>,
         private val uri: String,
         private val name: String,
         private val oddRowsOpposite: Boolean):
-        ImportPatternTask(context, listener) {
+        ImportPatternTask(context, listeners) {
 
     override fun doInBackground(vararg voids: Void): KnitPattern? {
         var knitPattern: KnitPattern? = null
