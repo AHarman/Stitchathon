@@ -7,6 +7,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -41,12 +43,15 @@ abstract class BaseImportPatternDialog<V: BaseImportPatternContract.View<P>, P: 
         onViewCreated(dialogView, null)
 
         builder.setView(dialogView)
-        builder.setCancelable(false)
         builder.setTitle(titleId)
-        builder.setCancelable(false)
-        builder.setPositiveButton(R.string.OK) { _, _ -> onOkPressed() }
+        builder.setPositiveButton(R.string.OK, null)
         builder.setNegativeButton(R.string.cancel) { _, _ -> dismiss() }
         dialog = builder.create()
+
+        // Needed so we can keep the dialog open if the positive button is pressed
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { onOkPressed() }
+        }
 
         return dialog
     }
@@ -74,8 +79,7 @@ abstract class BaseImportPatternDialog<V: BaseImportPatternContract.View<P>, P: 
 
         view.findViewById<Button>(R.id.import_file_browse_button).setOnClickListener { selectFile() }
         view.findViewById<EditText>(R.id.file_uri_edittext).setOnClickListener { selectFile() }
-        view.findViewById<EditText>(R.id.pattern_name)
-                .setOnFocusChangeListener() { v, hasFocus -> if (!hasFocus) presenter.name = (v as EditText).text.toString() }
+        view.findViewById<EditText>(R.id.pattern_name).addTextChangedListener { newText -> presenter.name = newText }
 
         val radioGroup = view.findViewById<RadioGroup>(R.id.rows_or_rounds)
         radioGroup.setOnCheckedChangeListener { _, checkedId -> radioButtonPressed(checkedId) }
@@ -175,4 +179,20 @@ abstract class BaseImportPatternDialog<V: BaseImportPatternContract.View<P>, P: 
     }
 
     private fun removeFileExtension(filename: String) = filename.split(Regex("\\..+$"))[0]
+
+    protected fun EditText.addTextChangedListener(onTextChanged: (newText: String) -> Unit) {
+        this.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                // No implementation needed
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // No implementation needed
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                onTextChanged.invoke(s.toString())
+            }
+        })
+    }
 }

@@ -34,9 +34,9 @@ class ImportImageDialog:
         presenter.numColours = numberPicker.value
 
         view.findViewById<EditText>(R.id.stitches_high_edittext)
-                .setOnFocusChangeListener() { v, hasFocus -> if (!hasFocus) presenter.stitchesHigh = (v as EditText).text.toString().toIntOrNull() }
+                .addTextChangedListener { newText -> presenter.stitchesHigh = newText.toIntOrNull() }
         view.findViewById<EditText>(R.id.stitches_wide_edittext)
-                .setOnFocusChangeListener() { v, hasFocus -> if (!hasFocus) presenter.stitchesWide = (v as EditText).text.toString().toIntOrNull() }
+                .addTextChangedListener { newText -> presenter.stitchesWide = newText.toIntOrNull() }
 
     }
 
