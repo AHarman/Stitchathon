@@ -17,7 +17,8 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        app:srcCompat="@drawable/logo" />
+        app:srcCompat="@drawable/ic_stitchathon"
+        android:contentDescription="@string/pattern_thumbnail" />
 
     <TextView
         android:id="@+id/nav_drawer_pattern_name"
