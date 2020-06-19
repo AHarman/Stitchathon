@@ -3,10 +3,7 @@ package com.alexharman.stitchathon.KnitPackageTests
 import com.alexharman.stitchathon.KnitPackage.Stitch
 import org.junit.Assert.assertFalse
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.junit.MockitoJUnitRunner
 
-@RunWith(MockitoJUnitRunner::class)
 class StitchUnitTests {
 
     @Test
