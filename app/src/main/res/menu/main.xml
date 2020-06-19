@@ -21,9 +21,4 @@
         android:title="@string/go_to_stitch_label"
         app:showAsAction="ifRoom"
         android:orderInCategory="2"/>
-    <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
 </menu>

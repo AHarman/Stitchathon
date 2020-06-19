@@ -76,7 +76,6 @@ class KnitPatternFragment : BaseFragmentView<PatternContract.View, PatternContra
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId){
-            R.id.action_settings -> true
             R.id.zoom_button -> { fitToPatternWidthButtonPressed(); true }
             R.id.go_to_stitch_button -> { openGotToStitchDialog(); true }
             R.id.lock_button -> { lockButtonPressed(item); true }
