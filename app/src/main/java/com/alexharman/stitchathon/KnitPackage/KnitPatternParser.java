@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
 
 public class KnitPatternParser {
 
+    private KnitPatternParser() { }
+
     public static KnitPattern createKnitPattern(String stringJsonPattern, String name, boolean oddRowsOpposite) throws JSONException {
         JSONObject json = new JSONObject(stringJsonPattern);
         return new KnitPattern(name, parseJSON(json), oddRowsOpposite);
